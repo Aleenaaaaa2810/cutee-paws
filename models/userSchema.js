@@ -1,101 +1,68 @@
-const mongoose=require("mongoose")
-const {Schema}=mongoose;
+const mongoose = require("mongoose");
+const bcrypt = require("bcryptjs");
+const { Schema } = mongoose;
 
-
-
-const userSchema= new Schema({
-  name:{
-    type:String,
-    required:true
+const userSchema = new Schema({
+  name: {
+    type: String,
+    required: true,
   },
-  email:{
-    type:String,
-    required:true,
-    unique:true
+  email: {
+    type: String,
+    required: true,
+    unique: true,
   },
-  phone:{
-    type:String,
+  phone: {
+    type: String,
     required:false,
-    unique:false,
+    unique:true,
     sparse:true,
-    default:null // single sign up -no phonenumber
+    default:null
+  },
+  googleId: {
+    type: String,
+    unique: true,
+    
   },
 
-  googleId:{
-    type:String,
-    unique:true
+  password: {
+    type: String,
+  required:false
+      
   },
-
-  password:{
-    type:String,
-    required:false//sigle signup-nouse password
+  isBlocked: {
+    type: Boolean,
+    default: false,
   },
-
-  isBlocked:{
-    type:Boolean,
-    default:false
+    isValid: {
+    type: Boolean,
+    default: false,
   },
-
-  isAdmin:{
-    type:Boolean,
-    default:false
+  isAdmin: {
+    type: Boolean,
+    default: false,
   },
-
-  cart:[{
-    type:Schema.Types.ObjectId,
-  ref:"cart",
-}],
-
-wallet:{
-  type:Number,
-  default:0
-},
-wishlist:[{
-  type:Schema.Types.ObjectId,
-  ref:"wishlist"
-}],
-
-orderHistory:[{
-  type:Schema.Types.ObjectId,
-  ref:"Order"
-}],
-
-createdOn:{
-  type:Date,
-  default:Date.now
-},
-
-referalCode:{
-  type:String
-},
-
-redeemed:{
-  type:Boolean
-},
-
-redeemedUsers:[{
-  type:Schema.Types.ObjectId,
-  ref:"User"
-}],
-
-searchHistory:[{
-  category:{
-    type:Schema.type.ObjectId,
-    ref:"Category",
+  createdOn: {
+    type: Date,
+    default: Date.now,
   },
-  brand:{
-    type:String
-  },
-  searchOn:{
-    type:Date,
-    default:Date.now
+});
+userSchema.pre('save', async function (next) {
+  if (this.isModified('password') && !this.password.startsWith('$2')) {
+    this.password = await bcrypt.hash(this.password, 10);
   }
-}]
-})
+  next();
+});
 
 
+userSchema.methods.matchPassword = async function (enteredPassword) {
+  if (!this.password) {
+    console.error('No password stored for this user.');
+    return false;
+  }
+  return await bcrypt.compare(enteredPassword, this.password);
+};
 
+const User = mongoose.model("User", userSchema);
+module.exports = User;
 
-
-const User =mongoose.model("User",userSchema);
-module.exports =user

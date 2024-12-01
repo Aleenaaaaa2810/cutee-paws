@@ -6,7 +6,7 @@
  */
 :root {
   --blue: #007bff;
-  --indigo: #6610f2;z
+  --indigo: #6610f2;
   --purple: #6f42c1;
   --pink: #e83e8c;
   --red: #dc3545;
@@ -53,6 +53,9 @@ html {
 
 article, aside, figcaption, figure, footer, header, hgroup, main, nav, section {
   display: block; }
+  .colorlib-nav{
+background-color: #ff9191;
+  }
 
 body {
   margin: 0;
@@ -62,7 +65,7 @@ body {
   line-height: 1.5;
   color: #212529;
   text-align: left;
-  background-color: #fff; }
+  background-color: #8a7b7b; }
 
 [tabindex="-1"]:focus {
   outline: 0 !important; }

@@ -1,0 +1,465 @@
+
+
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Categories</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            display: flex;
+            min-height: 100vh;
+            background-color: #f4f5f7;
+            color: #333;
+        }
+
+        .sidebar {
+            width: 250px;
+            background-color: #1e212d;
+            color: #ffffff;
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            height: 100%;
+            padding-top: 20px;
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.2);
+        }
+
+        .sidebar h2 {
+            text-align: center;
+            font-size: 24px;
+            color: #f5a623;
+            margin-bottom: 30px;
+        }
+
+        .sidebar a {
+            padding: 15px 20px;
+            font-size: 18px;
+            color: #ffffff;
+            text-decoration: none;
+            transition: background 0.3s ease, color 0.3s ease;
+        }
+
+        .sidebar a:hover, .sidebar a.active {
+            background-color: #f5a623;
+            color: #1e212d;
+        }
+
+        .main-content {
+            margin-left: 250px;
+            padding: 30px;
+            width: calc(100% - 250px);
+            transition: margin-left 0.3s ease;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #ffffff;
+            padding: 20px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+            border-radius: 10px;
+        }
+
+        .header h1 {
+            font-size: 24px;
+            color: #333;
+        }
+
+        .add-category, .search-category {
+            margin-bottom: 30px;
+            background-color: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+        }
+
+        form input, form button {
+            padding: 10px;
+            margin-right: 10px;
+        }
+
+        form input {
+            width: 300px;
+        }
+
+        form button {
+            background-color: #f5a623;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        form button:hover {
+            background-color: #333;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        table th, table td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        table th {
+            background-color: #f5a623;
+            color: white;
+        }
+
+        table td form {
+            display: inline-block;
+        }
+
+        table td button {
+            text-decoration: none;
+            color: white;
+            cursor: pointer;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+        }
+
+        table td button.list-btn {
+            background-color: #f5a623;
+        }
+
+        table td button.list-btn.unlist {
+            background-color: red;
+        }
+
+        table td a {
+            color: #007bff;
+            text-decoration: none;
+            margin-right: 10px;
+        }
+
+        table td a:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 100px;
+            }
+
+            .sidebar h2 {
+                font-size: 18px;
+            }
+
+            .main-content {
+                margin-left: 100px;
+                width: calc(100% - 100px);
+            }
+        }
+
+        .delete-btn {
+        background-color: red;
+        color: white;
+        border: none;
+        padding: 5px 10px;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+
+    .delete-btn:hover {
+        background-color: darkred;
+    }
+
+
+    .pagination {
+    position: fixed; /* Fix the position of the pagination */
+    bottom: 12px; /* Adjust this value to place it at the desired position */
+    left: 58%; /* Center it horizontally */
+    transform: translateX(-50%); /* Offset the position by half its width for perfect centering */
+    margin: 0; /* Remove any margins that might disrupt fixed positioning */
+    z-index: 1000; /* Ensure it stays above other elements */
+    text-align: center;
+}
+
+.pagination ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+.pagination ul li {
+    display: inline-block;
+    margin: 0 5px;
+}
+
+.pagination ul li a {
+    text-decoration: none;
+    padding: 10px 15px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    color: #333;
+    transition: 0.3s;
+}
+
+.pagination ul li a:hover {
+    background-color: #f5a623;
+    color: #fff;
+}
+
+.pagination ul li a.active-page {
+    background-color: #f5a623;
+    color: #fff;
+}
+    .list-btn {
+    background-color: #4caf50; /* Green for "List" */
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.list-btn.unlist {
+    background-color: red; /* Red for "Unlist" */
+}
+
+.list-btn:hover {
+    opacity: 0.8;
+}
+
+    </style>
+</head>
+<body>
+    <%-include("../../views/partials/admin/header.ejs")%>
+    <div class="main-content">
+        <div class="header">
+            <h1>Categories</h1>
+        </div>
+
+        <!-- Add Category -->
+        <div class="add-category">
+            <h2>Add New Category</h2>
+            <form id="addCategoryForm">
+                <input type="text" id="categoryName" name="name" placeholder="Enter category name" required>
+                <input type="text" id="categoryDescription" name="description" placeholder="Enter category description" required>
+                <button type="submit">Add Category</button>
+            </form>
+        </div>
+
+        <!-- Categories Table -->
+        <div class="categories-list">
+            <h2>Available Categories</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Category Name</th>
+                        <th>Description</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="categoryTableBody">
+                    <% if (cat && cat.length > 0) { %>
+                        <% cat.forEach(category => { %>
+                            <tr id="category-<%= category._id %>">
+                                <td><%= category.name %></td>
+                                <td><%= category.description %></td>
+                                <td><%= category.isListed ? 'Listed' : 'Unlisted' %></td>
+                                <td>
+                                    <a href="/admin/category/edit/<%= category._id %>">Edit</a>
+                                    <button 
+                                    class="list-btn <%= category.isListed ? 'unlist' : '' %>" 
+                                    onclick="toggleCategory('<%= category._id %>', '<%= category.isListed %>')">
+                                    <%= category.isListed ? 'Unlist' : 'List' %>
+                                </button>
+                                </td>  
+                            </tr>
+                        <% }); %>
+                    <% } else { %>
+                        <tr>
+                            <td colspan="3" style="text-align:center;">No categories available</td>
+                        </tr>
+                    <% } %>
+                </tbody>
+            </table>
+        </div>
+
+
+        
+    <div class="pagination">
+        <% if (totalPages > 1) { %>
+            <ul>
+                <% for (let i = 1; i <= totalPages; i++) { %>
+                    <li>
+                        <a 
+                            href="?page=<%= i %>" 
+                            class="<%= i === currentPage ? 'active-page' : '' %>"
+                        >
+                            <%= i %>
+                        </a>
+                    </li>
+                <% } %>
+            </ul>
+        <% } %>
+    </div>
+    </div>
+
+    
+
+    <script>
+        document.getElementById('addCategoryForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            const name = document.getElementById('categoryName').value.trim();
+            const description = document.getElementById('categoryDescription').value.trim();
+
+            try {
+                const response = await fetch('/admin/category/add', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ name, description }),
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    // Add the new category to the table
+                    const tableBody = document.getElementById('categoryTableBody');
+                    const newRow = document.createElement('tr');
+                    newRow.innerHTML = `
+                        <td>${name}</td>
+                        <td>${description}</td>
+                        <td>
+                            <a href="#">Edit</a>
+                            <form method="POST" style="display:inline;">
+                                <button type="submit">Delete</button>
+                            </form>
+                        </td>
+                    `;
+                    tableBody.appendChild(newRow);
+
+                    // Display success alert
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Success',
+                        text: 'Category added successfully!',
+                    });
+
+                    // Clear form fields
+                    document.getElementById('categoryName').value = '';
+                    document.getElementById('categoryDescription').value = '';
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: result.error || 'Failed to add category.',
+                    });
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'An unexpected error occurred.',
+                });
+            }
+        });
+//         async function deleteCategory(categoryId) {
+//     try {
+//         const response = await fetch(`/admin/category/delete/${categoryId}`, {
+//             method: 'DELETE',
+//         });
+
+//         if (response.ok) {
+//             const row = document.getElementById(`category-${categoryId}`);
+//             if (row) {
+//                 row.remove();
+//             }
+//             Swal.fire({
+//                 icon: 'success',
+//                 title: 'Deleted!',
+//                 text: 'Category deleted successfully.',
+//             });
+//         } else {
+//             const result = await response.json();
+//             Swal.fire({
+//                 icon: 'error',
+//                 title: 'Error!',
+//                 text: result.error || 'Failed to delete the category.',
+//             });
+//         }
+//     } catch (error) {
+//         Swal.fire({
+//             icon: 'error',
+//             title: 'Error!',
+//             text: 'An unexpected error occurred.',
+//         });
+//         console.error('Error deleting category:', error);
+//     }
+// }
+async function toggleCategory(categoryId, isListed) {
+    try {
+        const response = await fetch(`/admin/category/toggle/${categoryId}`, {
+            method: 'PUT',
+        });
+
+        if (response.ok) {
+            const result = await response.json();
+
+            // Update the UI
+            const row = document.getElementById(`category-${categoryId}`);
+            const statusCell = row.querySelector('td:nth-child(3)');
+            const toggleButton = row.querySelector('.list-btn');
+
+            // Update the status and button text
+            statusCell.textContent = result.category.isListed ? 'Listed' : 'Unlisted';
+            toggleButton.textContent = result.category.isListed ? 'Unlist' : 'List';
+            toggleButton.classList.toggle('unlist', result.category.isListed);
+
+            Swal.fire({
+                icon: 'success',
+                title: 'Success',
+                text: `Category ${result.category.isListed ? 'listed' : 'unlisted'} successfully!`,
+            });
+        } else {
+            const error = await response.json();
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: error.error || 'Failed to toggle category listing.',
+            });
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'An unexpected error occurred.',
+        });
+    }
+}
+
+</script>
+
+</body>
+</body>
+</html>

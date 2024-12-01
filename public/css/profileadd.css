@@ -1,0 +1,212 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Poppins', sans-serif;
+}
+
+
+body {
+  display: flex;
+  min-height: 100vh;
+  background-color: #f4f5f7;
+  color: #333;
+}
+
+.sidebar {
+  width: 250px;
+  background-color: #1e212d;
+  color: #ffffff;
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  height: 100%;
+  padding-top: 20px;
+  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.2);
+}
+
+.sidebar h2 {
+  text-align: center;
+  font-size: 24px;
+  color: #f5a623;
+  margin-bottom: 30px;
+}
+
+.sidebar a {
+  padding: 15px 20px;
+  font-size: 18px;
+  color: #ffffff;
+  text-decoration: none;
+  transition: background 0.3s ease, color 0.3s ease;
+}
+
+.sidebar a:hover {
+  background-color: #f5a623;
+  color: #1e212d;
+}
+
+.sidebar a.active {
+  background-color: #f5a623;
+  color: #1e212d;
+  font-weight: bold;
+}
+
+.main-content {
+  margin-left: 250px;
+  padding: 30px;
+  width: calc(100% - 250px);
+  transition: margin-left 0.3s ease;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #ffffff;
+  padding: 20px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  margin-bottom: 30px;
+  border-radius: 10px;
+}
+
+.header h1 {
+  font-size: 24px;
+  color: #333;
+}
+
+.logout-btn {
+  padding: 10px 20px;
+  font-size: 16px;
+  color: #ffffff;
+  background-color: #f5a623;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.logout-btn:hover {
+  background-color: #e0911c;
+}
+
+.add-product-form {
+  background-color: #fff;
+  padding: 30px;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 100%;
+}
+
+.add-product-form h2 {
+  text-align: center;
+  margin-bottom: 30px;
+  color: #333;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+  font-size: 14px;
+  color: #333;
+  margin-bottom: 5px;
+}
+
+.form-group input, .form-group textarea, .form-group select {
+  width: 100%;
+  padding: 12px;
+  font-size: 16px;
+  border-radius: 5px;
+  border: 1px solid #ddd;
+  outline: none;
+}
+
+.form-group input[type="file"] {
+  padding: 5px;
+  font-size: 14px;
+}
+
+.form-group textarea {
+  min-height: 100px;
+  resize: vertical;
+}
+
+.image-preview-container {
+  margin-top: 15px;
+  text-align: center;
+}
+
+.image-preview-container img {
+  max-width: 150px;
+  max-height: 150px;
+  object-fit: cover;
+  border: 1px solid #ccc;
+  margin-top: 10px;
+}
+
+
+.button-group {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 30px;
+}
+
+.button-group button {
+  padding: 12px 30px;
+  font-size: 16px;
+  border-radius: 5px;
+  border: none;
+  cursor: pointer;
+  color: #fff;
+  transition: background-color 0.3s;
+}
+
+.button-group .save-btn {
+  background-color: #4CAF50;
+}
+
+.button-group .publish-btn {
+  background-color: #f5a623;
+}
+
+.button-group button:hover {
+  background-color: #333;
+}
+
+
+@media (max-width: 768px) {
+.sidebar {
+width: 200px;
+}
+.main-content {
+margin-left: 200px;
+padding: 20px;
+}
+.add-product-form {
+width: 100%;
+}
+}
+
+.save-btn {
+  margin-top: 10px;
+  padding: 5px 15px;
+  background-color: #28a745;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.save-btn:hover {
+  background-color: #218838;
+}
+
+.image-preview-container img {
+  max-width: 150px;
+  max-height: 150px;
+  display: block;
+  margin-top: 10px;
+}

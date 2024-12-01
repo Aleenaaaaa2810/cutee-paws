@@ -19,12 +19,12 @@ const addressSchema= new Schema ({
       required:true,
     },
     city:{
-      type:Sting,
+      type:String,
       required:true,
 
     },
     landMark:{
-      type:Sting,
+      type:String,
       required:true
     },
     state:{
@@ -32,15 +32,15 @@ const addressSchema= new Schema ({
       required:true
     },
     phone:{
-      type:Sting,
+      type:String,
       required:true
     },
     pincode:{
-      type:Sting,
+      type:String,
       required:true
     },
 
-    altphone:{
+    altPhone:{
       type:String,
       required:true
     }

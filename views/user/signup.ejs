@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Signup - Cutee Paws</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #ffcece;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .signup-container {
+            background-color: #fff;
+            width: 100%;
+            max-width: 400px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+        }
+        .signup-container h2 {
+            text-align: center;
+            color: #5e2c5d;
+            font-size: 28px;
+            margin-bottom: 20px;
+        }
+        .form-input {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+        .form-input:focus {
+            outline: none;
+            border-color: #5e2c5d;
+        }
+        .form-button {
+            background-color: #5e2c5d;
+            color: white;
+            padding: 12px;
+            width: 100%;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s ease;
+        }
+        .form-button:hover {
+            background-color: #9b6b8d;
+        }
+        .error-message {
+            color: red;
+            font-size: 14px;
+            margin-top: -8px;
+            margin-bottom: 10px;
+        }
+        .google-signup {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 10px;
+            transition: background-color 0.3s ease;
+        }
+        .google-signup:hover {
+            background-color: #f4f4f4;
+        }
+        .google-icon {
+            margin-right: 10px;
+            width: 20px;
+            height: 20px;
+        }
+        .signup-footer {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .signup-footer a {
+            color: #5e2c5d;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .signup-footer a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="signup-container">
+        <h2>Sign Up</h2>
+        <form id="signupForm" method="post" action="/signup">
+            <input type="text" class="form-input" id="fullname" name="name" placeholder="Full Name">
+            <div class="error-message" id="nameError"></div>
+
+            <input type="email" class="form-input" id="email" name="email" placeholder="Email Address">
+            <div class="error-message" id="emailError"></div>
+
+            <input type="text" class="form-input" id="phone" name="phone" placeholder="Phone Number">
+            <div class="error-message" id="phoneError"></div>
+
+            <input type="password" class="form-input" id="password" name="password" placeholder="Password">
+            <div class="error-message" id="passwordError"></div>
+
+            <input type="password" class="form-input" id="cpassword" name="cpassword" placeholder="Confirm Password">
+            <div class="error-message" id="cpasswordError"></div>
+
+            <button type="submit" class="form-button"> Sign Up</button>
+        </form>
+
+        <div class="google-signup">
+            <a href="/auth/google"><img src="/images/ggo.svg" class="google-icon">
+                Sign up with Google</a>
+          
+        </div>
+
+        <div class="signup-footer">
+            <p>Already have an account? <a href="/login">Login here</a></p>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('signupForm').addEventListener('submit', function (event) {
+            let isValid = true;
+
+            // Full Name Validation
+            const fullname = document.getElementById('fullname').value.trim();
+            const nameError = document.getElementById('nameError');
+            if (!/^[a-zA-Z\s]+$/.test(fullname)) {
+                nameError.textContent = 'Full name must only contain letters.';
+                isValid = false;
+            } else {
+                nameError.textContent = '';
+            }
+
+            // Email Validation
+            const email = document.getElementById('email').value.trim();
+            const emailError = document.getElementById('emailError');
+            if (!/^[a-zA-Z0-9._%+-]+@gmail\.com$/.test(email)) {
+                emailError.textContent = 'Email must be a valid @gmail.com address.';
+                isValid = false;
+            } else {
+                emailError.textContent = '';
+            }
+
+            // Phone Validation
+            const phone = document.getElementById('phone').value.trim();
+            const phoneError = document.getElementById('phoneError');
+            if (!/^\d{10}$/.test(phone)) {
+                phoneError.textContent = 'Phone number must be exactly 10 digits.';
+                isValid = false;
+            } else {
+                phoneError.textContent = '';
+            }
+
+            // Password Validation
+            const password = document.getElementById('password').value.trim();
+            const cpassword = document.getElementById('cpassword').value.trim();
+            const passwordError = document.getElementById('passwordError');
+            const cpasswordError = document.getElementById('cpasswordError');
+
+            if (password === '') {
+                passwordError.textContent = 'Password cannot be empty.';
+                isValid = false;
+            } else {
+                passwordError.textContent = '';
+            }
+
+            if (cpassword !== password) {
+                cpasswordError.textContent = 'Passwords do not match.';
+                isValid = false;
+            } else {
+                cpasswordError.textContent = '';
+            }
+
+            // Prevent form submission if invalid
+            if (!isValid) {
+                event.preventDefault();
+            }
+        });
+    </script>
+</body>
+</html>

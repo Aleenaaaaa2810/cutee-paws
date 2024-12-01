@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <title>Admin Dashboard - Edit Category</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            display: flex;
+            min-height: 100vh;
+            background-color: #f4f5f7;
+            color: #333;
+        }
+
+        .sidebar {
+            width: 250px;
+            background-color: #1e212d;
+            color: #ffffff;
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            height: 100%;
+            padding-top: 20px;
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.2);
+        }
+
+        .sidebar h2 {
+            text-align: center;
+            font-size: 24px;
+            color: #f5a623;
+            margin-bottom: 30px;
+        }
+
+        .sidebar a {
+            padding: 15px 20px;
+            font-size: 18px;
+            color: #ffffff;
+            text-decoration: none;
+            transition: background 0.3s ease, color 0.3s ease;
+        }
+
+        .sidebar a:hover {
+            background-color: #f5a623;
+            color: #1e212d;
+        }
+
+        .sidebar a.active {
+            background-color: #f5a623;
+            color: #1e212d;
+            font-weight: bold;
+        }
+
+        .main-content {
+            margin-left: 250px;
+            padding: 30px;
+            width: calc(100% - 250px);
+            transition: margin-left 0.3s ease;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #ffffff;
+            padding: 20px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+            border-radius: 10px;
+        }
+
+        .header h1 {
+            font-size: 24px;
+            color: #333;
+        }
+
+        .logout-btn {
+            padding: 10px 20px;
+            font-size: 16px;
+            color: #ffffff;
+            background-color: #1c1203;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .logout-btn:hover {
+            background-color: #e0911c;
+        }
+
+        .edit-category {
+            background-color: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .edit-category h2 {
+            font-size: 24px;
+            margin-bottom: 20px;
+            text-align: center;
+            color: #333;
+        }
+
+        .edit-category form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .edit-category input {
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            width: 100%;
+        }
+
+        .edit-category button {
+            padding: 10px;
+            font-size: 16px;
+            border: none;
+            border-radius: 5px;
+            background-color: #f5a623;
+            color: #ffffff;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .edit-category button:hover {
+            background-color: #333;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Sidebar -->
+    <%-include("../../views/partials/admin/header.ejs")%>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="header">
+            <h1>Edit Category</h1>
+        </div>
+
+        <div class="edit-category">
+            <h2>Edit Category</h2>
+            <form id="editCategoryForm">
+                <input 
+                    type="text" 
+                    name="name" 
+                    placeholder="Enter category name" 
+                    value="<%= category.name %>" 
+                    id="category-name" 
+                    required>
+                <input 
+                    type="text" 
+                    name="description" 
+                    placeholder="Enter category description" 
+                    value="<%= category.description %>" 
+                    id="category-description" 
+                    required>
+                <button type="submit">Edit Category</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('editCategoryForm').addEventListener('submit', async function (e) {
+            e.preventDefault(); // Prevent default form submission
+            const categoryId = '<%= category._id %>';
+            const name = document.getElementById('category-name').value;
+            const description = document.getElementById('category-description').value;
+
+            try {
+                const response = await fetch(`/admin/category/edit/${categoryId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ name, description }),
+                });
+
+                if (response.headers.get('Content-Type').includes('application/json')) {
+                    const result = await response.json();
+                    if (response.ok) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Category Updated',
+                            text: 'The category was updated successfully!',
+                        }).then(() => {
+                            window.location.href = '/admin/category';
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Update Failed',
+                            text: result.message || 'An error occurred while updating the category.',
+                        });
+                    }
+                } else {
+                    const text = await response.text();
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Update Failed',
+                        text: 'Server returned a non-JSON response. Check server logs.',
+                    });
+                }
+            } catch (error) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Update Failed',
+                    text: 'An unexpected error occurred.',
+                });
+            }
+        });
+    </script>
+</body>
+</html>

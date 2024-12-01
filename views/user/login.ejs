@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Login Page</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.8/dist/sweetalert2.min.css">
+<style>
+    
+    body {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
+        margin: 0;
+        background: linear-gradient(135deg, #6a11cb, #ff8c8c); /* Vibrant gradient */
+        font-family: 'Arial', sans-serif;
+        color: #ff2626;
+    }
+    .login-container {
+        background: rgba(30, 30, 30, 0.9); /* Semi-transparent container */
+        padding: 2em;
+        border-radius: 16px;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
+        width: 360px;
+        text-align: center;
+        animation: fadeIn 0.8s ease-in-out;
+    }
+    .login-container h2 {
+        margin-bottom: 1em;
+        color: #ffffff;
+        font-size: 1.8em;
+        font-weight: bold;
+    }
+    .input-field {
+        width: 100%;
+        padding: 12px;
+        margin: 12px 0;
+        border-radius: 8px;
+        border: 1px solid #444;
+        background-color: #333;
+        color: #f0f0f0;
+        font-size: 1em;
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .input-field::placeholder {
+        color: #aaa;
+    }
+    .input-field:focus {
+        outline: none;
+        border-color: #66a6ff;
+        transform: scale(1.05);
+        box-shadow: 0 0 12px rgba(102, 166, 255, 0.7);
+    }
+    .login-button {
+        width: 100%;
+        padding: 12px;
+        margin-top: 16px;
+        border: none;
+        border-radius: 8px;
+        background: linear-gradient(135deg, #66a6ff, #89f7fe);
+        color: white;
+        font-size: 1.1em;
+        cursor: pointer;
+        font-weight: bold;
+        transition: background 0.3s ease, transform 0.2s;
+    }
+    .login-button:hover {
+        background: linear-gradient(135deg, #89f7fe, #66a6ff);
+        transform: translateY(-2px);
+    }
+    .forgot-password {
+        display: block;
+        margin-top: 1em;
+        font-size: 0.9em;
+        color: #bbb;
+        text-decoration: none;
+        transition: color 0.3s;
+    }
+    .forgot-password:hover {
+        color: #66a6ff;
+    }
+    /* Google Signup Button */
+    .google-signup {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-top: 20px;
+        padding: 12px;
+        border-radius: 8px;
+        background-color: #4285F4;
+        color: white;
+        cursor: pointer;
+        transition: background 0.3s ease, transform 0.2s;
+        font-weight: bold;
+    }
+    .google-signup:hover {
+        background-color: #357ae8;
+        transform: translateY(-2px);
+    }
+    .google-icon {
+        width: 20px;
+        height: 20px;
+        margin-right: 10px;
+    }
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: scale(0.9);
+        }
+        to {
+            opacity: 1;
+            transform: scale(1);
+        }
+    }
+</style>
+</head>
+<body>
+    <div class="login-container">
+      <h2>Login</h2>
+      <form id="loginForm" action="/login" method="POST">
+        <!-- Email Field -->
+        <input 
+          type="email" 
+          class="input-field" 
+          name="email" 
+          placeholder="Email Address" 
+          required
+        >
+  
+        <!-- Password Field -->
+        <input 
+          type="password" 
+          class="input-field" 
+          name="password" 
+          placeholder="Password" 
+          required
+        >
+  
+        <!-- Login Button -->
+        <button type="submit" class="login-button">Login</button>
+      </form>
+  
+      <!-- Forgot Password Link -->
+      <a href="/forgot-password" class="forgot-password">Forgot Password?</a>
+  
+      <!-- Google Signup Button -->
+      <div class="google-signup">
+        <!-- <img 
+          src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" 
+          alt="Google" 
+          class="google-icon"
+        > -->
+        <a 
+          href="/signup" 
+          style="color: white; text-decoration: none;"
+        >
+          Create New Account
+        </a>
+      </div>
+    </div>
+
+<!-- SweetAlert2 CSS -->
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<!-- SweetAlert2 JavaScript -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>  <!-- Add jQuery -->
+
+<script>
+    document.getElementById('loginForm').addEventListener('submit', (e) => {
+        e.preventDefault();
+
+        // Get values from form fields
+        const email = document.getElementsByName('email')[0].value;
+        const password = document.getElementsByName('password')[0].value;
+
+        // Basic validation check (optional)
+        if (!email || !password) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Missing Information',
+                text: 'Please fill in both email and password.',
+            });
+            return;
+        }
+
+        // Sending AJAX request
+        $.ajax({
+    method: 'POST',  
+    url: '/login',
+    data: { email, password },
+    success: function(response) {
+        console.log(response)
+        // Ensure the response has the 'success' property
+        if (response && response.success) {
+            Swal.fire({
+                icon: 'success',
+                title: 'Login Successful',
+                text: response.message,
+                confirmButtonText: 'Ok',
+            }).then(() => {
+                window.location.href = '/';  // Redirect after successful login
+            });
+        } else {
+            Swal.fire({
+                icon: 'error',
+                title: 'Login Failed',
+                text: response.message || 'Something went wrong, please try again.',
+            });
+        }
+    },
+    error: function(xhr, status, error) {
+        console.log(xhr,status,error)
+        Swal.fire({
+            icon: 'error',
+            title: 'Login Failed',
+            text: error ||'An error occurred during login. Please try again.',
+        });
+    }
+});
+
+    });
+</script>
+
+  </body>
+  
+</html>

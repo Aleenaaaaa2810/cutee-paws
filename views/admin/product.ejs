@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <title>Admin Dashboard</title>
+    <style>
+        /* Global Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            display: flex;
+            min-height: 100vh;
+            background-color: #f4f5f7;
+            color: #333;
+        }
+
+        /* Sidebar Styles */
+        .sidebar {
+            width: 250px;
+            background-color: #1e212d;
+            color: #ffffff;
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            height: 100%;
+            padding-top: 20px;
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.2);
+        }
+
+        .sidebar h2 {
+            text-align: center;
+            font-size: 24px;
+            color: #f5a623;
+            margin-bottom: 30px;
+        }
+
+        .sidebar a {
+            padding: 15px 20px;
+            font-size: 18px;
+            color: #ffffff;
+            text-decoration: none;
+            transition: background 0.3s ease, color 0.3s ease;
+        }
+
+        .sidebar a:hover {
+            background-color: #f5a623;
+            color: #1e212d;
+        }
+
+        .sidebar a.active {
+            background-color: #f5a623;
+            color: #1e212d;
+            font-weight: bold;
+        }
+
+        /* Main Content */
+        .main-content {
+            margin-left: 250px;
+            padding: 30px;
+            width: calc(100% - 250px);
+            transition: margin-left 0.3s ease;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #ffffff;
+            padding: 20px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+            border-radius: 10px;
+        }
+
+        .header h1 {
+            font-size: 24px;
+            color: #333;
+        }
+
+        .logout-btn {
+            padding: 10px 20px;
+            font-size: 16px;
+            color: #ffffff;
+            background-color: #f5a623;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .logout-btn:hover {
+            background-color: #e0911c;
+        }
+
+        /* Product Table */
+        .table-container {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: #fff;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        thead {
+            background-color: #343a40;
+            color: #fff;
+        }
+
+        th, td {
+            padding: 15px;
+            text-align: center;
+            border: 1px solid #ddd;
+        }
+
+        tbody tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        tbody tr:hover {
+            background-color: #e9ecef;
+        }
+
+        .btn {
+            padding: 8px 12px;
+            border: none;
+            border-radius: 4px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        .btn-primary {
+            background-color: #007bff;
+            color: #fff;
+        }
+
+        .btn-secondary {
+            background-color: #6c757d;
+            color: #fff;
+        }
+
+        .btn-danger {
+            background-color: #dc3545;
+            color: #fff;
+        }
+
+        .btn-warning {
+            background-color: #ffc107;
+            color: #000;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 5px 10px;
+            font-size: 12px;
+            border-radius: 4px;
+            color: #fff;
+        }
+
+        .badge-success {
+            background-color: #28a745;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 14px;
+            color: #6c757d;
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <%-include("../../views/partials/admin/header.ejs")%>
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="header">
+            <h1>Product Management</h1>
+            <!-- <button class="logout-btn">Logout</button> -->
+        </div>
+
+        <!-- Product Table -->
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Product Name</th>
+                        <th>Category</th>
+                        <th>Sale Price</th>
+                        <th>Offer</th>
+                        <th>Quantity</th>
+                        <th>Edit</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                  <% if (products && products.length > 0) { %>
+                    <% products.forEach((product, index) => { %>
+                      <tr>
+                        <td><%= index + 1 %></td>
+                        <td><%= product.name %></td>
+                        <td><%= product.category ? product.category.name : 'Uncategorized' %></td>
+                        <td>₹<%= product.salePrice %></td>
+                        <td>
+                          <% if (product.status === "Available") { %>
+                            <span class="badge badge-success">Available</span>
+                          <% } else { %>
+                            <span class="badge badge-warning"><%= product.status %></span>
+                          <% } %>
+                        </td>
+                        <td><%= product.quantity || 'N/A' %></td>
+                        <td>
+                          <a href="/admin/editProduct?productId=<%= product._id %>">
+                            <button class="btn btn-secondary">Edit</button>
+    
+                          </a>
+                        </td>
+                        <td>
+                                                    <% if (product.isBlocked) { %>
+                            <button class="btn btn-danger">Unblock</button>
+                          <% } else { %>
+                            <button class="btn btn-primary">Block</button>
+                          <% } %>
+                        </td>
+                      </tr>
+                    <% }); %>
+                  <% } else { %>
+                    <tr>
+                      <td colspan="7">No products available.</td>
+                    </tr>
+                  <% } %>
+                </tbody>
+                
+            </table>
+        </div>
+    </div>
+
+    
+</body>
+</html>

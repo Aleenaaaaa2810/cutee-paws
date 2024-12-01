@@ -30,29 +30,68 @@
       }
       .menu-1 .main-nav {
          display: flex;
-         gap: 20px;
+         gap: 70px;
       }
       .menu-1 .right-nav {
          display: flex;
-         gap: 15px; /* Reduced gap for smaller spacing */
-         font-size: 12px; /* Reduced font size */
-         font-weight: bold; /* Bold text */
-         align-items: center; /* Vertically center items */
+         gap: 15px;
+         font-size: 12px;
+         font-weight: bold;
+         align-items: center;
       }
       .menu-1 .right-nav a {
          text-decoration: none;
-         color: black; /* Consistent color */
+         color: black;
          padding: 5px 8px;
       }
       .menu-1 .right-nav .wishlist img {
          width: 18px;
          height: 18px;
       }
-      /* Add spacing after Contact */
       .menu-1 .contact-nav {
-         margin-right: 30px; /* Space after Contact */
+         margin-right: 20px; /* Space after Contact */
       }
+      .menu-1 .contact-nav + li {
+         margin-left: 20px; /* Space before Cart */
+      }
+
+      .dropdown{
+         position: relative;
+         display: inline-block;}
+
+      .dropdown-content{
+         display:none;
+         position: absolute;
+         background-color: yellowgreen;
+         min-width: 160px;
+         box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+         z-index:1000;
+         right: 0;
+      }
+
+      .dropdown-content a{
+         color: black;
+         padding: 12px 16px;
+         text-decoration: none;
+         display: block;
+         width:100%;
+      }
+      .dropdown-content a:hover{
+         background-color: aliceblue;
+
+      }
+      .dropdown:hover.dropdown-content{
+         display: block;
+      }
+      .header{
+         position: relative;
+         z-index: 500;
+
+      }
+
    </style>
+   
+
 </head>
 <body>
    
@@ -64,7 +103,7 @@
             <div class="container">
                <div class="row">
                   <div class="col-sm-7 col-md-9">
-                     <div id="colorlib-logo"><a href="index.html">Cutee Paws</a></div>
+                     <div id="colorlib-logo"><a href="/">Cutee Paws</a></div>
                   </div>
                   <div class="col-sm-5 col-md-3">
                      <form action="#" class="search-wrap">
@@ -79,33 +118,39 @@
                   <div class="col-sm-12 text-left menu-1">
                      <!-- Main navigation items -->
                      <ul class="main-nav">
-                        <li class="active"><a href="index.html">Home</a></li>
-                        <li class="has-dropdown">
-                           <a href="men.html">Pages</a>
+                        <li class="active"><a href="/">Home</a></li>
+                        <!-- <li class="has-dropdown"> -->
+                           <!-- <a href="men.html">Pages</a>
                            <ul class="dropdown">
                               <li><a href="product-detail.html">Product Detail</a></li>
                               <li><a href="cart.html">Shopping Cart</a></li>
                               <li><a href="checkout.html">Checkout</a></li>
                               <li><a href="order-complete.html">Order Complete</a></li>
-                           </ul>
+                           </ul> -->
                         </li>
-                        <li><a href="food.html">Food</a></li>
-                        <li><a href="accessories.html">Accessories</a></li>
-                        <li><a href="toys.html">Toys</a></li>
-                        <li><a href="medicines.html">Medicines</a></li>
-                        <li><a href="about.html">About</a></li>
-                        <!-- Contact link with space after it -->
-                        <li class="contact-nav"><a href="contact.html">Contact</a></li>
-												<li><a href="cart.html"><i class="icon-shopping-cart"></i></a></li>
-                        <!-- <li class="wishlist"><a href="add-to-wishlist.html"><img src="images/wishlist.webp" alt="Wishlist"></a></li> -->
-												<li class="wishlist">
-													<a href="add-to-wishlist.html">
-															<img src="images/wishlist.webp" alt="Wishlist" style="width: 24px; height: auto;">
+                        <li><a href="/shop">Shop</a></li>
+                        <li><a href="/about">About</a></li>
+                         <li class="contact-nav"><a href="/contact">Contact</a></li><li>
+                           <a href="/cart"><i class="icon-shopping-cart" style="font-size: 25px;"></i></a></li>
+
+                       				<li class="wishlist">
+													<a href="/wishlist">
+															<img src="images/wishlist.webp" alt="Wishlist" style="width: 25px; height: auto;">
 													</a>
 												</li>
-											
-                        <li><a href="/signup">Signup</a></li>
-                        <li><a href="/login">Login</a></li>
+								<div class="dropdown">
+                           <% if (user) { %>
+                              <li> <%= user.name %></li>
+                              <li><a href="/profile">Profile</a></li>
+                              <li><a href="/logout">Logout</a></li>
+                            <% } else { %>
+                              <li><a href="/login">Login</a></li>
+                              <li><a href="/signup">Signup</a></li>
+
+                            <% } %>
+</div>
+
+                        
                      </ul>
                      
                   </div>
