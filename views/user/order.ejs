@@ -1,0 +1,210 @@
+<%- include("../../views/partials/user/header") %>
+    <style>
+        
+        .order-container {
+            max-width: 800px;
+            margin: auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .header h1 {
+            font-size: 1.8rem;
+            color: #333;
+        }
+
+        .product-details {
+            margin-bottom: 20px;
+        }
+
+        .product-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .product-item img {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+
+        .product-info {
+            flex-grow: 1;
+            margin-left: 15px;
+        }
+
+        .product-info h4 {
+            font-size: 1rem;
+            color: #333;
+        }
+
+        .product-info p {
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        .total-price {
+            text-align: right;
+            font-size: 1.2rem;
+            margin-top: 10px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .address-section {
+            margin-top: 20px;
+        }
+
+        .address-section h3 {
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+        }
+
+        .address-card {
+            display: flex;
+            align-items: flex-start;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            background-color: #f9f9f9;
+        }
+
+        .address-radio {
+            margin-right: 10px;
+            cursor: pointer;
+        }
+
+        .address-info {
+            font-size: 0.9rem;
+        }
+
+        .add-address {
+            display: inline-block;
+            background-color: #4caf50;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+
+        .add-address:hover {
+            background-color: #45a049;
+        }
+
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 1rem;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+
+
+<body>
+    <div class="order-container">
+        <div class="header">
+            <h1>Checkout page</h1>
+        </div>
+
+        <!-- Product Details -->
+        <div class="product-details">
+            <h3>Your Products</h3>
+            <% cart.items.forEach(item => { %>
+                <div class="product-item">
+                    <img src="/uploads/<%= item.productId.productImage[0] %>" alt="Product Image">
+                    <div class="product-info">
+                        <h4><%= item.productId.name %></h4>
+                        <p>Quantity: <%= item.quantity %></p>
+                        <p>Price: ₹<%= item.price %></p>
+                    </div>
+                </div>
+            <% }) %>
+        </div>
+
+        <!-- Total Price -->
+        <div class="total-price">
+          <h3>Total Price: <span>₹0</span></h3>
+      </div>
+
+        <!-- Address Section -->
+        <div class="address-section">
+            <h3>Choose Delivery Address</h3>
+            <% if (userAddress && userAddress.length > 0) { %>
+                <% userAddress.forEach((doc, docIndex) => { %>
+                    <% doc.address.forEach((address, index) => { %>
+                        <div class="address-card">
+                            <input type="radio" name="address" value="<%= address._id %>" class="address-radio" required>
+                            <div class="address-info">
+                                <strong><%= address.addressType %></strong> - <%= address.city %>, <%= address.state %>, <%= address.pincode %><br>
+                                <strong>Name:</strong> <%= address.name %>, <strong>Phone:</strong> <%= address.phone %>
+                            </div>
+                        </div>
+                    <% }) %>
+                <% }) %>
+            <% } else { %>
+                <p>No addresses available.</p>
+            <% } %>
+            <a href="/addAddress" class="add-address">Add New Address</a>
+        </div>
+
+        <!-- Order Button -->
+        <form id="orderForm" action="/submitOrder" method="POST">
+            <!-- Hidden inputs to hold required data -->
+            <input type="hidden" name="items" id="hiddenItems">
+            <input type="hidden" name="totalPrice" id="hiddenTotalPrice">
+            <input type="hidden" name="addressId" id="hiddenAddressId">
+            <button type="submit">Place Order</button>
+        </form>
+    </div>
+
+    <script>
+        // Retrieve items from the server
+        const items = <%- JSON.stringify(cart.items) %>; // Pass items from server to client
+        const totalPriceElement = document.querySelector('.total-price span');
+        const totalPrice = items.reduce((total, item) => total + item.quantity * item.price, 0);
+    
+        // Display total price
+        totalPriceElement.textContent = `₹${totalPrice}`;
+    
+        // Populate hidden inputs before form submission
+        document.getElementById('orderForm').addEventListener('submit', function (e) {
+            const selectedAddress = document.querySelector('input[name="address"]:checked');
+    
+            if (!selectedAddress) {
+                e.preventDefault(); // Prevent form submission
+                alert('Please select a delivery address!');
+                return;
+            }
+    
+            // Set the hidden input values
+            document.getElementById('hiddenItems').value = JSON.stringify(items);
+            document.getElementById('hiddenTotalPrice').value = totalPrice;
+            document.getElementById('hiddenAddressId').value = selectedAddress.value;
+        });
+    </script>
+</body>
+<%- include("../../views/partials/user/footer.ejs") %>
+
+</html>

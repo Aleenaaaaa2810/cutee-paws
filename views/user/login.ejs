@@ -82,27 +82,25 @@
     }
     /* Google Signup Button */
     .google-signup {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin-top: 20px;
-        padding: 12px;
-        border-radius: 8px;
-        background-color: #4285F4;
-        color: white;
-        cursor: pointer;
-        transition: background 0.3s ease, transform 0.2s;
-        font-weight: bold;
-    }
-    .google-signup:hover {
-        background-color: #357ae8;
-        transform: translateY(-2px);
-    }
-    .google-icon {
-        width: 20px;
-        height: 20px;
-        margin-right: 10px;
-    }
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 10px;
+            transition: background-color 0.3s ease;
+        }
+        .google-signup:hover {
+            background-color: #f4f4f4;
+        }
+        .google-icon {
+            margin-right: 10px;
+            width: 20px;
+            height: 20px;
+        }
     @keyframes fadeIn {
         from {
             opacity: 0;
@@ -140,17 +138,17 @@
         <!-- Login Button -->
         <button type="submit" class="login-button">Login</button>
       </form>
-  
+      <div class="google-signup">
+        <a href="/auth/google"><img src="/images/ggo.svg" class="google-icon">
+            Sign up with Google</a>
+      
+    </div>
       <!-- Forgot Password Link -->
       <a href="/forgot-password" class="forgot-password">Forgot Password?</a>
   
       <!-- Google Signup Button -->
-      <div class="google-signup">
-        <!-- <img 
-          src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" 
-          alt="Google" 
-          class="google-icon"
-        > -->
+    
+        
         <a 
           href="/signup" 
           style="color: white; text-decoration: none;"
@@ -229,3 +227,6 @@
   </body>
   
 </html>
+
+
+

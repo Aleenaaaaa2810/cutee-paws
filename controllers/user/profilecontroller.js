@@ -63,10 +63,10 @@ const securePassword=async(password)=>{
 
 const getForgotPassword = async (req, res) => {
   try {
-    res.render('forgot-password'); // Render the forgot-password view
+    res.render('forgot-password'); 
   } catch (error) {
-    console.error('Error rendering forgot-password page:', error); // Log the error
-    res.redirect('/pageNotFound'); // Redirect to a page-not-found route
+    console.error('Error rendering forgot-password page:', error);
+    res.redirect('/pageNotFound'); 
   }
 };
 
@@ -116,10 +116,10 @@ console.log("Session OTP:", req.session.userOtp);
 
 const userprofile = async (req, res) => {
   try {
-    const userId = req.session.user?.id; // Retrieve user ID from session
+    const userId = req.session.user?.id; 
     console.log(userId);
 
-    // Validate session
+   
     if (!userId) {
       console.error('User session not found. Redirecting to login.');
       return res.redirect('/login');
@@ -132,7 +132,7 @@ const userprofile = async (req, res) => {
     }
     const objectId = new mongoose.Types.ObjectId(userId);
 
-    // Retrieve user data
+    
     const userData = await User.findById(objectId);
     console.log(userData);
     console.log('User ID:', userId);
@@ -142,10 +142,10 @@ const userprofile = async (req, res) => {
       return res.redirect('/pageNotFound');
     }
 
-    // Retrieve address data
+    
     const addressData = await Address.findOne({ userId: objectId });
 
-    // Render profile page
+    
     res.render('profile', {
       user: userData,
       userAddress: addressData,
@@ -169,13 +169,13 @@ const getResetpass =async(req,res)=>{
 
 const resendOtp = async (req, res) => {
   try {
-    const otp = generateOTP(); // Generate a new OTP
-    req.session.userOtp = otp; // Store OTP in session
-    const email = req.session.email; // Get email from session
+    const otp = generateOTP(); 
+    req.session.userOtp = otp; 
+    const email = req.session.email; 
 
     console.log("Resend OTP to email:", email);
 
-    // Call sendVerificationEmail with correct parameters
+    
     const emailSent = await sendVerificationEmail(email, otp);
 
     if (emailSent) {
@@ -197,7 +197,7 @@ const postNewpassword = async (req, res) => {
     const email = req.session.email;
     console.log( req.body)
 
-    // Validate session email
+    
     if (!email) {
       console.error("Session email is missing.");
       return res.render("reset-password", {
@@ -211,7 +211,7 @@ const postNewpassword = async (req, res) => {
       });  
     }
 
-    // Check if passwords match
+   
     if (newPass1 !== newPass2) {
       return res.render("reset-password", {
         message: "Passwords do not match.",
@@ -301,14 +301,14 @@ const changeEmail=async(req,res)=>{
 
  const updateemail = async (req, res) => {
   try {
-    console.log("hi"); // First console log
+    console.log("hi"); 
     const newEmail = req.body.newEmail;
-    console.log("hi"); // Second console log (corrected typo)
+    console.log("hi"); 
     const userId = req.session.user.id;
     await User.findByIdAndUpdate(userId, { email: newEmail });
     res.redirect('/profile');
   } catch (error) {
-    console.error(error); // Log the error for debugging
+    console.error(error); 
     res.redirect("pageNotFound");
   }
 };
@@ -402,7 +402,7 @@ const postAddAddress = async (req,res) => {
       return res.status(400).send("All required fields must be filled.");
     }
 
-    // Check if user already has an address
+   
     let userAddress = await Address.findOne({ userId });
 
     if (!userAddress) {
@@ -414,7 +414,7 @@ const postAddAddress = async (req,res) => {
       await newAddress.save();
       console.log("New address added for user:", userId);
     } else {
-      // Add address to existing entry
+      
       userAddress.address.push({ addressType, name, city, landMark, state, pincode, phone, altPhone });
       await userAddress.save();
       console.log("Address appended for user:", userId);
@@ -432,7 +432,7 @@ const editAddress = async (req, res) => {
   try {
     console.log("Edit address function called");
 
-    const addressId = req.query.id; // Extract address ID from query
+    const addressId = req.query.id; 
     console.log("Address ID:", addressId);
 
     const user = req.session.user;
@@ -441,14 +441,14 @@ const editAddress = async (req, res) => {
       return res.redirect("/login");
     }
 
-    // Validate user ID in the session
+    
     const userId = user.id;
     if (!mongoose.Types.ObjectId.isValid(userId)) {
       console.error("Invalid User ID format.");
       return res.redirect("/pageNotFound");
     }
 
-    // Fetch the address data by address ID
+    
     const currentAddress = await Address.findOne({
       userId,
       "address._id": addressId,
@@ -461,7 +461,7 @@ const editAddress = async (req, res) => {
       return res.status(404).send("Address not found.");
     }
 
-    // Find the specific address object
+   
     const addressToEdit = currentAddress.address.find(
       (addr) => addr._id.toString() === addressId
     );
@@ -471,7 +471,7 @@ const editAddress = async (req, res) => {
       return res.status(404).send("Address not found.");
     }
 
-    // Render edit address page with the selected address data
+    
     res.render("edit-address", {
       user: user,
       address: addressToEdit,
@@ -488,16 +488,16 @@ const posteditAddress = async (req, res) => {
     const addressId = req.query.id;
     const user = req.session.user;
 
-    // Check if the address exists
+    
     const findAddress = await Address.findOne({ "address._id": addressId });
     if (!findAddress) {
-      // console.log("kkkkk");
-      return res.redirect("/pageNotFound"); // Ensure the function exits after redirect
+      
+      return res.redirect("/pageNotFound"); 
     }
 
-    // Update the address
+  
     await Address.updateOne(
-      { "address._id": addressId }, // Match the specific address using addressId
+      { "address._id": addressId }, 
       {
         $set: {
           "address.$.addressType": data.addressType,
@@ -512,7 +512,7 @@ const posteditAddress = async (req, res) => {
       }
     );
 
-    res.redirect("/profile"); // Redirect to the profile page after successful update
+    res.redirect("/profile"); 
   } catch (error) {
     console.error("Error in edit address:", error);
     res.redirect("/pageNotFound");

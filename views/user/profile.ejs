@@ -199,42 +199,44 @@
                   </div>
                 </div>
 
-                <!-- My Address Tab -->
                 <div id="my-address" class="tab-pane">
                   <div class="card">
-                    <div class="card-header">My Addresses</div>
-                    <div class="card-body">
-                      <div class="address-container">
-                        <% if (userAddress && userAddress.address.length > 0) { %>
-                          <% userAddress.address.forEach((address, index) => { %>
-                            <div class="address-card">
-                              <div class="address-header">
-                                <span><%= address.addressType %></span>
-                              </div>
-                              <div class="address-details">
-                                <p><strong>Name:</strong> <%= address.name %></p>
-                                <p><strong>City:</strong> <%= address.city %></p>
-                                <p><strong>State:</strong> <%= address.state %></p>
-                                <p><strong>pincode:</strong> <%= address.pincode %></p>
-                                <p><strong>landMark:</strong> <%= address.landMark %></p>
-                                <p><strong>phone:</strong> <%= address.phone%></p>
-                                <p><strong>altPhone:</strong> <%= address.altPhone %></p>
-                              </div>
-                              <div class="address-actions">
-                                <a href="/edit-address?id=<%= address.id %>"><button class="btn edit-address-btn">Edit</button></a>
-                                <a href="/deleteAddress?id=<%=address.id%>"><button class="btn delete-address-btn" >Delete</button></a>
-                              </div>
-                            </div>
-                          <% }) %>
-                        <% } else { %>
-                          <p>No addresses available.</p>
-                        <% } %>
+                      <div class="card-header">My Addresses</div>
+                      <div class="card-body">
+                          <div class="address-container">
+                              <% if (userAddress && Array.isArray(userAddress.address) && userAddress.address.length > 0) { %>
+                                  <% userAddress.address.forEach((address, index) => { %>
+                                      <div class="address-card">
+                                          <div class="address-header">
+                                              <span><%= address.addressType %></span>
+                                          </div>
+                                          <div class="address-details">
+                                              <p><strong>Name:</strong> <%= address.name %></p>
+                                              <p><strong>City:</strong> <%= address.city %></p>
+                                              <p><strong>State:</strong> <%= address.state %></p>
+                                              <p><strong>Pincode:</strong> <%= address.pincode %></p>
+                                              <p><strong>Landmark:</strong> <%= address.landMark %></p>
+                                              <p><strong>Phone:</strong> <%= address.phone %></p>
+                                              <p><strong>Alt Phone:</strong> <%= address.altPhone %></p>
+                                          </div>
+                                          <div class="address-actions">
+                                              <a href="/edit-address?id=<%= address.id %>">
+                                                  <button class="btn edit-address-btn">Edit</button>
+                                              </a>
+                                              <a href="/deleteAddress?id=<%= address.id %>">
+                                                  <button class="btn delete-address-btn">Delete</button>
+                                              </a>
+                                          </div>
+                                      </div>
+                                  <% }) %>
+                              <% } else { %>
+                                  <p>No addresses available.</p>
+                              <% } %>
+                          </div>
+                          <a href="/addAddress" class="btn add-address-btn">Add New Address</a>
                       </div>
-                      <a href="/addAddress" class="btn add-address-btn">Add New Address</a>
-                    </div>
                   </div>
-                </div>
-
+              </div>
                 <!-- Orders Tab -->
                 <div id="orders" class="tab-pane">
                   <div class="card">
@@ -251,10 +253,8 @@
                         </thead>
                         <tbody>
                           <tr>
-                            <td>#12345</td>
-                            <td>Completed</td>
-                            <td>$50.00</td>
-                            <td><a href="#" class="btn btn-sm">View</a></td>
+                            <p>your orders</p>
+                            <td><a href="/Order" class="btn btn-sm">View</a></td>
                           </tr>
                         </tbody>
                       </table>

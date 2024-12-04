@@ -4,7 +4,14 @@ const adminController = require("../controllers/admin/adminController");
 const customerController = require("../controllers/admin/customerController");
 const categoryController=require('../controllers/admin/categoryController')
 const productController=require("../controllers/admin/productController")
+const orderController=require('../controllers/admin/orderController')
+const { updateProduct } = require('../controllers/admin/adminController');
+
+
 const multer = require('multer');
+
+// Check if `updateProduct` is undefined in `adminController.js`
+
 const path = require('path'); // Add this line
 const fs = require('fs');
 const { adminAuth } = require("../middelwares/auth");
@@ -62,7 +69,23 @@ router.post('/addproducts',upload.array("image",3),productController.postProduct
 router.get('/products',productController.getproduct)
 
 router.get("/editProduct",productController.editProduct)
-router.post("/updateProduct/:id",productController.updateProduct)
+router.post("/updateProduct/:id", upload.array("images", 3), productController.updateProduct);
+router.delete('/delete-image/:productId/:imageId', productController.removeImage);
+router.post('/blockProduct/:productId',productController. blockProduct);
+router.post('/admin/unblockProduct/:productId',productController. unblockProduct);
+
+router.get('/orders',orderController.getorder)
+router.put('/orders/:orderId',orderController.updateStatusorder)
+router.delete('/orders/:orderId',orderController.deleteOrder);
+
+
+
+
+
+
+
+
+
 
 
 

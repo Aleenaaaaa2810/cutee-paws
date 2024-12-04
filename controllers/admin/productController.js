@@ -17,10 +17,8 @@ const getproductAddpage = async (req, res) => {
 
 const postProductAdd = async (req, res) => {
   try {
-    // Fetch categories for rendering in case of errors
     const categories = await Category.find({ isListed: true });
 
-    // Extract data from the form
     const { name, description, regularPrice, salePrice,quantity ,categoryId } = req.body;
 
     if (!name || !description || !regularPrice || !salePrice ||!quantity || !categoryId ) {
@@ -39,9 +37,8 @@ const postProductAdd = async (req, res) => {
       });
     }
     
-    const images = req.files.map((file) => file.filename); // Relative paths
-    console.log(name, description, regularPrice, salePrice, categoryId )
-    // Validate price fields
+    const images = req.files.map((file) => file.filename); 
+   
     const regularPriceNum = parseFloat(regularPrice);
     const salePriceNum = parseFloat(salePrice);
 
@@ -59,7 +56,7 @@ const postProductAdd = async (req, res) => {
       });
     }
 
-    // Validate category existence
+    
     const categoryExists = await Category.findById(categoryId);
     if (!categoryExists) {
       return res.render("product-add", {
@@ -71,15 +68,7 @@ const postProductAdd = async (req, res) => {
 
 
 
-    console.log("SAving data", name,
-      description,
-    regularPriceNum,
-     salePriceNum,
-      categoryId,
-      quantity,
-       images,)
-       
-    // Create and save the product
+    
     const newProduct = new Product({
       name,
       description,
@@ -89,6 +78,7 @@ const postProductAdd = async (req, res) => {
       quantity,
       productImage: images,
     });
+    console.log(newProduct)
     await newProduct.save();
 
     res.render("product-add", {
@@ -122,68 +112,122 @@ const getproduct = async (req, res) => {
 };
 
 
- const  editProduct = async (req, res) => {
+
+
+
+const editProduct = async (req, res) => {
   try {
-      const productId = req.query.productId; 
-      console.log(req.query)
-      console.log(productId)
-      
-      const product = await Product.findById(productId); 
+    const productId = req.query.id || req.query.productId;
+   
 
-const cat = await Category.find();
-console.log(cat);
+    const product = await Product.findById(productId);
+   
 
-      if (!product) {
-          return res.status(404).send('Product not found');
-      }
+    const cat = await Category.find();
+   
 
-      res.render('productedit', { product,cat }); 
+    if (!product) {
+      return res.status(404).send("Product not found");
+    }
+
+    res.render("productedit", { product, cat });
   } catch (error) {
-      console.error(error);
-      res.status(500).send('Server error'); 
+    console.error("Error in editProduct:", error);
+    res.status(500).send("Server error");
   }
 };
+
 
 const updateProduct = async (req, res) => {
   try {
-    const productId = req.params.id;
-    
-    const { name, description, regularPrice, salePrice, quantity, categoryId } = req.body;
-    console.log(req.body)
+    const { id } = req.params || req.query;
+   
 
-    if (!name || !description || !regularPrice || !salePrice || !quantity || !categoryId) {
-      return res.redirect('/products');
-    }
+    const { name, description, price } = req.body;
+    const imagePaths = req.files?.map(file => file.path) || [];
 
-    if (parseFloat(salePrice) > parseFloat(regularPrice)) {
-      return res.status(400).send('Sale price cannot be greater than the regular price');
-    }
-
-    
-      const updatedProduct = await Product.findByIdAndUpdate(
-        productId,
-        {
-          name: name.trim(), // Trim whitespace
-          description: description.trim(), // Trim whitespace
-          regularPrice: isNaN(regularPrice) ? 0 : parseFloat(regularPrice), // Validate numeric value
-          salePrice: isNaN(salePrice) ? 0 : parseFloat(salePrice), // Validate numeric value
-          quantity: isNaN(quantity) ? 0 : parseInt(quantity), // Validate numeric value
-          category: categoryId, // Ensure categoryId is valid
-        },
-        { new: true } // Return the updated product
-      );
-      
+    const updatedProduct = await Product.findByIdAndUpdate(
+      id,
+      { name, description, price, productImage: imagePaths },
+      { new: true }
+    );
 
     if (!updatedProduct) {
-      return res.status(404).send('Product not found');
+      console.error("Product not found with ID:", id);
+      return res.status(404).send({ message: "Product not found" });
     }
 
-    res.redirect('/products');
+    res.redirect(`/admin/editProduct?id=${id}`);
   } catch (error) {
-    console.error(error);
-    res.status(500).send('Server error');
+    console.error("Error in updateProduct:", error);
+    res.status(500).send({ message: "Internal Server Error" });
   }
 };
+
+
+
+
+const removeImage = async (req, res) => {
+  try {
+    const { productId, imageId } = req.params;
+
+    const product = await Product.findById(productId);
+    if (!product) {
+      return res.status(404).send({ message: "Product not found" });
+    }
+
+    if (!product.productImage.includes(imageId)) {
+      return res.status(404).send({ message: "Image not found" });
+    }
+
+    product.productImage = product.productImage.filter(image => image !== imageId);
+    await product.save();
+
+    const filePath = path.join(__dirname, "../public/uploads", imageId);
+    if (fs.existsSync(filePath)) {
+      fs.unlinkSync(filePath);
+    }
+
+    res.status(200).send({ message: "Image deleted successfully" });
+  } catch (error) {
+    console.error("Error in removeImage:", error);
+    res.status(500).send({ message: "Internal Server Error" });
+  }
+};
+
+const blockProduct = async (req, res) => {
+  try {
+    const productId = req.params.id;
+
+  
+    await Product.findByIdAndUpdate(productId, { isBlocked: true });
+
+    
+    res.redirect('/admin/products');
+  } catch (error) {
+    console.error('Error blocking product:', error);
+    res.status(500).send('Internal Server Error');
+  }
+};
+
+
+const unblockProduct = async (req, res) => {
+  try {
+    const productId = req.params.productId;
+
+    
+    await Product.findByIdAndUpdate(productId, { isBlocked: true });
+
+    res.redirect('/admin/products'); 
+  } catch (error) {
+    console.error('Error blocking product:', error);
+    res.status(500).send('Internal Server Error');
+  }
+};
+
+
+
+
 
 
 
@@ -194,6 +238,9 @@ module.exports = {
   postProductAdd,
   getproduct,
   editProduct,
-  updateProduct
+  updateProduct,
+  removeImage,
+  blockProduct,
+  unblockProduct
 
 };

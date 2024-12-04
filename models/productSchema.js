@@ -3,7 +3,7 @@ const monngoose=require("mongoose")
 const {Schema}=mongoose;
 
 const productSchema = new Schema({
-  name: { // Correcting "productSchema" to "name"
+  name: { 
     type: String,
     required: true,
   },
@@ -11,10 +11,7 @@ const productSchema = new Schema({
     type: String,
     required: true,
   },
-  // brand: {
-  //   type: String,
-  //   required: true,
-  // },
+
   category: {
     type: Schema.Types.ObjectId,
     ref: "Category",
@@ -28,10 +25,7 @@ const productSchema = new Schema({
     type: Number,
     default: 0,
   },
-  // productOffer: { // Consistent camelCase
-  //   type: Number, 
-  //   default: 0,
-  // },
+
   quantity: { 
     type: Number, 
     required: true,
@@ -39,7 +33,7 @@ const productSchema = new Schema({
     },
 
   productImage: {
-    type: [String], // This matches your image array in the controller
+    type: [String], 
     required: true,
   },
   isBlocked: {

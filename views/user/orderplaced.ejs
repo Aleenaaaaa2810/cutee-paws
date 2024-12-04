@@ -1,0 +1,27 @@
+<%- include("../../views/partials/user/header") %>
+  <title>Order Placed</title>
+  <style>
+
+    h1 {
+      text-align: center;
+      color: #4CAF50;
+    }
+    p {
+      font-size: 18px;
+      margin: 10px 0;
+    }
+  </style>
+</head>
+
+<body>
+  <body>
+    <div class="container" style="width: 80%; margin: 50px auto; padding: 20px; border: 1px solid #ddd; border-radius: 8px; background-color: #f9f9f9;">
+      <h1>Order Placed Successfully!</h1>
+      <p><strong>Order ID:</strong> <%= orderId %></p>
+      <p><strong>Order Date:</strong> <%= orderDate %></p>
+      <p><strong>Total Price:</strong> ₹<%= totalPrice %></p>
+      <p><strong>Status:</strong> <%= status %></p>
+    </div>
+  </body>
+<%- include("../../views/partials/user/footer") %>
+</html>

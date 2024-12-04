@@ -10,7 +10,7 @@ const pageerror= async (req,res)=>{
 
 
 const loadLogin = (req, res) => {
-  // If admin is already logged in, redirect to the admin dashboard
+ 
   if (req.session.admin) {
     return res.redirect("/admin/dashboard"); 
   }
@@ -27,13 +27,13 @@ const login = async (req, res) => {
         req.session.admin = true;
         return res.redirect("/admin");
       } else {
-        // Login failed - incorrect password
+        
         return res.render("admin-login", {
           message: 'Incorrect password. Please try again.',
         });
       }
     } else {
-      // Admin not found
+    
       return res.render("admin-login", {
         message: 'Admin not found. Please check your email and try again.',
       });

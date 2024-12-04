@@ -1,23 +1,22 @@
-const Category = require('../../models/categorySchema'); // Ensure schema name starts with a capital letter as per convention
+const Category = require('../../models/categorySchema'); 
 
-// Controller to fetch paginated category information
 const CategoryInfo = async (req,res) => {
   try {
-    const page = parseInt(req.query.page) || 1; // Default to page 1 if no page query provided
-    const limit = 4; // Number of items per page
-    const skip = (page - 1) * limit; // Calculate the number of documents to skip
+    const page = parseInt(req.query.page) || 1; 
+    const limit = 4; 
+    const skip = (page - 1) * limit; 
 
-    // Fetch paginated category data
+    
     const categoryData = await Category.find({})
-      .sort({ createdAt: 1 }) // Sort by createdAt field in ascending order
+      .sort({ createdAt: 1 }) 
       .skip(skip)
       .limit(limit);
 
-    // Count total number of categories
+
     const totalCategories = await Category.countDocuments();
     const totalPages = Math.ceil(totalCategories / limit);
 
-    // Render category view
+    
     res.render('category', {
       cat: categoryData,
       currentPage: page,
@@ -26,11 +25,11 @@ const CategoryInfo = async (req,res) => {
     });
   } catch (error) {
     console.error('Error fetching category information:', error);
-    res.redirect('/pageerror'); // Redirect to a generic error page
+    res.redirect('/pageerror'); 
   }
 };
 
-// Controller to add a new category
+
 const addCategory = async (req, res) => {
   const { name, description } = req.body;
 
@@ -51,10 +50,9 @@ const addCategory = async (req, res) => {
 };
 
 
-// Update Category
 const editcategory = async (req, res) => {
   try {
-      // console.log("Edit category called");
+      
       const { name, description } = req.body;
       const id = req.params.id;
 
@@ -73,7 +71,7 @@ const editcategory = async (req, res) => {
 
 
 
-// Get Category Edit Page
+
 const getcategoryedit = async (req, res) => {
   try {
 
@@ -92,20 +90,6 @@ const getcategoryedit = async (req, res) => {
 };
 
 
-
-// const deleteCategory = async (req, res) => {
-//   const categoryId = req.params.id;
-
-//   try {
-//       await Category.findByIdAndDelete(categoryId); // Assuming you use Mongoose
-//       res.status(200).json({ message: 'Category deleted successfully' });
-//   } catch (error) {
-//       console.error('Error deleting category:', error);
-//       res.status(500).json({ error: 'Failed to delete category' });
-//   }
-// };
-
-// Toggle category listing
 const CategoryListing = async (req, res) => {
   try {
       const { id } = req.params;
@@ -115,7 +99,7 @@ const CategoryListing = async (req, res) => {
           return res.status(404).json({ error: 'Category not found' });
       }
 
-      category.isListed = !category.isListed; // Toggle isListed state
+      category.isListed = !category.isListed; 
       await category.save();
 
       res.status(200).json({

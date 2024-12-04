@@ -3,6 +3,9 @@ const router = express.Router();
 const passport = require('passport');
 const profilecontroller=require('../controllers/user/profilecontroller')
 const userController = require("../controllers/user/userController");
+const productController=require('../controllers/user/productController')
+const cartController=require('../controllers/user/cartController')
+const orederrController=require('../controllers/user/orederrController')
 
 // Utility for handling async errors (optional)
 const asyncHandler = fn => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
@@ -51,9 +54,9 @@ router.get('/auth/google/callback', passport.authenticate("google", {
       id: req.user.id,
     };
 
-    res.redirect("/"); // Redirect to homepage
+    res.redirect("/"); 
   } else {
-    res.redirect("/login"); // Fallback if no user data
+    res.redirect("/login"); 
   }
 }
 );
@@ -84,6 +87,20 @@ router.get("/deleteAddress",profilecontroller.deleteAddress)
 router.get("/filter",userController.filteProduct)
 router.get("/filterPrice",userController.filterPrice)
 router.post("/search",userController.searchProducts)
+
+router.get('/productDetails',productController.productDetails)
+
+router.get('/cartPage',cartController.getCart)
+router.post('/cart/add',cartController.postCart);
+router.post('/cart/increase', cartController.increaseQuantity);
+router.post('/cart/decrease', cartController.decreaseQuantity);
+router.post('/remove-item',cartController.removeCart);
+
+
+router.get('/Order',orederrController.getorder)
+router.post('/submitOrder',orederrController.postorder)
+
+
 
 
 

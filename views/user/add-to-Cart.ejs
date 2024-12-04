@@ -1,0 +1,259 @@
+<%- include("../../views/partials/user/header") %>
+    <style>
+      
+        .cart-main {
+            padding: 50px 20px;
+        }
+
+        .cart-section {
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .cart-section h2 {
+            font-size: 2rem;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .cart-items-list {
+    list-style: none; /* Removes bullets */
+    padding: 0; /* Removes default padding */
+  }
+
+
+  .cart-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 15px 0;
+    border-bottom: 1px solid #ddd;
+    text-align: left; /* Align content to the left */
+    gap: 20px; /* Adds spacing between elements */
+  }
+
+        .cart-item img {
+            width: 100px;
+            height: 100px;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+
+        .cart-item-details {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    flex-grow: 1;
+    text-align: left; /* Ensures all details align to the left */
+  }
+
+        .cart-item-details strong {
+            font-size: 1.2rem;
+            color: #333;
+        }
+
+        .cart-item-details p {
+            color: #666;
+        }
+
+        .remove-btn {
+    background-color: #ff5722;
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    border-radius: 5px;
+    transition: background-color 0.3s;
+  }
+
+        .remove-btn:hover {
+            background-color: #e64a19;
+        }
+
+        /* Cart Total */
+        .cart-total {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 2px solid #f0f0f0;
+        }
+
+        .cart-total p {
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .checkout-btn {
+            background-color: #4caf50;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            border-radius: 25px;
+            transition: background-color 0.3s;
+        }
+
+        .checkout-btn:hover {
+            background-color: #388e3c;
+        }
+
+        /* Continue Shopping Section */
+        .continue-shopping {
+            text-align: center;
+            margin-top: 30px;
+        }
+
+        .continue-btn {
+            background-color: #2196f3;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            border-radius: 25px;
+            transition: background-color 0.3s;
+        }
+
+        .continue-btn:hover {
+            background-color: #1976d2;
+        }
+
+        /* Footer Styling */
+        .footer {
+            background-color: #333;
+            color: white;
+            text-align: center;
+            padding: 20px 0;
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            font-size: 1rem;
+        }
+    </style>
+</head>
+
+<body>
+  <!-- Header Section -->
+
+
+  <!-- Main Content -->
+  <main class="cart-main">
+    <section class="cart-section">
+      <h2>Your Shopping Cart</h2>
+      <div id="cart">
+        <!-- Dynamic Cart Items -->
+        <ul class="cart-items-list">
+          <% cart.items.forEach(item => { %>
+            <li class="cart-item" data-item-id="<%= item._id %>">
+              <div class="cart-item-details">
+                <img src="/uploads/<%= item.productId.productImage[0] %>" alt="Product Image">
+                <div>
+                  <strong><%= item.productId.name %></strong>
+                  <p>Price: ₹<%= item.price %></p>
+                  <p>Total: ₹<%= item.totalPrice %></p>
+                  <div class="quantity-controls">
+                    <button class="quantity-btn" onclick="updateQuantity('<%= item._id %>', 'decrease')">-</button>
+                    <span class="quantity"><%= item.quantity %></span>
+                    <button class="quantity-btn" onclick="updateQuantity('<%= item._id %>', 'increase')">+</button>
+                  </div>
+                </div>
+              </div>
+              <!-- Remove Button -->
+              <button class="remove-btn" onclick="removeItem('<%= item._id %>')">Remove</button>
+            </li>
+          <% }) %>
+        </ul>
+        
+        <!-- Cart Total -->
+        <div class="cart-total">
+          <p><strong>Total:</strong> ₹<%= cart.items.reduce((total, item) => total + item.totalPrice, 0) %></p>
+          <button class="checkout-btn" onclick="window.location.href='/Order'">Proceed to Checkout</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Continue Shopping Section -->
+    <section class="continue-shopping">
+      <h2>Continue Shopping</h2>
+      <button class="continue-btn" onclick="window.location.href='/shop'">Go Back to Shop</button>
+    </section>
+  </main>
+
+  <!-- Footer Section -->
+  <%- include("../../views/partials/user/footer") %>
+</body>
+
+
+<script>
+  function updateQuantity(itemId, action) {
+  const url = action === 'increase' ? '/cart/increase' : '/cart/decrease';
+  fetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ itemId }),
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.dbCart) {
+      // Reload or update the cart dynamically
+      location.reload();
+    } else {
+      alert(data.error);
+    }
+  })
+  .catch(error => {
+    console.error('Error:', error);
+  });
+}
+
+
+  // Function to remove an item from the cart via AJAX
+  function removeItem(itemId) {
+    if (!confirm("Are you sure you want to remove this item from your cart?")) {
+      return;
+    }
+
+    // Send an AJAX request to remove the item from the cart
+    fetch('/remove-item', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ itemId: itemId })
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        // Remove the item from the UI
+        const itemElement = document.querySelector(`.cart-item[data-item-id="${itemId}"]`);
+        itemElement.remove();
+
+        // Optionally, update the cart total or show a success message
+        alert('Item removed from the cart');
+        // You can also update the cart total if needed
+        // document.getElementById("cart-total").textContent = "₹" + data.newCartTotal;
+      } else {
+        alert('Error removing item');
+      }
+    })
+    .catch(error => {
+      console.error('Error:', error);
+    });
+  }
+
+
+
+</script>
+
+</html>

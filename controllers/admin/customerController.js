@@ -1,13 +1,12 @@
 const User = require("../../models/userSchema");
 
-// GET: Admin Customer Management
 const customerManagement = async (req, res) => {
     try {
-        let search = req.query.search || ""; // Retrieve search query
-        let page = parseInt(req.query.page) || 1; // Default to page 1
-        const limit = 5; // Number of customers per page
+        let search = req.query.search || ""; 
+        let page = parseInt(req.query.page) || 1; 
+        const limit = 5; 
 
-        // Fetch customers matching the search query
+        
         const customers = await User.find({
             isAdmin: false,
             $or: [
@@ -19,7 +18,6 @@ const customerManagement = async (req, res) => {
             .limit(limit)
             .skip((page - 1) * limit);
 
-        // Count total customers for pagination
         const totalCustomers = await User.countDocuments({
             isAdmin: false,
             $or: [
@@ -41,7 +39,7 @@ const customerManagement = async (req, res) => {
     }
 };
 
-// POST: Block Customer
+
 const blockCustomer = async (req, res) => {
     try {
         const { id } = req.params;
@@ -53,7 +51,6 @@ const blockCustomer = async (req, res) => {
     }
 };
 
-// POST: Unblock Customer
 const unblockCustomer = async (req, res) => {
     try {
         const { id } = req.params;

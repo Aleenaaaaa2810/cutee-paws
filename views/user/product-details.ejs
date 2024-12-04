@@ -1,0 +1,211 @@
+<%- include("../../views/partials/user/header") %>
+<main class="main">
+  <div class="page-header breadcrumb-wrap">
+    <div class="container">
+      <div class="breadcrumb">
+        <a href="#" rel="nofollow">Home</a>
+        <span></span> Fashion
+        <span></span> Product Details
+      </div>
+    </div>
+  </div>
+  <section class="product-details mt-50 mb-50">
+    <div class="container">
+      <div class="row">
+        <!-- Product Images Section -->
+        <div class="col-lg-6">
+          <div class="product-gallery">
+            <div class="main-image">
+              <img
+                id="mainImage"
+                src="/uploads/<%= product.productImage[0] %>"
+                alt="Main Product Image"
+                class="img-fluid border-radius-10"
+              />
+            </div>
+            <div class="thumbnail-gallery mt-3 d-flex justify-content-start gap-2">
+              <% product.productImage.forEach((image) => { %>
+                <img
+                  src="/uploads/<%= image %>"
+                  alt="Thumbnail"
+                  class="thumbnail border-radius-5"
+                  onclick="updateMainImage('/uploads/<%= image %>')"
+                />
+              <% }); %>
+            </div>
+          </div>
+        </div>
+
+        <!-- Product Info Section -->
+        <div class="col-lg-6">
+          <div class="product-info">
+            <h2 class="product-title"><%= product.name %></h2>
+            <div class="product-price mt-3">
+              <span class="sale-price text-brand">₹<%= product.salePrice %></span>
+              <span class="regular-price text-muted ml-2"><del>₹<%= product.regularPrice %></del></span>
+              <% if (totalOffer) { %>
+                <span class="offer-label text-success ml-3"><%= totalOffer %>% Off</span>
+              <% } else { %>
+                <span class="no-offer text-danger ml-3">No Offers</span>
+              <% } %>
+            </div>
+            <p class="product-description mt-4"><%= product.description %></p>
+            <ul class="product-features mt-4">
+              <li><i class="fi-rs-crown"></i> 1 Year Brand Warranty</li>
+              <li><i class="fi-rs-refresh"></i> 30 Day Return Policy</li>
+              <li><i class="fi-rs-credit-card"></i> Cash on Delivery Available</li>
+            </ul>
+            <div class="product-actions mt-5">
+              <div class="quantity-selector d-flex align-items-center">
+                <button class="qty-btn" onclick="decrementQuantity()">-</button>
+                <span id="quantity" class="qty-value">1</span>
+                <button class="qty-btn" onclick="incrementQuantity()">+</button>
+              </div>
+              <div class="mt-4">
+                <button class="btn btn-gradient add-to-cart-btn">
+                  <i class="fi-rs-shopping-cart"></i> Add to Cart
+                </button>
+                <button class="btn btn-outline-secondary wishlist-btn">
+                  <i class="fi-rs-heart"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+<%- include("../../views/partials/user/footer") %>
+
+<script>
+  // Update main image function
+  function updateMainImage(imageSrc) {
+    document.getElementById("mainImage").src = imageSrc;
+  }
+
+  // Zoom functionality with magnifier effect
+  const mainImage = document.getElementById("mainImage");
+  mainImage.addEventListener("mousemove", (e) => {
+    const { left, top, width, height } = mainImage.getBoundingClientRect();
+    const x = ((e.pageX - left) / width) * 100;
+    const y = ((e.pageY - top) / height) * 100;
+    mainImage.style.transformOrigin = `${x}% ${y}%`;
+    mainImage.style.transform = "scale(2)";
+  });
+
+  mainImage.addEventListener("mouseleave", () => {
+    mainImage.style.transform = "scale(1)";
+    mainImage.style.transformOrigin = "center";
+  });
+
+  // Quantity increment and decrement
+  function incrementQuantity() {
+    const qtyElement = document.getElementById("quantity");
+    qtyElement.textContent = parseInt(qtyElement.textContent) + 1;
+  }
+
+  function decrementQuantity() {
+    const qtyElement = document.getElementById("quantity");
+    if (parseInt(qtyElement.textContent) > 1) {
+      qtyElement.textContent = parseInt(qtyElement.textContent) - 1;
+    }
+  }
+</script>
+
+<style>
+  .product-gallery {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .main-image {
+    width: 100%;
+    overflow: hidden;
+    border-radius: 10px;
+  }
+
+  .main-image img {
+    width: 100%;
+    transition: transform 0.2s ease;
+    cursor: zoom-in;
+  }
+
+  .thumbnail-gallery img {
+    width: 80px;
+    height: 80px;
+    cursor: pointer;
+    object-fit: cover;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    transition: border 0.2s;
+  }
+
+  .thumbnail-gallery img:hover {
+    border-color: #ff5722;
+  }
+
+  .product-title {
+    font-size: 2.5rem;
+    font-weight: bold;
+  }
+
+  .product-price .sale-price {
+    font-size: 1.8rem;
+    font-weight: bold;
+    color: #ff5722;
+  }
+
+  .product-price .regular-price {
+    font-size: 1.2rem;
+    color: #999;
+  }
+
+  .product-description {
+    line-height: 1.8;
+    font-size: 1rem;
+  }
+
+  .product-actions .quantity-selector {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+  }
+
+  .product-actions .qty-btn {
+    background-color: #ff5722;
+    color: #fff;
+    border: none;
+    padding: 5px 15px;
+    font-size: 1.2rem;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+
+  .btn-gradient {
+    background: linear-gradient(45deg, #ff5722, #f06292);
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    font-size: 1.2rem;
+    border-radius: 25px;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+    margin-top: 10px;
+  }
+
+  .btn-gradient:hover {
+    transform: scale(1.1);
+    background: linear-gradient(45deg, #f06292, #ff5722);
+  }
+
+  .btn-outline-secondary {
+    border: 1px solid #ddd;
+    padding: 10px 15px;
+    border-radius: 25px;
+    color: #666;
+    margin-left: 10px;
+  }
+</style>

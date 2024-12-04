@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <title>Admin Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            display: flex;
+            min-height: 100vh;
+            background-color: #f4f5f7;
+            color: #333;
+        }
+
+        .sidebar {
+            width: 250px;
+            background-color: #1e212d;
+            color: #ffffff;
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            height: 100%;
+            padding-top: 20px;
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.2);
+        }
+
+        .sidebar h2 {
+            text-align: center;
+            font-size: 24px;
+            color: #f5a623;
+            margin-bottom: 30px;
+        }
+
+        .sidebar a {
+            padding: 15px 20px;
+            font-size: 18px;
+            color: #ffffff;
+            text-decoration: none;
+            transition: background 0.3s ease, color 0.3s ease;
+        }
+
+        .sidebar a:hover {
+            background-color: #f5a623;
+            color: #1e212d;
+        }
+
+        .sidebar a.active {
+            background-color: #f5a623;
+            color: #1e212d;
+            font-weight: bold;
+        }
+
+        .main-content {
+            margin-left: 250px;
+            padding: 30px;
+            width: calc(100% - 250px);
+            transition: margin-left 0.3s ease;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #ffffff;
+            padding: 20px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+            border-radius: 10px;
+        }
+
+        .header h1 {
+            font-size: 24px;
+            color: #333;
+        }
+
+        .logout-btn {
+            padding: 10px 20px;
+            font-size: 16px;
+            color: #ffffff;
+            background-color: #f5a623;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .logout-btn:hover {
+            background-color: #e0911c;
+        }
+
+        .orders-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 30px;
+        }
+
+        .orders-table th, .orders-table td {
+            padding: 15px;
+            text-align: center;
+            border: 1px solid #ddd;
+            background-color: #fff;
+        }
+
+        .orders-table th {
+            background-color: #f5a623;
+            color: white;
+        }
+
+        .orders-table td {
+            background-color: #fafafa;
+        }
+
+        .orders-table td a {
+            text-decoration: none;
+            color: #f5a623;
+            font-weight: bold;
+            margin-right: 10px;
+            transition: color 0.3s ease;
+        }
+
+        .orders-table td a:hover {
+            color: #e0911c;
+        }
+
+        .actions-btns {
+            display: flex;
+            justify-content: center;
+        }
+
+        .actions-btns button {
+            padding: 8px 15px;
+            background-color: #f5a623;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 0 5px;
+            transition: background-color 0.3s ease;
+        }
+
+        .actions-btns button:hover {
+            background-color: #e0911c;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="sidebar">
+        <h2>Admin Panel</h2>
+        <a href="/admin" class="active">Dashboard</a>
+        <a href="/admin/customers">Customers</a>
+        <a href="/admin/category">Categories</a>
+        <a href="/admin/addproducts">Add Product</a>
+        <a href="/admin/products">Products</a>
+        <a href="/admin/orders">Order manage</a>
+        <a href="/admin/logout" class="logout-btn">Logout</a>
+    </div>
+
+    <div class="main-content">
+        <div class="header">
+            <h1>Order Management</h1>
+        </div>
+        <table class="orders-table">
+            <thead>
+                <tr>
+                    <th>Order ID</th>
+                    <th>Customer</th>
+                    <!-- <th>Address</th> -->
+                    <th>Items</th>
+                    <th>Total Price</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% orders.forEach((order) => { %>
+                    <tr>
+                        <td><%= order._id %></td>
+                        <td>
+                            <%= order.user && order.user.name ? order.user.name : 'No name' %> 
+                            (<%= order.user && order.user.email ? order.user.email : 'No email' %>)
+                        </td>
+                        <!-- <td>
+                            <%= order.address && order.address.street ? order.address.street : 'No street' %>,
+                            <%= order.address && order.address.city ? order.address.city : 'No city' %>
+                        </td> -->
+                        <td>
+                            <ul>
+                                <% order.orderedItems.forEach((item) => { %>
+                                    <li><%= item.product.name %> (x<%= item.quantity %>) - <%= item.product.price %></li>
+                                <% }) %>
+                            </ul>
+                        </td>
+                        <td>₹<%= order.totalPrice %></td>
+                        <td><%= order.status %></td>
+                        <td class="actions-btns">
+                            <button onclick="updateStatus('<%= order._id %>')">Update Status</button>
+                            <button onclick="deleteOrder('<%= order._id %>')">Delete</button>
+                        </td>
+                    </tr>
+                <% }) %>
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        const updateStatus = (orderId) => {
+            const statusOptions = ['Pending', 'Processing', 'Shipped', 'Delivered', 'Cancelled'];
+
+            Swal.fire({
+                title: 'Select new status',
+                input: 'select',
+                inputOptions: statusOptions.reduce((acc, status) => {
+                    acc[status] = status;
+                    return acc;
+                }, {}),
+                inputPlaceholder: 'Select status',
+                showCancelButton: true,
+                confirmButtonText: 'Update Status',
+                cancelButtonText: 'Cancel',
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    const selectedStatus = result.value;
+
+                    fetch(`/admin/orders/${orderId}`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ status: selectedStatus }),
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        Swal.fire({
+                            icon: 'success',
+                            title: data.message,
+                            showConfirmButton: false,
+                            timer: 1500
+                        });
+                        location.reload();
+                    })
+                    .catch(err => console.error(err));
+                }
+            });
+        };
+
+        const deleteOrder = (orderId) => {
+            Swal.fire({
+                title: 'Are you sure?',
+                text: 'Do you really want to delete this order?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, delete it!',
+                cancelButtonText: 'No, keep it'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    fetch(`/admin/orders/${orderId}`, {
+                        method: 'DELETE',
+                    }).then(response => response.json()).then(data => {
+                        if (data.success) {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Order deleted successfully!',
+                                showConfirmButton: false,
+                                timer: 1500
+                            });
+                            location.reload(); // Reload the page to reflect the deletion
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Failed to delete the order',
+                                showConfirmButton: true,
+                            });
+                        }
+                    }).catch(err => console.error(err));
+                }
+            });
+        };
+    </script>
+</body>
+</html>

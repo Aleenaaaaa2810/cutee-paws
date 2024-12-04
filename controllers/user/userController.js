@@ -55,21 +55,17 @@ async function loadHomepage(req, res) {
 }
 
 async function loadshop(req, res) {
-  console.log("haii welcome");
   try {
     const userSession = req.session.user;
-    console.log("Session User ID:", userSession);
-
+   
     if (!userSession || !userSession.id) {
       console.error("No valid user in session");
       return res.redirect("/login");
     }
 
-    // Extract only the `id` field
     const userId = userSession.id;
 
     const userData = await User.findOne({ _id: userId });
-    console.log("User Data:", userData);
 
     if (!userData) {
       console.error("User not found in database");
@@ -79,10 +75,9 @@ async function loadshop(req, res) {
     const categorise = await category.find({ isListed: true });
     const CategorIds = categorise.map((category) => category._id.toString());
     const page = parseInt(req.query.page) || 1;
-    const limit = 9;
+    const limit = 6;
     const skip = (page - 1) * limit;
 
-    console.log("heyy");
 
     const products = await Product.find({
       isBlocked: false,
@@ -132,7 +127,7 @@ async function loadabout(req, res) {
 
 async function loadcart(req, res) {
   try {
-    res.render("cart");
+    res.render("add-to-Cart");
   } catch (error) {
     console.error("Error loading cart page:", error);
     res.redirect("/pageNotFound");
@@ -243,12 +238,9 @@ async function verifyOtp(req, res) {
 
     // Extract user data and hash the password
     const { name, email, phone, password } = req.session.userData;
-    // console.log( name, email, phone, password, cpassword)
-    console.log(req.session)
 
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    console.log("Hashed Password:", hashedPassword);
 const newUser = new User({
   name,
   email,
@@ -295,10 +287,8 @@ async function login(req, res) {
 
   try {
     const { email, password } = req.body;
-    console.log(req.body)
   
     const user = await User.findOne({ email });
-    console.log(user); 
     
     if (!user) {
       return res.status(404).json({ success: false, message: "User not found" });
@@ -308,7 +298,6 @@ async function login(req, res) {
     }
     
       const isPasswordValid = await user.matchPassword(password);
-console.log(isPasswordValid); 
 if (!isPasswordValid) {
   return res.status(401).json({ success: false, message: "Incorrect password" });
 }
@@ -386,7 +375,6 @@ const logout = async (req, res) => {
 const filteProduct =async(req,res)=>{
   try {
     const user=req.session.user;
-    console.log("user",user);
     const category=req.query.category
     const findCategory = category ? await Category.findById({_id: category}) : null;
 
@@ -433,12 +421,12 @@ const filterPrice=async(req,res)=>{
     const user=req.session.user
     const categorise=await Category.find({isListed:true}).lean()
     let findProducts=await Product.find({
-      salePrice:{$gt:req.query.gt,$lt:req.query.lt},
+      salePrice:{$gte:req.query.gte,$lte:req.query.lte},
       isBlocked:false,
       quantity:{$gt:0}
     }).lean()
+
     findProducts.sort((a,b)=>new Date(b.createdOn)-new Date(a.createdOn))
-console.log('findProducts',findProducts)
     let itemsPerPage=6;
     let currentpage=parseInt(req.query.page)|| 1
     let startIndex=(currentpage-1)*itemsPerPage
@@ -473,13 +461,12 @@ const searchProducts=async(req,res)=>{
   const CategorIds= categorise.map(category=>category._id.toString())
   let searchReasult=[]
 
-  console.log(req.body.query)
   if (search && search.length > 0) {
-    // If there is a search query, find products with matching names
+    
     searchReasult = await Product.find({
-      name: { $regex: search, $options: "i" },  // Case-insensitive search
-      quantity: { $gt: 0 },  // Only show products with quantity greater than 0
-    }).populate('category');  // Populate category details if needed
+      name: { $regex: search, $options: "i" }, 
+      quantity: { $gt: 0 }, 
+    }).populate('category'); 
   } else {
     searchReasult = await Product.find({
       quantity: { $gt: 0 },
@@ -533,5 +520,5 @@ module.exports = {
   logout,
   filteProduct,
   filterPrice,
-  searchProducts
+  searchProducts,
 };
