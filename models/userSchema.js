@@ -46,6 +46,7 @@ const userSchema = new Schema({
     type: Date,
     default: Date.now,
   },
+  wishlist: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Product' }],
 });
 userSchema.pre('save', async function (next) {
   if (this.isModified('password') && !this.password.startsWith('$2')) {

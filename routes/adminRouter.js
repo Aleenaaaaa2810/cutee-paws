@@ -5,6 +5,7 @@ const customerController = require("../controllers/admin/customerController");
 const categoryController=require('../controllers/admin/categoryController')
 const productController=require("../controllers/admin/productController")
 const orderController=require('../controllers/admin/orderController')
+const couponCOntroller=require('../controllers/admin/couponController')
 const { updateProduct } = require('../controllers/admin/adminController');
 
 
@@ -77,6 +78,9 @@ router.post('/admin/unblockProduct/:productId',productController. unblockProduct
 router.get('/orders',orderController.getorder)
 router.put('/orders/:orderId',orderController.updateStatusorder)
 router.delete('/orders/:orderId',orderController.deleteOrder);
+
+router.get('/coupons',couponCOntroller.loadcoupon)
+router.post('/createcoupon',couponCOntroller.createcoupon)
 
 
 

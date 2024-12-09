@@ -155,9 +155,9 @@
           <% cart.items.forEach(item => { %>
             <li class="cart-item" data-item-id="<%= item._id %>">
               <div class="cart-item-details">
-                <img src="/uploads/<%= item.productId.productImage[0] %>" alt="Product Image">
+                <img src="/uploads/<%= item?.productId?.productImage[0] %>" alt="Product Image">
                 <div>
-                  <strong><%= item.productId.name %></strong>
+                  <strong><%= item.productId?.name %></strong>
                   <p>Price: ₹<%= item.price %></p>
                   <p>Total: ₹<%= item.totalPrice %></p>
                   <div class="quantity-controls">

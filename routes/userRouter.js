@@ -6,6 +6,7 @@ const userController = require("../controllers/user/userController");
 const productController=require('../controllers/user/productController')
 const cartController=require('../controllers/user/cartController')
 const orederrController=require('../controllers/user/orederrController')
+const wishlistController=require('../controllers/user/wishlistController')
 
 // Utility for handling async errors (optional)
 const asyncHandler = fn => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
@@ -19,7 +20,6 @@ router.get("/shop", asyncHandler(userController.loadshop));
 router.get("/about", asyncHandler(userController.loadabout));
 router.get("/cart", asyncHandler(userController.loadcart));
 router.get("/contact", asyncHandler(userController.loadcontact));
-router.get("/wishlist", asyncHandler(userController.loadwishlist));
 router.get("/otp", asyncHandler(userController.loadotp));
 
 // Signup routes
@@ -100,6 +100,10 @@ router.post('/remove-item',cartController.removeCart);
 router.get('/Order',orederrController.getorder)
 router.post('/submitOrder',orederrController.postorder)
 
+
+router.get('/wishlist',wishlistController.loadwishlist)
+router.post('/addTowishlist',wishlistController.addTowishlist)
+router.delete('/removefromwishlist', wishlistController.deletewishlist);
 
 
 

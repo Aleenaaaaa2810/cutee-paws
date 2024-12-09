@@ -7,6 +7,8 @@ const getCart = async (req, res) => {
   const userId = req.session.user;
   try {
     const cart = await Cart.findOne({ userId: userId.id }).populate('items.productId');
+    console.log(JSON.stringify(cart, null, 2));
+
     cart.items.forEach(item => {
       
     });

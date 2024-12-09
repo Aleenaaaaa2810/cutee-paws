@@ -143,15 +143,6 @@ async function loadcontact(req, res) {
   }
 }
 
-async function loadwishlist(req, res) {
-  try {
-    res.render("wishlist");
-  } catch (error) {
-    console.error("Error loading wishlist page:", error);
-    res.redirect("/pageNotFound");
-  }
-}
-
 async function loadotp(req, res) {
   try {
     res.render("otp");
@@ -513,7 +504,7 @@ module.exports = {
   loadabout,
   loadcart,
   loadcontact,
-  loadwishlist,
+
   loadotp,
   login,
   resendOtp,

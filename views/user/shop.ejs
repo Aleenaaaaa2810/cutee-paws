@@ -1,4 +1,5 @@
 <%- include("../../views/partials/user/header") %>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <style>
  .main-container {
    max-width: 1200px;
@@ -246,7 +247,7 @@
       <% for (let i = 0; i < products.length; i++) { %>
         <div class="product-card">
         
-          <span class="wishlist-btn" onclick="">❤️</span>  
+          <span class="wishlist-btn" onclick="addTowishlist('<%=products[i]._id%>')">❤️</span>  
           <a href="/productDetails?id=<%=products[i]._id %>">
             <img src="/uploads/<%= products[i].productImage[0] %>" 
                  alt="<%= products[i].name %>" 
@@ -306,7 +307,7 @@
         productDetails: { name: productName, price: productPrice }
       }),
       success: function (response) {
-        // Show Confirmation Alert
+       
         if (confirm("Product added to cart. Go to Cart or Continue Shopping?")) {
          
           window.location.href = '/cartPage'; 
@@ -318,6 +319,46 @@
       }
     });
   }
+  
+
+  function addTowishlist(productId) {
+  $.ajax({
+    url: '/addTowishlist',
+    method: 'POST',
+    data: { productId: productId },
+    success: (response) => {
+      if (response.status) {
+        Swal.fire({
+          title: 'Added to wishlist',
+          text: 'The product has been added to your wishlist.',
+          icon: 'success',
+          timer: 2000,
+        });
+      } else {
+        Swal.fire({
+          title: 'Already in wishlist',
+          text: response.message,
+          icon: 'info',
+          timer: 2000,
+        });
+      }
+    },
+    error: (error) => {
+      Swal.fire({
+        title: 'Error',
+        text: 'There was an error adding the product to your wishlist.',
+        icon: 'error',
+        timer: 2000,
+      });
+      console.error("Error:", error);
+    },
+  });
+}
+
+
+
+
+
 </script>
 
 <%- include("../../views/partials/user/footer") %>

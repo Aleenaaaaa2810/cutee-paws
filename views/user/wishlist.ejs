@@ -1,198 +1,172 @@
-<%-include("../../views/partials/user/header.ejs")%>
-		<div class="breadcrumbs">
-			<div class="container">
-				<div class="row">
-					<div class="col">
-						<p class="bread"><span><a href="/">Home</a></span> / <span>My Wishlist</span></p>
-					</div>
-				</div>
-			</div>
-		</div>
+<%- include("../../views/partials/user/header") %>
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      background-color: #f8f9fa;
+    }
 
+    .page-header {
+      background: #f1f1f1;
+      padding: 20px 0;
+    }
 
-		<div class="colorlib-product">
-			<div class="container">
-				<div class="row row-pb-lg">
-					<div class="col-md-10 offset-md-1">
-						<div class="process-wrap">
-							<div class="process text-center active">
-								<p><span>01</span></p>
-								<h3>Shopping Cart</h3>
-							</div>
-							<div class="process text-center">
-								<p><span>02</span></p>
-								<h3>Checkout</h3>
-							</div>
-							<div class="process text-center">
-								<p><span>03</span></p>
-								<h3>Order Complete</h3>
-							</div>
-						</div>
-					</div>
-				</div>
-				<div class="row row-pb-lg">
-					<div class="col-md-12">
-						<div class="product-name d-flex">
-							<div class="one-forth text-left px-4">
-								<span>Product Details</span>
-							</div>
-							<div class="one-eight text-center">
-								<span>Price</span>
-							</div>
-							<div class="one-eight text-center">
-								<span>Quantity</span>
-							</div>
-							<div class="one-eight text-center">
-								<span>Total</span>
-							</div>
-							<div class="one-eight text-center px-4">
-								<span>Remove</span>
-							</div>
-						</div>
-						<div class="product-cart d-flex">
-							<div class="one-forth">
-								<div class="product-img" style="background-image: url(images/3.webp);">
-								</div>
-								<div class="display-tc">
-									<h3>Product Name</h3>
-								</div>
-							</div>
-							<div class="one-eight text-center">
-								<div class="display-tc">
-									<span class="price">$68.00</span>
-								</div>
-							</div>
-							<div class="one-eight text-center">
-								<div class="display-tc">
-									<input type="text" id="quantity" name="quantity" class="form-control input-number text-center" value="1" min="1" max="100">
-								</div>
-							</div>
-							<div class="one-eight text-center">
-								<div class="display-tc">
-									<span class="price">$120.00</span>
-								</div>
-							</div>
-							<div class="one-eight text-center">
-								<div class="display-tc">
-									<a href="#" class="closed"></a>
-								</div>
-							</div>
-						</div>
-						<div class="product-cart d-flex">
-							<div class="one-forth">
-								<div class="product-img" style="background-image: url(images/2.webp);">
-								</div>
-								<div class="display-tc">
-									<h3>Product Name</h3>
-								</div>
-							</div>
-							<div class="one-eight text-center">
-								<div class="display-tc">
-									<span class="price">$68.00</span>
-								</div>
-							</div>
-							<div class="one-eight text-center">
-								<div class="display-tc">
-									<form action="#">
-										<input type="text" name="quantity" class="form-control input-number text-center" value="1" min="1" max="100">
-									</form>
-								</div>
-							</div>
-							<div class="one-eight text-center">
-								<div class="display-tc">
-									<span class="price">$120.00</span>
-								</div>
-							</div>
-							<div class="one-eight text-center">
-								<div class="display-tc">
-									<a href="#" class="closed"></a>
-								</div>
-							</div>
-						</div>
-						<div class="product-cart d-flex">
-							<div class="one-forth">
-								<div class="product-img" style="background-image: url(images/1.webp);">
-								</div>
-								<div class="display-tc">
-									<h3>Product Name</h3>
-								</div>
-							</div>
-							<div class="one-eight text-center">
-								<div class="display-tc">
-									<span class="price">$68.00</span>
-								</div>
-							</div>
-							<div class="one-eight text-center">
-								<div class="display-tc">
-									<input type="text" id="quantity" name="quantity" class="form-control input-number text-center" value="1" min="1" max="100">
-								</div>
-							</div>
-							<div class="one-eight text-center">
-								<div class="display-tc">
-									<span class="price">$120.00</span>
-								</div>
-							</div>
-							<div class="one-eight text-center">
-								<div class="display-tc">
-									<a href="#" class="closed"></a>
-								</div>
-							</div>
-						</div>
-					</div>
-				</div>
-				<div class="row">
-					<div class="col-sm-8 offset-sm-2 text-center colorlib-heading colorlib-heading-sm">
-						<h2>Shop more</h2>
-					</div>
-				</div>
-				<div class="row">
-					<div class="col-md-3 col-lg-3 mb-4 text-center">
-						<div class="product-entry border">
-							<a href="#" class="prod-img">
-								<img src="images/6.webp" class="img-fluid" alt="Free html5 bootstrap 4 template">
-							</a>
-							<div class="desc">
-								<h2><a href="#">Women's Boots Shoes Maca</a></h2>
-								<span class="price">$139.00</span>
-							</div>
-						</div>
-					</div>
-					<div class="col-md-3 col-lg-3 mb-4 text-center">
-						<div class="product-entry border">
-							<a href="#" class="prod-img">
-								<img src="images/5.webp" class="img-fluid" alt="Free html5 bootstrap 4 template">
-							</a>
-							<div class="desc">
-								<h2><a href="#">Women's Minam Meaghan</a></h2>
-								<span class="price">$139.00</span>
-							</div>
-						</div>
-					</div>
-					<div class="col-md-3 col-lg-3 mb-4 text-center">
-						<div class="product-entry border">
-							<a href="#" class="prod-img">
-								<img src="images/6.webp" class="img-fluid" alt="Free html5 bootstrap 4 template">
-							</a>
-							<div class="desc">
-								<h2><a href="#">Men's Taja Commissioner</a></h2>
-								<span class="price">$139.00</span>
-							</div>
-						</div>
-					</div>
-					<div class="col-md-3 col-lg-3 mb-4 text-center">
-						<div class="product-entry border">
-							<a href="#" class="prod-img">
-								<img src="images/9.webp" class="img-fluid" alt="Free html5 bootstrap 4 template">
-							</a>
-							<div class="desc">
-								<h2><a href="#">Russ Men's Sneakers</a></h2>
-								<span class="price">$139.00</span>
-							</div>
-						</div>
-					</div>
-				</div>
-			</div>
-		</div>
-<%-include("../../views/partials/user/footer.ejs")%>
-		
+    .breadcrumb a {
+      color: #007bff;
+      text-decoration: none;
+    }
 
+    .table {
+      border-radius: 10px;
+      overflow: hidden;
+      background-color: white;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .table th {
+      background-color: #343a40;
+      color: white;
+      padding: 15px;
+    }
+
+    .table td {
+      vertical-align: middle;
+      padding: 15px;
+    }
+
+    .img-thumbnail {
+      border-radius: 8px;
+      max-height: 80px;
+      object-fit: cover;
+    }
+
+    .btn-sm {
+      padding: 5px 10px;
+      font-size: 14px;
+    }
+
+    .btn-success {
+      background-color: #28a745;
+      border: none;
+    }
+
+    .btn-danger {
+      background-color: #dc3545;
+      border: none;
+    }
+
+    .lead {
+      font-size: 1.2rem;
+      color: #6c757d;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <!-- Include your header partial here -->
+  </header>
+
+  <main class="main">
+    <div class="page-header breadcrumb-wrap">
+      <div class="container">
+        <div class="breadcrumb">
+          <a href="/" rel="nofollow">Home</a>
+          <span></span> Shop
+          <span></span> My Wishlist
+        </div>
+      </div>
+    </div>
+
+    <section class="mt-50 mb-50">
+      <div class="container">
+        <div class="row">
+          <div class="col-12">
+            <div class="table-responsive">
+              <table class="table shopping-summery text-center clean table-bordered">
+                <thead class="table-dark">
+                  <tr class="main-heading">
+                    <th scope="col">Image</th>
+                    <th scope="col">Name</th>
+                    <th scope="col">Price</th>
+                    
+                    <th scope="col">Remove</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% if (Wishlist.length > 0) { %>
+                    <% Wishlist.forEach(product => { %>
+                      <tr>
+                        <td class="image product-thumbnail">
+                          <img src="/uploads/<%= product.productImage[0] %>" class="img-thumbnail" alt="<%= product.name %>" />
+                        </td>
+                        <td class="product-des product-name">
+                          <h5>
+                            <a href="#" class="text-primary"><%= product.name %></a>
+                          </h5>
+                          <p class="font-xs text-muted"><%= product.category.name %></p>
+                        </td>
+                        <td class="price">₹<%= product.salePrice %></td>
+                       
+                        <td>
+                          <a href="/removefromwishlist" onclick="removeFromWishlist('<%= product._id %>')" class="btn btn-danger btn-sm">Remove</a>
+                        </td>
+                      </tr>
+                    <% }); %>
+                  <% } else { %>
+                    <tr>
+                      <td colspan="5" class="text-center">
+                        <p class="lead">No items found in Wishlist</p>
+                      </td>
+                    </tr>
+                  <% } %>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <!-- Include your footer partial here -->
+  </footer>
+
+  <script>
+    
+    function removeFromWishlist(productId) {
+  Swal.fire({
+    title: 'Are you sure?',
+    text: 'This will remove the item from your wishlist.',
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#d33',
+    cancelButtonColor: '#3085d6',
+    confirmButtonText: 'Yes, remove it!'
+  }).then(result => {
+    if (result.isConfirmed) {
+      fetch('/removefromwishlist', {
+        method: 'DELETE', // Use DELETE method for removal
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ productId }) // Send productId as JSON
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.status) {
+          Swal.fire('Removed!', 'Your item has been removed.', 'success');
+          location.reload(); // Optionally reload the page to update the wishlist
+        } else {
+          Swal.fire('Error!', data.message, 'error');
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        Swal.fire('Error!', 'Something went wrong. Please try again later.', 'error');
+      });
+    }
+  });
+}
+
+  </script>
+<%- include("../../views/partials/user/footer") %>

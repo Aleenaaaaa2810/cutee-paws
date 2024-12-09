@@ -17,7 +17,7 @@
   <div class="main-content">
     <div class="edit-product-form">
       <h2>Edit Product</h2>
-      <form action="/admin/updateProduct/<%= product._id %>" method="POST" enctype="multipart/form-data"> 
+      <form action="" id="edit-product-form" method="POST" data-product-id="<%= product._id %>" enctype="multipart/form-data"> 
         <!-- Product Name -->
         <div class="form-group">
           <label for="product-name">Product Name</label>
@@ -70,46 +70,47 @@
         <!-- Image Upload -->
         <div class="form-group">
           <label for="image1">Choose Image 1</label>
-          <input type="file" id="image1" name="image1" accept="image/*">
+          <input type="file" id="image1" name="images" accept="image/*">
         </div>
 
         <div class="form-group">
           <label for="image2">Choose Image 2</label>
-          <input type="file" id="image2" name="image2" accept="image/*">
+          <input type="file" id="image2" name="images" accept="image/*">
         </div>
 
         <div class="form-group">
           <label for="image3">Choose Image 3</label>
-          <input type="file" id="image3" name="image3" accept="image/*">
+          <input type="file" id="image3" name="images" accept="image/*">
         </div>
 
         <!-- Submit Button -->
-       <a href="/product"> <button type="submit">Update Product</button></a>
+        <button type="submit">Update Product</button>
       </form>
     </div>
   </div>
 
   <script>
     // Handle form submission
-    async function handleFormSubmit(event) {
+    document.getElementById("edit-product-form").addEventListener("submit", async function(event) {
       event.preventDefault();
       const formData = new FormData(event.target);
 
       try {
-        const response = await fetch(event.target.action, {
+        const response = await fetch('/admin/updateProduct/<%=product._id%>', {
           method: 'POST',
           body: formData
         });
         const result = await response.json();
         if (result.success) {
-          Swal.fire('Success', 'Product updated successfully!', 'success');
+          Swal.fire('Success', 'Product updated successfully!', 'success')
+         
         } else {
           Swal.fire('Error', result.error || 'Failed to update product', 'error');
         }
       } catch (err) {
         Swal.fire('Error', 'An unexpected error occurred.', 'error');
       }
-    }
+    });
 
     // Delete Image
     async function deleteImage(productId, imageId) {

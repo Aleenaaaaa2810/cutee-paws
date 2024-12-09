@@ -140,60 +140,68 @@ const editProduct = async (req, res) => {
 
 const updateProduct = async (req, res) => {
   try {
-    const { id } = req.params || req.query;
-   
+    console.log("Files received:", req.files);
+    console.log("Body received:", req.body);
 
-    const { name, description, price } = req.body;
-    const imagePaths = req.files?.map(file => file.path) || [];
-
-    const updatedProduct = await Product.findByIdAndUpdate(
-      id,
-      { name, description, price, productImage: imagePaths },
-      { new: true }
-    );
-
-    if (!updatedProduct) {
-      console.error("Product not found with ID:", id);
-      return res.status(404).send({ message: "Product not found" });
+    const productId = req.params.id;
+    const { name, description, regularPrice, salePrice, quantity, categoryId } = req.body;
+    console.log( name, description, regularPrice, salePrice, quantity, categoryId);
+    
+    const newImages = req.files.map((file) => file.filename); // Handle new uploaded images
+  
+      // Fetch existing product
+      const product = await Product.findById(productId);
+  
+      // Update details
+      product.name = name;
+      product.description = description;
+      product.regularPrice = regularPrice;
+      product.salePrice = salePrice;
+      product.quantity = quantity;
+      product.category = categoryId;
+  
+      // Add new images to the product
+      product.productImage.push(...newImages);
+  
+      // Save the product
+      await product.save();
+  
+    res.json({ success: true, message: "Product updated successfully" });
+    } catch (error) {
+      console.error('Error updating product:', error);
+      res.status(500).send('Failed to update product');
     }
-
-    res.redirect(`/admin/editProduct?id=${id}`);
-  } catch (error) {
-    console.error("Error in updateProduct:", error);
-    res.status(500).send({ message: "Internal Server Error" });
   }
-};
 
 
 
 
 const removeImage = async (req, res) => {
+  const { productId, imageId } = req.params;
   try {
-    const { productId, imageId } = req.params;
-
     const product = await Product.findById(productId);
+
     if (!product) {
-      return res.status(404).send({ message: "Product not found" });
+      return res.status(404).json({ message: 'Product not found' });
     }
 
-    if (!product.productImage.includes(imageId)) {
-      return res.status(404).send({ message: "Image not found" });
-    }
+    product.productImage = product.productImage.filter((img) => img !== imageId);
 
-    product.productImage = product.productImage.filter(image => image !== imageId);
     await product.save();
 
-    const filePath = path.join(__dirname, "../public/uploads", imageId);
-    if (fs.existsSync(filePath)) {
-      fs.unlinkSync(filePath);
+    // Remove the image from the file system (optional)
+    const imagePath = path.join(__dirname, '../public/uploads', imageId);
+    if (fs.existsSync(imagePath)) {
+      fs.unlinkSync(imagePath);
     }
 
-    res.status(200).send({ message: "Image deleted successfully" });
+    res.status(200).json({ message: 'Image deleted successfully' });
   } catch (error) {
-    console.error("Error in removeImage:", error);
-    res.status(500).send({ message: "Internal Server Error" });
+    console.error(error);
+    res.status(500).json({ message: 'Error deleting image' });
   }
 };
+
 
 const blockProduct = async (req, res) => {
   try {
