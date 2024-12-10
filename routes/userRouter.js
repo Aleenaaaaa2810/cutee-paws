@@ -19,6 +19,7 @@ router.get("/", asyncHandler(userController.loadHomepage));
 router.get("/shop", asyncHandler(userController.loadshop));
 router.get("/about", asyncHandler(userController.loadabout));
 router.get("/cart", asyncHandler(userController.loadcart));
+
 router.get("/contact", asyncHandler(userController.loadcontact));
 router.get("/otp", asyncHandler(userController.loadotp));
 
@@ -97,9 +98,10 @@ router.post('/cart/decrease', cartController.decreaseQuantity);
 router.post('/remove-item',cartController.removeCart);
 
 
-router.get('/Order',orederrController.getorder)
-router.post('/submitOrder',orederrController.postorder)
 
+router.get('/Order',orederrController.getorder)
+router.post('/submitOrders',orederrController.postorder)
+router.get('/orderSummary',orederrController.orderPage)
 
 router.get('/wishlist',wishlistController.loadwishlist)
 router.post('/addTowishlist',wishlistController.addTowishlist)

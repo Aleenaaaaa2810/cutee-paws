@@ -54,65 +54,6 @@ async function loadHomepage(req, res) {
   res.render("home", { user });
 }
 
-async function loadshop(req, res) {
-  try {
-    const userSession = req.session.user;
-   
-    if (!userSession || !userSession.id) {
-      console.error("No valid user in session");
-      return res.redirect("/login");
-    }
-
-    const userId = userSession.id;
-
-    const userData = await User.findOne({ _id: userId });
-
-    if (!userData) {
-      console.error("User not found in database");
-      return res.redirect("/login");
-    }
-
-    const categorise = await category.find({ isListed: true });
-    const CategorIds = categorise.map((category) => category._id.toString());
-    const page = parseInt(req.query.page) || 1;
-    const limit = 6;
-    const skip = (page - 1) * limit;
-
-
-    const products = await Product.find({
-      isBlocked: false,
-      category: { $in: CategorIds },
-      quantity: { $gt: 0 },
-    })
-      .sort({ createOn: -1 })
-      .skip(skip)
-      .limit(limit);
-
-    const totalProducts = await Product.countDocuments({
-      isBlocked: false,
-      category: { $in: CategorIds },
-      quantity: { $gt: 0 },
-    });
-
-    const totalpags = Math.ceil(totalProducts / limit);
-    const categoriseWithIds = categorise.map((category) => ({
-      _id: category._id,
-      name: category.name,
-    }));
-
-    res.render("shop", {
-      user: userData,
-      products: products,
-      category: categoriseWithIds,
-      totalProducts: totalProducts,
-      currentpage: page,
-      totalPages: totalpags,
-    });
-  } catch (error) {
-    console.error("Error loading shop page:", error);
-    res.redirect("/pageNotFound");
-  }
-}
 
 
 
@@ -358,6 +299,77 @@ const logout = async (req, res) => {
     res.redirect("/pageNotFound");
   }
 };
+
+
+
+
+
+
+async function loadshop(req, res) {
+  try {
+    const categorise = await category.find({ isListed: true });
+    const CategorIds = categorise.map((category) => category._id.toString());
+
+    const page = parseInt(req.query.page) || 1;
+    const limit = 6;
+    const skip = (page - 1) * limit;
+
+    // Fetch user data from session (if required)
+    const userData = req.session.user || null;
+
+    // Prepare the filter conditions
+    const filterConditions = {
+      isBlocked: false,
+      category: { $in: CategorIds },
+      quantity: { $gt: 0 },
+    };
+
+    // Add category filter if selected
+    const categoryFilter = req.query.category;
+    if (categoryFilter) {
+      filterConditions.category = { $in: [categoryFilter] };
+    }
+
+    // Add price filter if selected
+    const minPrice = req.query.gte ? parseInt(req.query.gte) : 0;
+    const maxPrice = req.query.lte ? parseInt(req.query.lte) : 100000;
+    filterConditions.salePrice = { $gte: minPrice, $lte: maxPrice };
+
+    // Fetch products based on filters
+    const products = await Product.find(filterConditions)
+      .sort({ createOn: -1 })
+      .skip(skip)
+      .limit(limit);
+
+    // Get total product count for pagination
+    const totalProducts = await Product.countDocuments(filterConditions);
+
+    // Calculate total pages
+    const totalpags = Math.ceil(totalProducts / limit);
+
+    // Prepare categories with their IDs and names
+    const categoriseWithIds = categorise.map((category) => ({
+      _id: category._id,
+      name: category.name,
+    }));
+
+    // Render the shop page with data
+    res.render("shop", {
+      user: userData,  // Pass user data to the view
+      products: products,
+      category: categoriseWithIds,
+      totalProducts: totalProducts,
+      currentpage: page,
+      totalPages: totalpags,
+      selectedCategory: categoryFilter || null,
+      minPrice: minPrice,
+      maxPrice: maxPrice,
+    });
+  } catch (error) {
+    console.error("Error loading shop page:", error);
+    res.redirect("/pageNotFound");
+  }
+}
 
 
 

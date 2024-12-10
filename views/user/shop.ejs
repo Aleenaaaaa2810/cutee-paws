@@ -197,6 +197,17 @@
  .price-button:active {
    transform: scale(0.95);
  }
+
+ a.active, .price-button.active {
+  background-color: #007bff;
+  color: white;
+  transform: scale(1.05);
+  font-weight: bold;
+}
+
+.price-button.active {
+  border: 2px solid #007bff;
+}
 </style>
 
 <div class="main-container">
@@ -219,14 +230,14 @@
            <ul>
             <% for (let i = 0; i < category.length; i++) { %>
               <li class="filter-item">
-                <a href="/filter?category=<%=category[i]._id%>"><%= category[i].name %></a>
+                <a href="/shop?category=<%= category[i]._id %>&gte=<%= minPrice %>&lte=<%= maxPrice %>"
+                   class="<%= selectedCategory === category[i]._id.toString() ? 'active' : '' %>">
+                  <%= category[i].name %>
+                </a>
               </li>
             <% } %>
-            
-
-
-               
-           </ul>
+          </ul>
+          </ul>
          </div>
        </div>
 
@@ -234,10 +245,28 @@
          <div class="filter-title">Filter by Price</div>
          <form id="price-filter-form">
            <div class="price-options">
-             <a href="/filterPrice?gte=0&lte=499"><button type="button" class="price-button">Under ₹500</button></a>
-             <a href="/filterPrice?gte=500&lte=999"><button type="button" class="price-button">₹500 - ₹1000</button></a>
-             <a href="/filterPrice?gte=1000&lte=1499"><button type="button" class="price-button">₹1000- ₹1500</button></a>
-             <a href="/filterPrice?gte=1500&lte=100000"><button type="button" class="price-button">Above ₹1500</button></a>
+            <div class="price-filter">
+              <a href="/shop?category=<%= selectedCategory %>&gte=0&lte=499">
+                <button type="button" class="price-button <%= minPrice === 0 && maxPrice === 499 ? 'active' : '' %>">
+                  Under ₹500
+                </button>
+              </a>
+              <a href="/shop?category=<%= selectedCategory %>&gte=500&lte=999">
+                <button type="button" class="price-button <%= minPrice === 500 && maxPrice === 999 ? 'active' : '' %>">
+                  ₹500 - ₹1000
+                </button>
+              </a>
+              <a href="/shop?category=<%= selectedCategory %>&gte=1000&lte=1499">
+                <button type="button" class="price-button <%= minPrice === 1000 && maxPrice === 1499 ? 'active' : '' %>">
+                  ₹1000 - ₹1500
+                </button>
+              </a>
+              <a href="/shop?category=<%= selectedCategory %>&gte=1500&lte=100000">
+                <button type="button" class="price-button <%= minPrice === 1500 && maxPrice === 100000 ? 'active' : '' %>">
+                  Above ₹1500
+                </button>
+              </a>
+            </div>
            </div>
          </form>
        </div>

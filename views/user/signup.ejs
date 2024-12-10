@@ -133,64 +133,66 @@
     </div>
 
     <script>
-        document.getElementById('signupForm').addEventListener('submit', function (event) {
-            let isValid = true;
+       document.getElementById('signupForm').addEventListener('submit', function (event) {
+    let isValid = true;
 
-            // Full Name Validation
-            const fullname = document.getElementById('fullname').value.trim();
-            const nameError = document.getElementById('nameError');
-            if (!/^[a-zA-Z\s]+$/.test(fullname)) {
-                nameError.textContent = 'Full name must only contain letters.';
-                isValid = false;
-            } else {
-                nameError.textContent = '';
-            }
+    // Full Name Validation
+    const fullname = document.getElementById('fullname').value.trim();
+    const nameError = document.getElementById('nameError');
+    if (!/^[a-zA-Z\s]+$/.test(fullname)) {
+        nameError.textContent = 'Full name must only contain letters.';
+        isValid = false;
+    } else {
+        nameError.textContent = '';
+    }
 
-            // Email Validation
-            const email = document.getElementById('email').value.trim();
-            const emailError = document.getElementById('emailError');
-            if (!/^[a-zA-Z0-9._%+-]+@gmail\.com$/.test(email)) {
-                emailError.textContent = 'Email must be a valid @gmail.com address.';
-                isValid = false;
-            } else {
-                emailError.textContent = '';
-            }
+    // Email Validation
+    const email = document.getElementById('email').value.trim();
+    const emailError = document.getElementById('emailError');
+    if (!/^[a-zA-Z0-9._%+-]+@gmail\.com$/.test(email)) {
+        emailError.textContent = 'Email must be a valid @gmail.com address.';
+        isValid = false;
+    } else {
+        emailError.textContent = '';
+    }
 
-            // Phone Validation
-            const phone = document.getElementById('phone').value.trim();
-            const phoneError = document.getElementById('phoneError');
-            if (!/^\d{10}$/.test(phone)) {
-                phoneError.textContent = 'Phone number must be exactly 10 digits.';
-                isValid = false;
-            } else {
-                phoneError.textContent = '';
-            }
+    // Phone Validation
+    const phone = document.getElementById('phone').value.trim();
+    const phoneError = document.getElementById('phoneError');
+    if (!/^\d{10}$/.test(phone)) {
+        phoneError.textContent = 'Phone number must be exactly 10 digits.';
+        isValid = false;
+    } else {
+        phoneError.textContent = '';
+    }
 
-            // Password Validation
-            const password = document.getElementById('password').value.trim();
-            const cpassword = document.getElementById('cpassword').value.trim();
-            const passwordError = document.getElementById('passwordError');
-            const cpasswordError = document.getElementById('cpasswordError');
+    // Password Validation
+    const password = document.getElementById('password').value.trim();
+    const cpassword = document.getElementById('cpassword').value.trim();
+    const passwordError = document.getElementById('passwordError');
+    const cpasswordError = document.getElementById('cpasswordError');
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
 
-            if (password === '') {
-                passwordError.textContent = 'Password cannot be empty.';
-                isValid = false;
-            } else {
-                passwordError.textContent = '';
-            }
+    if (!passwordRegex.test(password)) {
+        passwordError.textContent = 'Password must be at least 8 characters, include an uppercase letter, a lowercase letter, a number, and a special character.';
+        isValid = false;
+    } else {
+        passwordError.textContent = '';
+    }
 
-            if (cpassword !== password) {
-                cpasswordError.textContent = 'Passwords do not match.';
-                isValid = false;
-            } else {
-                cpasswordError.textContent = '';
-            }
+    if (cpassword !== password) {
+        cpasswordError.textContent = 'Passwords do not match.';
+        isValid = false;
+    } else {
+        cpasswordError.textContent = '';
+    }
 
-            // Prevent form submission if invalid
-            if (!isValid) {
-                event.preventDefault();
-            }
-        });
+    // Prevent form submission if invalid
+    if (!isValid) {
+        event.preventDefault();
+    }
+});
+
     </script>
 </body>
 </html>
