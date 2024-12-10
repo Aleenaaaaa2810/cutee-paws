@@ -1,4 +1,7 @@
 <%- include("../../views/partials/user/header") %>
+<head>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  </head>
     <style>
         .order-container {
             max-width: 800px;
@@ -187,7 +190,11 @@
     const selectedAddress = document.querySelector('input[name="address"]:checked');
 
     if (!selectedAddress) {
-        alert('Please select a delivery address!');
+        Swal.fire({
+            icon: 'warning',
+            title: 'No Address Selected',
+            text: 'Please select a delivery address before proceeding.',
+        });
         return;
     }
 
@@ -205,15 +212,29 @@
         .then(response => response.json())
         .then(data => {
             if (data.message === 'Checkout successful, cart is now empty') {
-                // Redirect to the order summary page
-                window.location.href = '/orderSummary';
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Order Placed!',
+                    text: 'Your order has been placed successfully!',
+                }).then(() => {
+                    // Redirect to the order summary page after confirmation
+                    window.location.href = '/orderSummary';
+                });
             } else {
-                alert('Error during checkout: ' + (data.error || 'Unknown error'));
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Checkout Failed',
+                    text: data.error || 'An unknown error occurred during checkout.',
+                });
             }
         })
         .catch(error => {
             console.error('Error:', error);
-            alert('An unexpected error occurred. Please try again.');
+            Swal.fire({
+                icon: 'error',
+                title: 'Unexpected Error',
+                text: 'An unexpected error occurred. Please try again later.',
+            });
         });
 }
 

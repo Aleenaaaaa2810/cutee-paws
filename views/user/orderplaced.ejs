@@ -10,6 +10,22 @@
       font-size: 18px;
       margin: 10px 0;
     }
+
+    .btn-shop {
+    display: inline-block;
+    margin-top: 20px;
+    padding: 10px 20px;
+    font-size: 16px;
+    color: #fff;
+    background-color: #4CAF50;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    text-decoration: none;
+  }
+  .btn-shop:hover {
+    background-color: #45a049;
+  }
   </style>
 </head>
 
@@ -21,6 +37,7 @@
       <p><strong>Order Date:</strong> <%= orderDate %></p>
       <p><strong>Total Price:</strong> ₹<%= totalPrice %></p>
       <p><strong>Status:</strong> <%= status %></p>
+      <a href="/shop" class="btn-shop">Continue with Shop</a>
     </div>
   </body>
 <%- include("../../views/partials/user/footer") %>
