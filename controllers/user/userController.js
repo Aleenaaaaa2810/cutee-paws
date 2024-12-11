@@ -335,14 +335,13 @@ const loadshop = async (req, res) => {
     const maxPrice = parseInt(req.query.lte) || 100000;
     filterConditions.salePrice = { $gte: minPrice, $lte: maxPrice };
 
-    // Search functionality
+    
     const searchQuery = req.query.search || "";
     console.log(searchQuery)
     if (searchQuery) {
       filterConditions.name = { $regex: searchQuery, $options: "i" };
     }
 
-    // Sorting setup
     const sortType = req.query.sort || "default";
     const getSortQuery = (type) => {
       switch (type) {
@@ -355,7 +354,7 @@ const loadshop = async (req, res) => {
         case "zToA":
           return { name: -1 };
         default:
-          return { createdOn: -1 }; // Default: newest first
+          return { createdOn: -1 }; 
       }
     };
     const sortQuery = getSortQuery(sortType);
@@ -406,8 +405,4 @@ module.exports = {
   login,
   resendOtp,
   logout,
-  // filteProduct,
-  // filterPrice,
-  // searchProducts,
-  // sorting
 };
