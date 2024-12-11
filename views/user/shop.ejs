@@ -214,8 +214,8 @@
  <section class="shop-page container">
    <div class="shop-topbar">
      <div class="search-bar">
-       <form action="/search" method="POST" class="search-form">
-         <input type="text" name="query" placeholder="Search items..." class="search-input" />
+      <form action="/shop" method="GET" class="search-form">
+         <input type="text" name="search" placeholder="Search items..." class="search-input" />
          <button type="submit" class="search-button">Search</button>
        </form>
      </div>
@@ -269,6 +269,28 @@
             </div>
            </div>
          </form>
+       </div>
+       <div>
+        <ul>
+          <li>
+            <a href="" class="<%= selectedSort === 'default' ? 'active' : '' %>">Default</a>
+          </li>
+          <li>
+            <a href="/shop?sort=lowToHigh" class="<%= selectedSort === 'lowToHigh' ? 'active' : '' %>">Price: Low to High</a>
+
+          </li>
+
+          <li>
+            <a href="/shop?sort=highToLow" class="<%= selectedSort === 'highToLow' ? 'active' : '' %>">Price: High to Low</a>
+          </li>
+          <li>
+            <a href="/shop?sort=aToZ" class="<%= selectedSort === 'aToZ' ? 'active' : '' %>">Name: A to Z</a>
+          </li>
+          <li>
+            <a href="/shop?sort=zToA" class="<%= selectedSort === 'zToA' ? 'active' : '' %>">Name: Z to A</a>
+          </li>
+        </ul>
+        
        </div>
      </aside>
 
@@ -325,79 +347,52 @@
 </div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.0/jquery.min.js"></script>
 <script>
- function addToCart(productId, productName, productPrice) {
-  console.log(productId, productName, productPrice);
-  $.ajax({
-    url: '/cart/add',
-    method: 'POST',
-    contentType: 'application/json',
-    data: JSON.stringify({
-      productId: productId,
-      productDetails: { name: productName, price: productPrice }
-    }),
-    success: function (response) {
-      Swal.fire({
-        title: 'Product added to cart',
-        text: 'Do you want to go to the cart or continue shopping?',
-        icon: 'success',
-        showCancelButton: true,
-        confirmButtonText: 'Go to Cart',
-        cancelButtonText: 'Continue Shopping',
-      }).then((result) => {
-        if (result.isConfirmed) {
-          window.location.href = '/cartPage';
+  function addToCart(productId, productName, productPrice) {
+    console.log(productId, productName, productPrice)
+    $.ajax({
+      url: '/cart/add',
+      method: 'POST',
+      contentType: 'application/json',
+      data: JSON.stringify({
+        productId: productId,
+        productDetails: { name: productName, price: productPrice }
+      }),
+      success: function (response) {
+       
+        if (confirm("Product added to cart. Go to Cart or Continue Shopping?")) {
+         
+          window.location.href = '/cartPage'; 
         }
-      });
-    },
-    error: function (error) {
-      Swal.fire({
-        title: 'Error',
-        text: 'Failed to add product to cart!',
-        icon: 'error',
-        timer: 2000,
-        timerProgressBar: true,
-      });
-      console.error(error);
-    }
-  });
-}
-
-function addTowishlist(productId) {
-  $.ajax({
-    url: '/addTowishlist',
-    method: 'POST',
-    data: { productId: productId },
-    success: (response) => {
-      if (response.status) {
-        Swal.fire({
-          title: 'Added to wishlist',
-          text: 'The product has been added to your wishlist.',
-          icon: 'success',
-          timer: 2000,
-          timerProgressBar: true,
-        });
-      } else {
-        Swal.fire({
-          title: 'Already in wishlist',
-          text: response.message,
-          icon: 'info',
-          timer: 2000,
-          timerProgressBar: true,
-        });
+      },
+      error: function (error) {
+        alert('Failed to add product to cart!');
+        console.error(error);
       }
-    },
-    error: (error) => {
-      Swal.fire({
-        title: 'Error',
-        text: 'There was an error adding the product to your wishlist.',
-        icon: 'error',
-        timer: 2000,
-        timerProgressBar: true,
-      });
-      console.error("Error:", error);
-    },
-  });
-}
+    });
+  }
+  
+
+   // Add to Wishlist Functionality
+   function addTowishlist(productId) {
+    Swal.fire({
+      title: 'Added to Wishlist!',
+      text: 'You can check your wishlist for saved items.',
+      icon: 'success',
+      confirmButtonText: 'OK'
+    });
+    // Implement backend wishlist functionality here
+  }
+
+  // Add to Cart Functionality
+  function addToCart(productId, productName, productPrice) {
+    Swal.fire({
+      title: 'Added to Cart!',
+      text: `${productName} for ₹${productPrice} has been added to your cart!`,
+      icon: 'success',
+      confirmButtonText: 'OK'
+    });
+    // Implement backend cart functionality here
+  }
 
 
 

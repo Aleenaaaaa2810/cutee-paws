@@ -85,10 +85,6 @@ router.get('/edit-address',profilecontroller.editAddress)
 router.post('/edit-Address',profilecontroller.posteditAddress)
 router.get("/deleteAddress",profilecontroller.deleteAddress)
 
-router.get("/filter",userController.filteProduct)
-router.get("/filterPrice",userController.filterPrice)
-router.post("/search",userController.searchProducts)
-
 router.get('/productDetails',productController.productDetails)
 
 router.get('/cartPage',cartController.getCart)
