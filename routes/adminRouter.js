@@ -63,11 +63,14 @@ router.post("/category/add",adminAuth,categoryController.addCategory)
 router.get("/category/edit/:id",adminAuth,categoryController.getcategoryedit)
 router.post("/category/edit/:id",categoryController.editcategory);
 router.put('/category/toggle/:id', categoryController.CategoryListing);
+router.post('/addcategoryoffer',adminAuth,categoryController.addcategoryoffer)
+router.post('/removecategoryOffer',adminAuth,categoryController.removecategoryoffer)
 
 
 router.get('/addproducts',productController.getproductAddpage)
 router.post('/addproducts',upload.array("image",3),productController.postProductAdd)
 router.get('/products',productController.getproduct)
+
 
 router.get("/editProduct",productController.editProduct)
 router.post("/updateProduct/:id", upload.array("images", 3), productController.updateProduct);

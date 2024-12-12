@@ -271,8 +271,13 @@
                     <tr>
                         <th>Category Name</th>
                         <th>Description</th>
+                        <th>Offer</th>
+                        <th>Offer Price</th>
                         <th>Status</th>
                         <th>Actions</th>
+                       
+                        
+    
                     </tr>
                 </thead>
                 <tbody id="categoryTableBody">
@@ -281,6 +286,33 @@
                             <tr id="category-<%= category._id %>">
                                 <td><%= category.name %></td>
                                 <td><%= category.description %></td>
+
+                                
+
+
+                                <!-- <td class="text-start">
+                                  
+                                    
+                                  </td> -->
+                                  <td>
+                                    <%if(category.categoryOffer){%>
+                                    <%=category.categoryOffer%>%
+                                        <%}else{%>
+                                            0%
+                                            <%}%>
+                                  </td>
+                                  <td><%if(category.categoryOffer==0){%> 
+                                    <button class="btn btn-info" style="width: 100px">
+                                        <a href="#" class="text-white" onclick="addOffer('<%=category._id%>')">Add Offer</a>
+                                      </button><%}else{%>
+                                      <button class="btn btn-info"style="width: 100px">
+                                        <a href="#" class="text-white" onclick="removeoffer('<%=category._id%>')">Remove</a>
+                                      </button>
+                                    <%}%></td>
+
+
+
+
                                 <td><%= category.isListed ? 'Listed' : 'Unlisted' %></td>
                                 <td>
                                     <a href="/admin/category/edit/<%= category._id %>">Edit</a>
@@ -290,6 +322,7 @@
                                     <%= category.isListed ? 'Unlist' : 'List' %>
                                 </button>
                                 </td>  
+              
                             </tr>
                         <% }); %>
                     <% } else { %>
@@ -383,39 +416,7 @@
                 });
             }
         });
-//         async function deleteCategory(categoryId) {
-//     try {
-//         const response = await fetch(`/admin/category/delete/${categoryId}`, {
-//             method: 'DELETE',
-//         });
-
-//         if (response.ok) {
-//             const row = document.getElementById(`category-${categoryId}`);
-//             if (row) {
-//                 row.remove();
-//             }
-//             Swal.fire({
-//                 icon: 'success',
-//                 title: 'Deleted!',
-//                 text: 'Category deleted successfully.',
-//             });
-//         } else {
-//             const result = await response.json();
-//             Swal.fire({
-//                 icon: 'error',
-//                 title: 'Error!',
-//                 text: result.error || 'Failed to delete the category.',
-//             });
-//         }
-//     } catch (error) {
-//         Swal.fire({
-//             icon: 'error',
-//             title: 'Error!',
-//             text: 'An unexpected error occurred.',
-//         });
-//         console.error('Error deleting category:', error);
-//     }
-// }
+//         
 async function toggleCategory(categoryId, isListed) {
     try {
         const response = await fetch(`/admin/category/toggle/${categoryId}`, {
@@ -457,6 +458,96 @@ async function toggleCategory(categoryId, isListed) {
         });
     }
 }
+
+
+
+async function addOffer(categoryId){
+    const {value:amount}=await Swal.fire({
+        title:"offer in percentage",
+        input:"number",
+        inputLable:"percentage",
+        inputPlaceholder:"%",
+
+    })
+    if(amount){
+        try {
+            const response=await fetch("/admin/addcategoryoffer",{
+                method:"POST",
+                headers:{
+                    'content-type':"application/json",
+                },
+                body:JSON.stringify({
+                    percentage:amount,
+                    categoryId:categoryId,
+                }),
+
+            })
+
+            const data=await response.json();
+            if(response.ok && data.status===true){
+                Swal.fire(
+                    "Offer Added",
+                    "The offer has been added",
+                    "success"
+                ).then(()=>{
+                    location.reload();
+
+                })
+            }else{
+                 Swal.fire("Failed",data.message || "Adding offer failed", "error")   
+                }
+            
+        } catch (error) {
+            Swal.fire(
+                "Error",
+                "An error occure while adding the offer",
+                "error"
+            )
+            console.log("Error adding offer ",error)
+            
+        }
+    }
+}
+
+
+async function removeoffer(categoryId){
+    try {
+       const response=await fetch("/admin/removecategoryOffer",{
+        method:"POST",
+        headers:{
+            "content-type":"application/json",
+
+        },
+        body:JSON.stringify({
+            categoryId:categoryId,
+        })
+       }) 
+       const data=await response.json();
+       if(response.ok && data.status===true){
+        Swal.fire(
+           "Offer removed" ,
+           "The offer has been removed",
+           "success"
+        ).then(()=>{
+            location.reload()
+        })
+       }else{
+        Swal.fire("Failed",data.message || "Removing offer failed ","error")
+       }
+    } catch (error) {
+        Swal.fire(
+            "Error",
+            "An Error occcure while removing the offer",
+            "error"
+
+        )
+        console.error("Error removing offer",error);
+        
+    }
+
+}
+    
+
 
 </script>
 
