@@ -93,7 +93,15 @@
               <p><strong>Status:</strong> <%= order.status %></p>
               <p><strong>Total Amount:</strong> ₹<%= order.finalAmount.toFixed(2) %></p>
             </div>
-            <button class="btn cancel-button" data-order-id="<%= order.orderId %>">Cancel Order</button>
+            <% if (order.status.toLowerCase() === 'delivered') { %>
+              <button class="btn cancel-button" data-order-id="<%= order.orderId %>">Return Order</button>
+            <% } else if(order.status.toLowerCase() === 'cancelled'){ %>
+              <button class="btn disabled" data-message="This order is already cancelled">Cancelled</button>
+            <% }else if(order.status.toLowerCase() === 'returned'){ %>
+              <button class="btn disabled" data-message="This order is already cancelled">Returned</button>
+            <% }else{ %>
+              <button class="btn cancel-button" data-order-id="<%= order.orderId %>"> Cancel Order</button>
+              <% } %>
           </div>
 
           <table>
@@ -124,7 +132,48 @@
   </div>
 
   <%- include("../../views/partials/user/footer.ejs") %>
+  <script>
+   document.querySelectorAll('.return-button').forEach(button => {
+  button.addEventListener('click', function (event) {
+    const orderId = this.getAttribute('data-order-id');
 
+    // Show SweetAlert2 confirmation for returning the order
+    Swal.fire({
+      title: 'Are you sure?',
+      text: "You are about to return this order!", // Correct text for return action
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Yes, return it!',
+      cancelButtonText: 'No, keep it'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        // Sending the return request
+        fetch('/return-order', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ orderId: orderId })
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            Swal.fire('Returned', data.message, 'success');
+          } else {
+            Swal.fire('Error', data.message, 'error');
+          }
+        })
+        .catch(error => {
+          Swal.fire('Error', 'Failed to return the order. Please try again.', 'error');
+        });
+      } else {
+        Swal.fire('Cancelled', 'Your order is safe.', 'info');
+      }
+    });
+  });
+});
+
+  </script>
   <script>
     // Adding an event listener to all cancel buttons
     document.querySelectorAll('.cancel-button').forEach(button => {
@@ -169,6 +218,7 @@
       });
     });
   </script>
-  
+
+    
 </body>
 </html>

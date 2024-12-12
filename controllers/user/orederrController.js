@@ -196,7 +196,42 @@ const cancelOrder = async (req, res) => {
     res.status(500).send('An error occurred while cancelling the order.');
   }
 };
+const returnorder = async (req, res) => {
 
+  try {
+    const { orderId } = req.body; // Extract orderId from request body
+    // Check if orderId is provided
+    if (!orderId) {
+      return res.status(400).send('Order ID is required.');
+    }
+
+    // Ensure the user is logged in (session exists)
+    if (!req.session?.user?.id) {
+      return res.status(401).send('User not logged in.');
+    }
+
+    // Find the order by orderId (use _id instead of orderId)
+    const order = await Order.findOne({ orderId: orderId, user: req.session.user.id });
+    console.log(order)
+
+    // Check if the order was found
+    if (!order) {
+      return res.status(404).json({ success: false, message: 'Order not found or you do not have permission to return this order.' });
+    }
+
+ 
+    // Update the order status to 'Cancelled'
+    order.status = 'Returned';
+    await order.save();
+
+    // Send success response
+    return res.status(200).json({ success: true, message: 'Order successfully returned.' });
+    
+  } catch (error) {
+    console.error('Error returning order:', error);
+    res.status(500).send('An error occurred while returning the order.');
+  }
+};
 
 
 
@@ -208,5 +243,6 @@ module.exports = {
   postorder,
   orderPage,
   profileOderget,
-  cancelOrder
+  cancelOrder,
+  returnorder,
 };
