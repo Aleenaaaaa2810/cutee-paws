@@ -1,4 +1,5 @@
 <%- include("../../views/partials/user/header") %>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <main class="main">
   <div class="page-header breadcrumb-wrap">
     <div class="container">
@@ -62,8 +63,9 @@
                 <button class="qty-btn" onclick="incrementQuantity()">+</button>
               </div>
               <div class="mt-4">
-                <button class="btn btn-gradient add-to-cart-btn">
-                  <i class="fi-rs-shopping-cart"></i> Add to Cart
+                <button class="btn btn-gradient add-to-cart-btn" 
+                  onclick="addToCart('<%= product._id %>', '<%= product.name %>', '<%= product.salePrice %>')">
+                  Add to Cart                
                 </button>
                 <button class="btn btn-outline-secondary wishlist-btn">
                   <i class="fi-rs-heart"></i>
@@ -111,6 +113,46 @@
       qtyElement.textContent = parseInt(qtyElement.textContent) - 1;
     }
   }
+  function addToCart(productId, productName, productPrice) {
+    console.log(productId, productName, productPrice);
+    
+    // Perform the AJAX request to add the product to the cart
+    $.ajax({
+        url: '/cart/add',
+        method: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify({
+            productId: productId,
+            productDetails: { name: productName, price: productPrice }
+        }),
+        success: function (response) {
+            // Display success alert using SweetAlert
+            Swal.fire({
+                icon: 'success',
+                title: `${productName} added to cart!`,
+                text: `Price: ₹${productPrice}`,
+                showCancelButton: true,
+                confirmButtonText: 'Go to Cart',
+                cancelButtonText: 'Continue Shopping'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Redirect to the cart page if "Go to Cart" is selected
+                    window.location.href = '/cartPage';
+                }
+            });
+        },
+        error: function (error) {
+            // Handle errors
+            Swal.fire({
+                icon: 'error',
+                title: 'Failed to add product to cart!',
+                text: 'Please try again later.',
+            });
+            console.error(error);
+        }
+    });
+}
+
 </script>
 
 <style>

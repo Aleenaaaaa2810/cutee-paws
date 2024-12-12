@@ -1,4 +1,5 @@
 <%- include("../../views/partials/user/header") %>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <style>
     body {
       font-family: 'Arial', sans-serif;
@@ -87,14 +88,15 @@
                     <th scope="col">Image</th>
                     <th scope="col">Name</th>
                     <th scope="col">Price</th>
-                    
+                    <th scope="col">Add to cart</th>
+                  
                     <th scope="col">Remove</th>
                   </tr>
                 </thead>
                 <tbody>
                   <% if (Wishlist.length > 0) { %>
-                    <% Wishlist.forEach(product => { %>
-                      <tr>
+                    <% Wishlist.forEach(product => { %>  
+                      <tr id="product-<%= product._id %>">
                         <td class="image product-thumbnail">
                           <img src="/uploads/<%= product.productImage[0] %>" class="img-thumbnail" alt="<%= product.name %>" />
                         </td>
@@ -105,9 +107,13 @@
                           <p class="font-xs text-muted"><%= product.category.name %></p>
                         </td>
                         <td class="price">₹<%= product.salePrice %></td>
-                       
+
+                        <td> <button class="add-to-cart-btn"
+                          onclick="addToCart('<%= product._id %>', '<%= product.name %>', '<%= product.salePrice %>')">
+                    Add to Cart
+                         </button></td> 
                         <td>
-                          <a href="/removefromwishlist" onclick="removeFromWishlist('<%= product._id %>')" class="btn btn-danger btn-sm">Remove</a>
+                          <a href="javascript:void(0);" onclick="removeFromWishlist('<%= product._id %>')" class="btn btn-danger btn-sm">Remove</a>
                         </td>
                       </tr>
                     <% }); %>
@@ -119,6 +125,7 @@
                     </tr>
                   <% } %>
                 </tbody>
+                
               </table>
             </div>
           </div>
@@ -130,10 +137,68 @@
   <footer>
     <!-- Include your footer partial here -->
   </footer>
+<script>
 
-  <script>
+   function addToCart(productId, productName, productPrice) {
+    console.log(productId, productName, productPrice);
     
-    function removeFromWishlist(productId) {
+    // Perform the AJAX request to add the product to the cart
+    $.ajax({
+        url: '/cart/add',
+        method: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify({
+            productId: productId,
+            productDetails: { name: productName, price: productPrice }
+        }),
+        success: function (response) {
+            // Display success alert using SweetAlert
+            Swal.fire({
+                icon: 'success',
+                title: `${productName} added to cart!`,
+                text: `Price: ₹${productPrice}`,
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Redirect to the cart page if "Go to Cart" is selected
+                    fetch('/removefromwishlist', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ productId }),
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          if (data.status) {
+            // Remove the item from the DOM
+            window.location.href = '/wishlist';
+            const row = document.getElementById(`product-${productId}`);
+            if (row) {
+              row.remove();
+            }
+          } else {
+            Swal.fire('Error!', data.message, 'error');
+          }
+        })
+        .catch((error) => {
+          console.error('Error:', error);
+          Swal.fire('Error!', 'Something went wrong. Please try again later.', 'error');
+        });
+                }
+            });
+        },
+        error: function (error) {
+            // Handle errors
+            Swal.fire({
+                icon: 'error',
+                title: 'Failed to add product to cart!',
+                text: 'Please try again later.',
+            });
+            console.error(error);
+        }
+    });
+}
+function removeFromWishlist(productId) {
   Swal.fire({
     title: 'Are you sure?',
     text: 'This will remove the item from your wishlist.',
@@ -141,32 +206,38 @@
     showCancelButton: true,
     confirmButtonColor: '#d33',
     cancelButtonColor: '#3085d6',
-    confirmButtonText: 'Yes, remove it!'
-  }).then(result => {
+    confirmButtonText: 'Yes, remove it!',
+  }).then((result) => {
     if (result.isConfirmed) {
       fetch('/removefromwishlist', {
-        method: 'DELETE', // Use DELETE method for removal
+        method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ productId }) // Send productId as JSON
+        body: JSON.stringify({ productId }),
       })
-      .then(response => response.json())
-      .then(data => {
-        if (data.status) {
-          Swal.fire('Removed!', 'Your item has been removed.', 'success');
-          location.reload(); // Optionally reload the page to update the wishlist
-        } else {
-          Swal.fire('Error!', data.message, 'error');
-        }
-      })
-      .catch(error => {
-        console.error('Error:', error);
-        Swal.fire('Error!', 'Something went wrong. Please try again later.', 'error');
-      });
+        .then((response) => response.json())
+        .then((data) => {
+          if (data.status) {
+            Swal.fire('Removed!', 'Your item has been removed.', 'success');
+            // Remove the item from the DOM
+            const row = document.getElementById(`product-${productId}`);
+            if (row) {
+              row.remove();
+            }
+          } else {
+            Swal.fire('Error!', data.message, 'error');
+          }
+        })
+        .catch((error) => {
+          console.error('Error:', error);
+          Swal.fire('Error!', 'Something went wrong. Please try again later.', 'error');
+        });
     }
   });
 }
 
-  </script>
+
+</script>
+  
 <%- include("../../views/partials/user/footer") %>

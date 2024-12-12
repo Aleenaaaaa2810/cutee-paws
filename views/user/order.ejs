@@ -171,10 +171,27 @@
             <% } %>
             <a href="/addAddress" class="add-address">Add New Address</a>
         </div>
-
-        <!-- Checkout Button -->
-        <button class="checkout-btn" onclick="proceedToCheckout()">Place Order</button>
+        
+        <!-- Payment Method Section -->
+<div class="payment-section">
+    <h3>Select Payment Method</h3>
+    <div class="payment-card">
+        <input type="radio" name="paymentMethod" value="Cash on Delivery" class="payment-radio" required>
+        <label for="paymentMethod">Cash on Delivery</label>
     </div>
+    <div class="payment-card">
+        <input type="radio" name="paymentMethod" value="Razorpay" class="payment-radio" required>
+        <label for="paymentMethod">Razorpay</label>
+    </div>
+    <div class="payment-card">
+        <input type="radio" name="paymentMethod" value="Wallet" class="payment-radio" required>
+        <label for="paymentMethod">Wallet</label>
+    </div>
+</div>
+
+<!-- Checkout Button -->
+<button class="checkout-btn" onclick="proceedToCheckout()">Place Order</button>
+
 
     <script>
       
@@ -188,6 +205,7 @@
       
         function proceedToCheckout() {
     const selectedAddress = document.querySelector('input[name="address"]:checked');
+    const selectedPayment = document.querySelector('input[name="paymentMethod"]:checked');
 
     if (!selectedAddress) {
         Swal.fire({
@@ -198,46 +216,65 @@
         return;
     }
 
-    fetch('/submitOrders', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-            items,
-            totalPrice,
-            addressId: selectedAddress.value,
-        }),
-    })
-        .then(response => response.json())
-        .then(data => {
-            if (data.message === 'Checkout successful, cart is now empty') {
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Order Placed!',
-                    text: 'Your order has been placed successfully!',
-                }).then(() => {
-                    // Redirect to the order summary page after confirmation
-                    window.location.href = '/orderSummary';
-                });
-            } else {
+    if (!selectedPayment) {
+        Swal.fire({
+            icon: 'warning',
+            title: 'No Payment Method Selected',
+            text: 'Please select a payment method before proceeding.',
+        });
+        return;
+    }
+
+    if (selectedPayment.value === 'Cash on Delivery') {
+        // Trigger fetch request only for "Cash on Delivery"
+        fetch('/submitOrders', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                items,
+                totalPrice,
+                addressId: selectedAddress.value,
+                paymentMethod: selectedPayment.value,
+            }),
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.message === 'Checkout successful, cart is now empty') {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Order Placed!',
+                        text: 'Your order has been placed successfully!',
+                    }).then(() => {
+                        // Redirect to the order summary page after confirmation
+                        window.location.href = '/orderSummary';
+                    });
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Checkout Failed',
+                        text: data.error || 'An unknown error occurred during checkout.',
+                    });
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
                 Swal.fire({
                     icon: 'error',
-                    title: 'Checkout Failed',
-                    text: data.error || 'An unknown error occurred during checkout.',
+                    title: 'Unexpected Error',
+                    text: 'An unexpected error occurred. Please try again later.',
                 });
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            Swal.fire({
-                icon: 'error',
-                title: 'Unexpected Error',
-                text: 'An unexpected error occurred. Please try again later.',
             });
+    } else {
+        // Handle other payment methods (optional)
+        Swal.fire({
+            icon: 'info',
+            title: 'Payment Method Selected',
+            text: `You selected ${selectedPayment.value}. Further steps will be implemented here.`,
         });
+    }
 }
-
    </script>
 </body>
 <%- include("../../views/partials/user/footer.ejs") %>

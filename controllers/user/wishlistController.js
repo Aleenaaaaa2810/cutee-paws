@@ -60,32 +60,39 @@ const addTowishlist = async (req, res) => {
     return res.status(500).json({ status: false, message: "Server error" });
   }
 };
+
+
 const deletewishlist = async (req, res) => {
   try {
-    const productId = req.body.productId; // Get the productId from the request body
-    const userId = req.session.user.id; // Get the user ID from the session
+    const { productId } = req.body;
+
+    if (!productId) {
+      return res.status(400).json({ status: false, message: 'Product ID is required' });
+    }
+
+    const userId = req.session?.user?.id;
+    if (!userId) {
+      return res.status(401).json({ status: false, message: 'User not logged in' });
+    }
 
     const user = await User.findById(userId);
     if (!user) {
       return res.status(404).json({ status: false, message: 'User not found' });
     }
 
-    // Find the product in the user's wishlist
-    const productIndex = user.wishlist.indexOf(productId);
-    if (productIndex === -1) {
-      return res.status(404).json({ status: false, message: 'Product not found in wishlist' });
-    }
+    // Filter out the product from the wishlist
+    user.wishlist = user.wishlist.filter(id => id.toString() !== productId);
 
-    // Remove the product from the wishlist
-    user.wishlist.splice(productIndex, 1);
     await user.save();
 
-    return res.json({ status: true, message: 'Product removed from wishlist successfully' });
+    res.status(200).json({ status: true, message: 'Product removed from wishlist successfully' });
   } catch (error) {
-    console.error(error);
-    return res.status(500).json({ status: false, message: 'Server error' });
+    console.error('Error in deletewishlist:', error);
+    res.status(500).json({ status: false, message: 'Internal server error' });
   }
 };
+
+
 
 
 module.exports = {

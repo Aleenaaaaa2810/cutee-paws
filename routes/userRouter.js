@@ -98,10 +98,12 @@ router.post('/remove-item',cartController.removeCart);
 router.get('/Order',orederrController.getorder)
 router.post('/submitOrders',orederrController.postorder)
 router.get('/orderSummary',orederrController.orderPage)
+router.get('/profileOrder',orederrController.profileOderget)
+router.post('/cancel-order',orederrController.cancelOrder)
 
 router.get('/wishlist',wishlistController.loadwishlist)
 router.post('/addTowishlist',wishlistController.addTowishlist)
-router.delete('/removefromwishlist', wishlistController.deletewishlist);
+router.post('/removefromwishlist', wishlistController.deletewishlist);
 
 
 

@@ -211,78 +211,82 @@
             </tbody>
         </table>
     </div>
-
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         const updateStatus = (orderId) => {
-            const statusOptions = ['Pending', 'Processing', 'Shipped', 'Delivered', 'Cancelled'];
+    const statusOptions = ['Pending', 'Processing', 'Shipped', 'Delivered', 'Cancelled'];
 
-            Swal.fire({
-                title: 'Select new status',
-                input: 'select',
-                inputOptions: statusOptions.reduce((acc, status) => {
-                    acc[status] = status;
-                    return acc;
-                }, {}),
-                inputPlaceholder: 'Select status',
-                showCancelButton: true,
-                confirmButtonText: 'Update Status',
-                cancelButtonText: 'Cancel',
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    const selectedStatus = result.value;
+    Swal.fire({
+        title: 'Select new status',
+        input: 'select',
+        inputOptions: statusOptions.reduce((acc, status) => {
+            acc[status] = status;
+            return acc;
+        }, {}),
+        inputPlaceholder: 'Select status',
+        showCancelButton: true,
+        confirmButtonText: 'Update Status',
+        cancelButtonText: 'Cancel',
+    }).then((result) => {
+        if (result.isConfirmed) {
+            const selectedStatus = result.value;
 
-                    fetch(`/admin/orders/${orderId}`, {
-                        method: 'PUT',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ status: selectedStatus }),
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        Swal.fire({
-                            icon: 'success',
-                            title: data.message,
-                            showConfirmButton: false,
-                            timer: 1500
-                        });
-                        location.reload();
-                    })
-                    .catch(err => console.error(err));
+            fetch(`/admin/orders/${orderId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ status: selectedStatus }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Status updated successfully!',
+                    text: 'Click OK to continue.',
+                    confirmButtonText: 'OK',
+                }).then(() => {
+                    location.reload(); // Reload the page to reflect the changes
+                });
+            })
+            .catch(err => console.error(err));
+        }
+    });
+};
+
+const deleteOrder = (orderId) => {
+    Swal.fire({
+        title: 'Are you sure?',
+        text: 'Do you really want to delete this order?',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Yes, delete it!',
+        cancelButtonText: 'No, keep it'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            fetch(`/admin/orders/${orderId}`, {
+                method: 'DELETE',
+            }).then(response => response.json()).then(data => {
+                if (data.success) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Order deleted successfully!',
+                        text: 'Click OK to continue.',
+                        confirmButtonText: 'OK',
+                    }).then(() => {
+                        location.reload(); // Reload the page to reflect the deletion
+                    });
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Failed to delete the order',
+                        text: 'Please try again later.',
+                        confirmButtonText: 'OK',
+                    });
                 }
-            });
-        };
+            }).catch(err => console.error(err));
+        }
+    });
+};
 
-        const deleteOrder = (orderId) => {
-            Swal.fire({
-                title: 'Are you sure?',
-                text: 'Do you really want to delete this order?',
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonText: 'Yes, delete it!',
-                cancelButtonText: 'No, keep it'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    fetch(`/admin/orders/${orderId}`, {
-                        method: 'DELETE',
-                    }).then(response => response.json()).then(data => {
-                        if (data.success) {
-                            Swal.fire({
-                                icon: 'success',
-                                title: 'Order deleted successfully!',
-                                showConfirmButton: false,
-                                timer: 1500
-                            });
-                            location.reload(); // Reload the page to reflect the deletion
-                        } else {
-                            Swal.fire({
-                                icon: 'error',
-                                title: 'Failed to delete the order',
-                                showConfirmButton: true,
-                            });
-                        }
-                    }).catch(err => console.error(err));
-                }
-            });
-        };
     </script>
 </body>
 </html>
