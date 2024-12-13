@@ -70,6 +70,9 @@ router.post('/removecategoryOffer',adminAuth,categoryController.removecategoryof
 router.get('/addproducts',productController.getproductAddpage)
 router.post('/addproducts',upload.array("image",3),productController.postProductAdd)
 router.get('/products',productController.getproduct)
+router.post('/addProductOffer',adminAuth,productController.addproductoffer)
+router.post('/removeProductOffer',adminAuth,productController.removeproductoffer)
+
 
 
 router.get("/editProduct",productController.editProduct)

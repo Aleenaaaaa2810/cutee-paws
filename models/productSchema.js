@@ -46,6 +46,10 @@ const productSchema = new Schema({
     required: true,
     default: "Available",
   },
+  productOffer:{
+    type:Number,
+    default:0
+},
 }, 
 { timestamps: true }); 
 

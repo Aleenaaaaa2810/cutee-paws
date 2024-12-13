@@ -208,6 +208,34 @@
 .price-button.active {
   border: 2px solid #007bff;
 }
+.sort-list {
+  list-style-type: none; /* Remove default bullets */
+  padding-left: 0; /* Remove default padding */
+  margin: 0; /* Remove default margin */
+}
+
+.sort-list li {
+  padding: 10px 15px;
+  margin: 5px 0;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.3s, transform 0.2s;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background-color: #f1f1f1;
+}
+
+.sort-list li:hover {
+  background-color: #007bff;
+  color: white;
+  transform: scale(1.05);
+}
+
+.sort-list li.active {
+  background-color: #007bff;
+  color: white;
+  font-weight: bold;
+}
 </style>
 
 <div class="main-container">
@@ -271,22 +299,22 @@
          </form>
        </div>
        <div>
-        <ul>
-          <li>
-            <a href="" class="<%= selectedSort === 'default' ? 'active' : '' %>">Default</a>
-          </li>
-          <li>
+        <ul  class="sort-list"></ul>>
+          <li  class="sort-list">
+            <a href="" class="<%= selectedSort === 'default' ? 'active' : '' %>">Sort list</a>
+          </li >
+          <li class="sort-list" >
             <a href="/shop?sort=lowToHigh" class="<%= selectedSort === 'lowToHigh' ? 'active' : '' %>">Price: Low to High</a>
 
           </li>
 
-          <li>
+          <li class="sort-list">
             <a href="/shop?sort=highToLow" class="<%= selectedSort === 'highToLow' ? 'active' : '' %>">Price: High to Low</a>
           </li>
-          <li>
+          <li class="sort-list">
             <a href="/shop?sort=aToZ" class="<%= selectedSort === 'aToZ' ? 'active' : '' %>">Name: A to Z</a>
           </li>
-          <li>
+          <li class="sort-list">
             <a href="/shop?sort=zToA" class="<%= selectedSort === 'zToA' ? 'active' : '' %>">Name: Z to A</a>
           </li>
         </ul>

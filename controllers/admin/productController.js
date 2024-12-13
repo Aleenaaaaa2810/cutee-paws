@@ -234,6 +234,64 @@ const unblockProduct = async (req, res) => {
 };
 
 
+const  addproductoffer=async(req,res)=>{
+  console.log("ji")
+  try {
+    const{productId,percentage}=req.body;
+    const findProduct=await Product.findOne({_id:productId})
+    const findCategory=await Category.findOne({_id:findProduct.category})
+    if(findCategory.categoryOffer<percentage){
+return res.json({status:false,message:"This producds category already has a category offer"})
+    }
+    findProduct.salePrice=findProduct.salePrice-Math.floor(findProduct.regularPrice*(percentage/100))
+    findProduct.productOffer=parseInt(percentage)
+    await findProduct.save()
+
+    findCategory.categoryOffer=0;
+    await findCategory.save()
+    res.json({status:true})
+    
+  } catch (error) {
+    res.redirect("/pageNotfound")
+    res.status(500).json({status:false,message:"internal server error"})
+  }
+}
+
+const removeproductoffer = async (req, res) => {
+  try {
+    const { productId } = req.body;
+    const findProduct = await Product.findOne({ _id: productId });
+
+    if (!findProduct) {
+      return res.status(404).json({
+        status: false,
+        message: "Product not found.",
+      });
+    }
+
+    const percentage = findProduct.productOffer || 0;
+    findProduct.salePrice =
+      findProduct.salePrice + Math.floor(findProduct.regularPrice * (percentage / 100));
+    findProduct.productOffer = 0;
+
+    await findProduct.save();
+
+    return res.status(200).json({
+      status: true,
+      message: "This offer removed successfully.",
+    });
+  } catch (error) {
+    console.error("Error in removeproductoffer:", error);
+    return res.status(500).json({
+      status: false,
+      message: "Internal server error.",
+    });
+  }
+};
+
+
+
+
 
 
 
@@ -249,6 +307,8 @@ module.exports = {
   updateProduct,
   removeImage,
   blockProduct,
-  unblockProduct
+  unblockProduct,
+  addproductoffer,
+  removeproductoffer
 
 };

@@ -168,7 +168,9 @@
             <th>Product Name</th>
             <th>Category</th>
             <th>Sale Price</th>
-            <th>Status</th>
+            <th>Offer Price</th>
+           <th>Offer </th>
+           <th>status</th>
             <th>Quantity</th>
             <th>Edit</th>
             <th>Action</th>
@@ -182,6 +184,24 @@
                 <td><%= product.name %></td>
                 <td><%= product.category ? product.category.name : 'Uncategorized' %></td>
                 <td>₹<%= product.salePrice %></td>
+                <td>
+                  <% if (product.productOffer === 0) { %>
+                    <button class="btn btn-info" style="width: 100px">
+                      <a href="#" class="text-white" onclick="addOffer('<%= product._id %>')">Add Offer</a>
+                    </button>
+                  <% } else { %>
+                    <button class="btn btn-info" style="width: 100px">
+                      <a href="#" class="text-white" onclick="removeoffer('<%= product._id %>')">Remove</a>
+                    </button>
+                  <% } %>
+                </td>
+                <td>
+                  <% if (product.productOffer) { %>
+                    <%= product.productOffer %>%
+                  <% } else { %>
+                    0%
+                  <% } %>
+                </td>
                 <td>
                   <% if (product.isBlocked) { %>
                     <span class="badge badge-warning">Blocked</span>
@@ -214,11 +234,12 @@
             </tr>
           <% } %>
         </tbody>
+        
       </table>
     </div>
   </div>
 
-  <!-- SweetAlert Confirmation Script -->
+
   <script>
     function confirmAction(event, message) {
       event.preventDefault();
@@ -232,10 +253,113 @@
         confirmButtonText: 'Yes'
       }).then((result) => {
         if (result.isConfirmed) {
-          event.target.closest('form').submit(); // Submit the form
+          event.target.closest('form').submit(); 
         }
       });
     }
+
+
+
+    async function addOffer(productId) {
+  // Prompt user to enter the offer percentage
+  const { value: amount } = await Swal.fire({
+    title: 'Offer in percentage',
+    input: 'number',
+    inputLabel: 'Percentage',
+    inputPlaceholder: '%',
+    inputValidator: (value) => {
+      if (!value || isNaN(value)) {
+        return 'Please enter a valid number!';
+      }
+    }
+  });
+
+  // Validate the input amount before making the AJAX call
+  if (!amount || amount < 0 || amount > 100) {
+    Swal.fire('Invalid Input', 'Please enter a percentage between 0 and 100.', 'error');
+    return;
+  }else if(amount){
+    try {
+      const response=await fetch("/admin/addProductOffer",{
+                method:"POST",
+                headers:{
+                    'content-type':"application/json",
+                },
+                body:JSON.stringify({
+                    percentage:amount,
+                    productId: productId,
+                }),
+              })
+              const data=await response.json();
+            if(response.ok && data.status===true){
+                Swal.fire(
+                    "Offer Added",
+                    "The offer has been added",
+                    "success"
+                ).then(()=>{
+                    location.reload();
+
+                })}
+              else{
+        Swal.fire("Failed",data.message ||"Adding offer failed", "error")
+       }
+
+
+    } catch (error) {
+      Swal.fire(
+        
+                "Error",
+                "An error occure while adding the offer",
+                "error"
+            )
+            console.log("Error adding offer ",error)
+            
+        }}
+  }
+ 
+
+
+  async function removeoffer(productId) {
+  try {
+    const response = await fetch("/admin/removeProductOffer", {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+      },
+      body: JSON.stringify({ productId }),
+    });
+
+    const data = await response.json(); // Ensure proper parsing
+
+    if (response.ok && data.status === true) {
+      Swal.fire(
+        "Offer Removed",
+        "The offer has been successfully removed.",
+        "success"
+      ).then(() => {
+        location.reload();
+      });
+    } else {
+      Swal.fire(
+        "Failed",
+        data.message || "Failed to remove the offer.",
+        "error"
+      );
+    }
+  } catch (error) {
+    Swal.fire(
+      "Error",
+      "An error occurred while removing the offer.",
+      "error"
+    );
+    console.error("Error removing offer:", error);
+  }
+}
+
+
+
+
+
   </script>
 </body>
 </html> 
