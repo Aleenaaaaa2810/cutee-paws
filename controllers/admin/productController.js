@@ -235,13 +235,12 @@ const unblockProduct = async (req, res) => {
 
 
 const  addproductoffer=async(req,res)=>{
-  console.log("ji")
   try {
     const{productId,percentage}=req.body;
     const findProduct=await Product.findOne({_id:productId})
     const findCategory=await Category.findOne({_id:findProduct.category})
-    if(findCategory.categoryOffer<percentage){
-return res.json({status:false,message:"This producds category already has a category offer"})
+    if(findCategory.categoryOffer>percentage){
+      return res.json({status:false,message:"This producds category already has a category offer"})
     }
     findProduct.salePrice=findProduct.salePrice-Math.floor(findProduct.regularPrice*(percentage/100))
     findProduct.productOffer=parseInt(percentage)

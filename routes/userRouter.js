@@ -86,6 +86,7 @@ router.post('/edit-Address',profilecontroller.posteditAddress)
 router.get("/deleteAddress",profilecontroller.deleteAddress)
 
 router.get('/productDetails',productController.productDetails)
+router.post('/rate-product', productController.rateProduct);
 
 router.get('/cartPage',cartController.getCart)
 router.post('/cart/add',cartController.postCart);

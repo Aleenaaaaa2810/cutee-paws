@@ -59,6 +59,13 @@
       font-size: 1.2rem;
       color: #6c757d;
     }
+    .btn-secondary {
+  background-color: #6c757d;
+  border: none;
+  color: white;
+  cursor: not-allowed;
+}
+
   </style>
 </head>
 <body>
@@ -108,10 +115,18 @@
                         </td>
                         <td class="price">₹<%= product.salePrice %></td>
 
-                        <td> <button class="add-to-cart-btn"
-                          onclick="addToCart('<%= product._id %>', '<%= product.name %>', '<%= product.salePrice %>')">
-                    Add to Cart
-                         </button></td> 
+                        <td>
+                          <% if (product.quantity > 0) { %>
+                            <button class="add-to-cart-btn"
+                              onclick="addToCart('<%= product._id %>', '<%= product.name %>', '<%= product.salePrice %>')">
+                              Add to Cart
+                            </button>
+                          <% } else { %>
+                            <button class="btn btn-secondary" disabled>
+                              Out of Stock
+                            </button>
+                          <% } %>
+                        </td>
                         <td>
                           <a href="javascript:void(0);" onclick="removeFromWishlist('<%= product._id %>')" class="btn btn-danger btn-sm">Remove</a>
                         </td>

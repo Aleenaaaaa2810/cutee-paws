@@ -29,7 +29,34 @@ const productDetails = async (req, res) => {
 };
 
 
+const rateProduct =  async (req, res) => {
+  const { productId, rating } = req.body;
+
+  if (!productId || !rating) {
+    return res.status(400).send({ error: 'Invalid request data' });
+  }
+
+  try {
+    const product = await Product.findById(productId);
+    if (!product) {
+      return res.status(404).send({ error: 'Product not found' });
+    }
+
+    // Update product ratings (logic depends on your schema)
+    product.ratings.push(rating);
+    product.averageRating = product.ratings.reduce((a, b) => a + b) / product.ratings.length;
+    await product.save();
+
+    res.send({ averageRating: product.averageRating });
+  } catch (err) {
+    console.error(err);
+    res.status(500).send({ error: 'Server error' });
+  }
+}
+
+
 module.exports={
   productDetails,
+  rateProduct
 
 }

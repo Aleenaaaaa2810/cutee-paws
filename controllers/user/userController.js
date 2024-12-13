@@ -321,7 +321,7 @@ const loadshop = async (req, res) => {
     // Filter conditions
     const filterConditions = {
       isBlocked: false,
-      quantity: { $gt: 0 },
+      // quantity: { $gt: 0 },
     };
 
     // Category filter

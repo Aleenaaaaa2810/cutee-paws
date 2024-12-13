@@ -40,6 +40,15 @@ const productSchema = new Schema({
     type: Boolean,
     default: false,
   },
+  ratings: {
+    type: [Number], // Array of ratings (1-5)
+    default: [],
+  },
+  averageRating: {
+    type: Number, // Calculated average
+    default: 0,
+  },
+
   status: {
     type: String,
     enum: ["Available", "Out of Stock", "Discontinued"], // Fixed typos in options
@@ -50,6 +59,7 @@ const productSchema = new Schema({
     type:Number,
     default:0
 },
+
 }, 
 { timestamps: true }); 
 

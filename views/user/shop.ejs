@@ -1,5 +1,7 @@
 <%- include("../../views/partials/user/header") %>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+
 <style>
  .main-container {
    max-width: 1200px;
@@ -236,6 +238,11 @@
   color: white;
   font-weight: bold;
 }
+.rating-stars i {
+  color: #ffdd57; /* Gold color for stars */
+  font-size: 1.2rem; /* Smaller size for stars */
+  margin-right: 3px;
+}
 </style>
 
 <div class="main-container">
@@ -327,7 +334,7 @@
         <div class="product-card">
         
           <span class="wishlist-btn" onclick="addTowishlist('<%=products[i]._id%>')">❤️</span>  
-          <a href="/productDetails?id=<%=products[i]._id %>">
+          <!-- <a href="/productDetails?id=<%=products[i]._id %>"> -->
             <img src="/uploads/<%= products[i].productImage[0] %>" 
                  alt="<%= products[i].name %>" 
                  class="product-image" />
@@ -337,20 +344,41 @@
             <p>
               Price: ₹<%= products[i].salePrice.toLocaleString('en-IN') %>
               <span class="text-muted">
-                <strike>₹<%= products[i].regularPrice.toLocaleString('en-IN') %></strike>
+                <strike>₹<%=products[i].regularPrice.toLocaleString('en-IN') %></strike>
+              
               </span>
             </p>
           </a>
-      
+          <div class="rating-stars">
+            <i class="fas fa-star"></i>
+            <i class="fas fa-star"></i>
+            <i class="fas fa-star"></i>
+            <i class="fas fa-star"></i>
+            <i class="fas fa-star-half-alt"></i>
+          </div>
           <!-- Add to Cart Button -->
-          <a>
-            <button class="add-to-cart-btn" 
-                    onclick="addToCart('<%= products[i]._id %>', '<%= products[i].name %>', '<%= products[i].salePrice %>')">
-              Add to Cart
-            </button>
-          </a>
-         </div>
+          <% if (products[i].quantity > 0) { %>
+        
+            <!-- onclick="addToCart('<%= products._id %>', '<%= products.name %>', '<%= products.salePrice %>')"> -->
+             <!-- Product Details Button --><br>
+<a href="/productDetails?id=<%= products[i]._id %>">
+  <button class="add-to-cart-btn">
+    View Details
+  </button>
+</a>
+          <% } else { %>
+            <span class="out-of-stock-message" style="color: #d9534f; font-weight: bold;">
+              Out of Stock
+            </span>
+            <a href="/productDetails?id=<%= products[i]._id %>">
+              <button class="add-to-cart-btn">
+                View Details
+              </button>
+            </a>
+          <% } %>
+        </div>
       <% } %>
+     
       
      </main>
    </div>
@@ -375,47 +403,41 @@
 </div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.0/jquery.min.js"></script>
 <script>
-  function addToCart(productId, productName, productPrice) {
-    console.log(productId, productName, productPrice);
-    
-    // Perform the AJAX request to add the product to the cart
-    $.ajax({
-        url: '/cart/add',
-        method: 'POST',
-        contentType: 'application/json',
-        data: JSON.stringify({
-            productId: productId,
-            productDetails: { name: productName, price: productPrice }
-        }),
-        success: function (response) {
-            // Display success alert using SweetAlert
-            Swal.fire({
-                icon: 'success',
-                title: `${productName} added to cart!`,
-                text: `Price: ₹${productPrice}`,
-                showCancelButton: true,
-                confirmButtonText: 'Go to Cart',
-                cancelButtonText: 'Continue Shopping'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    // Redirect to the cart page if "Go to Cart" is selected
-                    window.location.href = '/cartPage';
-                }
-            });
-        },
-        error: function (error) {
-            // Handle errors
-            Swal.fire({
-                icon: 'error',
-                title: 'Failed to add product to cart!',
-                text: 'Please try again later.',
-            });
-            console.error(error);
-        }
-    });
-}
 
-  
+function addToCart(productId, productName, productPrice) {
+    // AJAX request to add the product to the cart
+    $.ajax({
+      url: '/cart/add',
+      method: 'POST',
+      contentType: 'application/json',
+      data: JSON.stringify({
+        productId: productId,
+        productDetails: { name: productName, price: productPrice }
+      }),
+      success: function (response) {
+        Swal.fire({
+          icon: 'success',
+          title: `${productName} added to cart!`,
+          text: `Price: ₹${productPrice}`,
+          showCancelButton: true,
+          confirmButtonText: 'Go to Cart',
+          cancelButtonText: 'Continue Shopping'
+        }).then((result) => {
+          if (result.isConfirmed) {
+            window.location.href = '/cartPage';
+          }
+        });
+      },
+      error: function (error) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Failed to add product to cart!',
+          text: 'Please try again later.',
+        });
+      }
+    });
+  }
+
 
   function addTowishlist(productId) {
   $.ajax({

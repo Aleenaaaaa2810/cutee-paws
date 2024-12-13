@@ -74,7 +74,6 @@ const postCart = async (req, res) => {
     res.status(500).json({ error: "Error adding item to cart", details: error.message });
   }
 };
-
 const increaseQuantity = async (req, res) => {
   const { itemId } = req.body;
   try {
@@ -86,19 +85,26 @@ const increaseQuantity = async (req, res) => {
     }
 
     const item = dbCart.items.find(item => item._id.toString() === itemId);
+    
+    // Check if item is found and if its quantity is less than 5
     if (item) {
-      item.quantity += 1;
-      item.totalPrice = item.price * item.quantity;
-      await dbCart.save();
-      res.status(200).json({ message: "Item quantity increased", dbCart });
+      if (item.quantity < 5) {
+        item.quantity += 1;
+        item.totalPrice = item.price * item.quantity;
+        await dbCart.save();
+        return res.status(200).json({ message: "Item quantity increased", dbCart });
+      } else {
+        return res.status(400).json({ error: "Maximum quantity reached (5)" });
+      }
     } else {
-      res.status(404).json({ error: "Item not found in cart" });
+      return res.status(404).json({ error: "Item not found in cart" });
     }
   } catch (error) {
     console.error("Error increasing quantity:", error);
     res.status(500).json({ error: "Error increasing quantity", details: error.message });
   }
 };
+
 
 const decreaseQuantity = async (req, res) => {
   const { itemId } = req.body;
@@ -112,7 +118,7 @@ const decreaseQuantity = async (req, res) => {
 
     const item = dbCart.items.find(item => item._id.toString() === itemId);
     if (item) {
-      if (item.quantity > 1) {
+      if (item.quantity > 1 &&item.quantity  ) {
         item.quantity -= 1;
         item.totalPrice = item.price * item.quantity;
         await dbCart.save();

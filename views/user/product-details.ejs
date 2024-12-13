@@ -1,12 +1,14 @@
 <%- include("../../views/partials/user/header") %>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
 <main class="main">
   <!-- Breadcrumb -->
   <div class="page-header breadcrumb-wrap">
     <div class="container">
-      <a href="#" rel="nofollow">Home</a>
-      <span></span> Fashion
+      <a href="/" rel="nofollow">Home</a>
+      <span>/</span> 
       <span></span> Product Details
     </div>
   </div>
@@ -53,11 +55,20 @@
               <% } %>
             </div>
             <p class="product-description mt-4"><%= product.description %></p>
+            <!-- <p class="product-description mt-4"><%= product.quantity %></p> -->
+
             <ul class="product-features mt-4">
               <li><i class="fi-rs-refresh"></i> 30 Day Return Policy</li>
               <li><i class="fi-rs-credit-card"></i> Cash on Delivery Available</li>
               
             </ul>
+            <div class="rating-stars">
+              <i class="fas fa-star"></i>
+              <i class="fas fa-star"></i>
+              <i class="fas fa-star"></i>
+              <i class="fas fa-star"></i>
+              <i class="fas fa-star-half-alt"></i>
+            </div>
             <div class="category-offer-container">
               <span class="category-offer-value">
                 <% if (category.categoryOffer) { %>
@@ -67,20 +78,40 @@
                 <% } %>
               </span>
             </div>
+
+           
+            
+
+
             <!-- Product Actions -->
-            <div class="product-actions mt-5">
+           <!-- Product Actions -->
+          
+           <div class="product-actions mt-5">
+            <% if (product.quantity > 0) { %>
+              <!-- Quantity Selector -->
               <div class="quantity-selector d-flex align-items-center">
                 <button class="qty-btn" onclick="decrementQuantity()">-</button>
                 <span id="quantity" class="qty-value">1</span>
                 <button class="qty-btn" onclick="incrementQuantity()">+</button>
-              </div>
-              <div class="mt-4">
+              </div><br>
+              <!-- Add to Cart Button -->
+              <div class=a"mt-4">
                 <button class="btn btn-gradient add-to-cart-btn" 
                   onclick="addToCart('<%= product._id %>', '<%= product.name %>', '<%= product.salePrice %>')">
                   Add to Cart                
                 </button>
               </div>
-            </div>
+            <% } else { %>
+              <!-- Disabled Out of Stock Button -->
+              <div class="mt-4">
+                <button class="btn btn-gradient out-of-stock-btn" disabled>
+                  Out of Stock
+                </button>
+              </div>
+            <% } %>
+          </div>
+          
+
           </div>
         </div>
       </div>
@@ -114,8 +145,19 @@
   // Quantity increment and decrement
   function incrementQuantity() {
     const qtyElement = document.getElementById("quantity");
-    qtyElement.textContent = parseInt(qtyElement.textContent) + 1;
-  }
+    let currentQty = parseInt(qtyElement.textContent);
+
+    if (currentQty < 5) {
+        qtyElement.textContent = currentQty + 1;
+    } else {
+        Swal.fire({
+            icon: 'info',
+            title: 'Maximum Limit Reached',
+            text: 'You can only purchase up to 5 items.',
+        });
+    }
+}
+
 
   function decrementQuantity() {
     const qtyElement = document.getElementById("quantity");
@@ -158,6 +200,38 @@
       }
     });
   }
+
+
+
+
+  function submitRating(rating) {
+  $.ajax({
+    url: '/product/rate', // Endpoint to save the rating
+    method: 'POST',
+    contentType: 'application/json',
+    data: JSON.stringify({ productId: '<%= product._id %>', rating }),
+    success: function (response) {
+      Swal.fire({
+        icon: 'success',
+        title: 'Thanks for rating!',
+        text: `You rated this product ${rating} star(s).`,
+      });
+      updateAverageRating(response.averageRating); // Update the average rating display
+    },
+    error: function (error) {
+  console.error('Rating error:', error);
+  Swal.fire({
+    icon: 'error',
+    title: 'Rating failed!',
+    text: 'Please try again later.',
+  });
+}
+  });
+}
+function updateAverageRating(averageRating) {
+  const ratingElement = document.querySelector('.average-rating .rating-value');
+  ratingElement.textContent = averageRating.toFixed(1);
+}
 </script>
 
 <style>
@@ -269,4 +343,40 @@
   color: #28a745; /* Green color for category offer */
   font-weight: 600;
 }
+.out-of-stock-message {
+  font-size: 1.4rem;
+  font-weight: bold;
+  color: #f44336; /* Red color for out of stock */
+}
+.rating-star {
+  font-size: 2rem;
+  color: #ccc;
+  cursor: pointer;
+  transition: color 0.3s ease;
+}
+
+.rating-star:hover,
+.rating-star:hover ~ .rating-star {
+  color: #ffdd57; /* Highlight on hover */
+}
+
+.rating-star[data-value="1"]:hover,
+.rating-star[data-value="2"]:hover ~ .rating-star,
+.rating-star[data-value="3"]:hover ~ .rating-star,
+.rating-star[data-value="4"]:hover ~ .rating-star,
+.rating-star[data-value="5"]:hover ~ .rating-star {
+  color: #ffd700; /* Highlight all stars up to the hovered star */
+}
+.fi-rs-star-empty {
+  font-size: 24px;
+  color: #ff5722;
+  cursor: pointer;
+}
+
+.rating-stars i {
+  color: #ffdd57; /* Gold color for stars */
+  font-size: 1.5rem;
+  margin-right: 5px;
+}
+
 </style>
