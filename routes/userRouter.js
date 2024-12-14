@@ -7,6 +7,7 @@ const productController=require('../controllers/user/productController')
 const cartController=require('../controllers/user/cartController')
 const orederrController=require('../controllers/user/orederrController')
 const wishlistController=require('../controllers/user/wishlistController')
+const paymentController=require('../controllers/user/paymentcontroller')
 
 // Utility for handling async errors (optional)
 const asyncHandler = fn => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
@@ -102,10 +103,14 @@ router.get('/orderSummary',orederrController.orderPage)
 router.get('/profileOrder',orederrController.profileOderget)
 router.post('/cancel-order',orederrController.cancelOrder)
 router.post ('/return-order',orederrController.returnorder)
+router.post('/payment',paymentController.onlinepayment)
 
 router.get('/wishlist',wishlistController.loadwishlist)
 router.post('/addTowishlist',wishlistController.addTowishlist)
 router.post('/removefromwishlist', wishlistController.deletewishlist);
+
+
+
 
 
 
