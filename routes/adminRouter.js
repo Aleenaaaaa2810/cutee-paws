@@ -87,6 +87,9 @@ router.delete('/orders/:orderId',orderController.deleteOrder);
 
 router.get('/coupons',couponCOntroller.loadcoupon)
 router.post('/createcoupon',couponCOntroller.createcoupon)
+router.get("/editcoupon",couponCOntroller.editcoupon)
+router.post('/updateCoupon',couponCOntroller.updatecoupon)
+router.delete("/deletecoupon",couponCOntroller.deletecoupon)
 
 
 

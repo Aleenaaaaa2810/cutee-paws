@@ -1,6 +1,8 @@
 <%- include("../../views/partials/user/header") %>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+
 
 <style>
  .main-container {
@@ -125,7 +127,7 @@
    top: 8px;
    right: 8px;
    background-color: rgba(237, 247, 247, 0.8);
-   color: #fff;
+   color: #1d1a1a;
    padding: 8px;
    border-radius: 50%;
    cursor: pointer;
@@ -333,7 +335,7 @@
       <% for (let i = 0; i < products.length; i++) { %>
         <div class="product-card">
         
-          <span class="wishlist-btn" onclick="addTowishlist('<%=products[i]._id%>')">❤️</span>  
+          <span class="wishlist-btn" onclick="addTowishlist('<%=products[i]._id%>')"><i class="fa-regular fa-heart"></i></span>  
           <!-- <a href="/productDetails?id=<%=products[i]._id %>"> -->
             <img src="/uploads/<%= products[i].productImage[0] %>" 
                  alt="<%= products[i].name %>" 

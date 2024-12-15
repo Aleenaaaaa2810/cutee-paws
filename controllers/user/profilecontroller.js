@@ -385,7 +385,6 @@ const addAddress=async(req,res)=>{
 
 const postAddAddress = async (req,res) => {
   try {
-    console.log("haiiiiiiiiiiiiiiiiiii")
     const userId = req.session.user?.id;
     console.log(userId)
     console.log(req.session)

@@ -68,6 +68,8 @@
     function validateForm() {
         let isValid = true;
         const requiredFields = ["addressType", "name", "city", "landMark", "state", "pincode", "phone", "altPhone"];
+        const noWhitespacePattern = /^\S+$/; // Regex to disallow whitespace
+
         requiredFields.forEach(function(field) {
             const input = document.getElementById(field);
             const errorElement = document.getElementById(field + '-error');
@@ -79,6 +81,15 @@
                     errorDiv.className = "text-danger mt-1 small";
                     errorDiv.id = field + '-error';
                     errorDiv.textContent = "This field is required.";
+                    input.parentNode.appendChild(errorDiv);
+                }
+                isValid = false;
+            } else if (!noWhitespacePattern.test(inputValue)) {
+                if (!errorElement) {
+                    const errorDiv = document.createElement('div');
+                    errorDiv.className = "text-danger mt-1 small";
+                    errorDiv.id = field + '-error';
+                    errorDiv.textContent = "Whitespace is not allowed.";
                     input.parentNode.appendChild(errorDiv);
                 }
                 isValid = false;
@@ -112,4 +123,5 @@
         return isValid;
     }
 </script>
+
 <%- include("../../views/partials/user/footer") %>
