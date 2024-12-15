@@ -71,6 +71,7 @@
         .address-section h3 {
             font-size: 1.2rem;
             margin-bottom: 10px;
+              margin-right: 549px;
         }
 
         .address-card {
@@ -121,6 +122,60 @@
         .checkout-btn:hover {
             background-color: #0056b3;
         }
+
+
+        .payment-section {
+    margin-top: 20px;
+    padding: 20px;
+    background-color: #f9f9f9;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.payment-section h3 {
+    font-size: 1.2rem;
+    margin-bottom: 20px;
+    color: #333;
+    text-align: center;
+    font-weight: bold;
+}
+
+.payment-card {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    background-color: white;
+    padding: 15px;
+    margin-bottom: 10px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    transition: box-shadow 0.3s, transform 0.3s;
+    cursor: pointer;
+}
+
+.payment-card:hover {
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    transform: translateY(-2px);
+}
+
+.payment-card input[type="radio"] {
+    margin: 0;
+    accent-color: #007bff;
+    transform: scale(1.3);
+}
+
+.payment-card label {
+    font-size: 1rem;
+    color: #333;
+    cursor: pointer;
+    font-weight: 500;
+}
+
+.payment-icon {
+    width: 40px;
+    height: 40px;
+}
+
     </style>
 </head>
 
@@ -145,12 +200,51 @@
                 </div>
             <% }) %>
         </div>
+        
 
-        <!-- Total Price -->
-        <div class="total-price">
-            <h3>Total Price: ₹<span id="totalPrice"></span></h3>
+        <div class="coupon-section">
+            <h3>Apply Coupon</h3>
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <input type="text" id="couponCode" placeholder="Enter Coupon Code" style="flex-grow: 1; padding: 10px; border-radius: 5px; border: 1px solid #ddd;">
+                <p id="couponMessage" style="margin-top: 10px; color: red;"></p>
+                <button onclick="showCoupons()" style="margin-top: 10px; padding: 10px 20px; background-color: #4caf50; color: white; border: none; border-radius: 5px; cursor: pointer;">View All Coupons</button>
+            </div>
+           
         </div>
+        
+        <!-- Coupons Modal -->
+        <div id="couponsModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.5); z-index: 1000; justify-content: center; align-items: center;">
+            <div style="background-color: white; padding: 20px; border-radius: 10px; width: 50%; max-height: 80%; overflow-y: auto;">
+                <h3>Available Coupons</h3>
+                <form id="couponForm">
+                    <% for (let i = 0; i < coupon.length; i++) { %>
+                        <label style="display: block; margin-bottom: 10px;">
+                            <input 
+                                type="radio" 
+                                name="selectedCoupon" 
+                                value="<%= coupon[i].name %>" 
+                                data-discount="<%= coupon[i].offerPrice %>" 
+                                style="margin-right: 10px;" 
+                            />
+                            <%= coupon[i].name %> - Valid from <%= new Date(coupon[i].createdOn).toLocaleDateString('en-US') %> to <%= new Date(coupon[i].expireOn).toLocaleDateString('en-US') %> | Offer Price: ₹<%= coupon[i].offerPrice %> | Minimum Price: ₹<%= coupon[i].minimumPrice %>
+                        </label>
+                    <% } %>
+                    <div style="margin-top: 20px;">
+                        <button type="button" onclick="selectCouponFromModal()" style="padding: 10px 20px; background-color: #28a745; color: white; border: none; border-radius: 5px; cursor: pointer;">OK</button>
+                        <button type="button" onclick="closeModal()" style="padding: 10px 20px; background-color: #dc3545; color: white; border: none; border-radius: 5px; cursor: pointer;">Close</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <div class="total-price">
+            <h3>Discount: ₹<span id="discountAmount">0</span></h3>
+           
 
+        <div class="total-price">
+            <h3>Total Price: ₹<span id="totalPrice"><%= cart.totalPrice %></span></h3>
+             <h3>Final Total Price: ₹<span id="finalTotalPrice"></span></h3>
+        </div>
         <!-- Address Section -->
         <div class="address-section">
             <h3>Choose Delivery Address</h3>
@@ -201,6 +295,9 @@
     const totalPriceElement = document.getElementById('totalPrice');
     const totalPrice = items.reduce((total, item) => total + item.quantity * item.price, 0);
     totalPriceElement.textContent = totalPrice;
+
+
+    
 
     // Handle checkout
    async function proceedToCheckout() {
@@ -341,7 +438,35 @@
 }
 
 
-</script>
+
+function showCoupons() {
+    document.getElementById('couponsModal').style.display = 'flex';
+}
+
+function closeModal() {
+    document.getElementById('couponsModal').style.display = 'none';
+}
+
+function selectCouponFromModal() {
+    const totalPrice = parseFloat(document.getElementById('totalPrice').textContent);
+
+    const selectedCoupon = document.querySelector('input[name="selectedCoupon"]:checked');
+    if (selectedCoupon) {
+        const couponName = selectedCoupon.value;
+        const discount = parseFloat(selectedCoupon.getAttribute('data-discount')); // Ensure it's a number
+        document.getElementById('couponCode').value = couponName; // Set the coupon name in the input box
+        document.getElementById('discountAmount').textContent = discount; // Show the discount amount
+        document.getElementById('finalTotalPrice').textContent =totalPrice-discount; 
+
+        closeModal();
+    } else {
+        alert('Please select a coupon!');
+    }
+}
+
+        </script>
+        
+
 
 
 </body>

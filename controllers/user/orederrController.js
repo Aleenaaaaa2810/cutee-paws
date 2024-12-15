@@ -5,10 +5,13 @@ const Cart = require('../../models/cartShema');
 const Address = require('../../models/addressSchema');
 const User = require('../../models/userSchema');
 const Order = require('../../models/orderSchema');
+const Coupon=require('../../models/couponSchema')
 
 const getorder = async (req, res) => {
   try {
     const userId = req.session?.user?.id;
+    const coupon= await Coupon.find({})
+    console.log(coupon)
 
     // Check if user is authenticated
     if (!userId || !mongoose.Types.ObjectId.isValid(userId)) {
@@ -29,9 +32,10 @@ const getorder = async (req, res) => {
 
     
     const totalPrice = cart.items.reduce((total, item) => total + item.quantity * item.price, 0);
+   
 
     
-    res.render('order', { userAddress: userAddress || [], cart, totalPrice });
+    res.render('order', { userAddress: userAddress || [], cart, totalPrice ,coupon});
   } catch (error) {
     console.error('Error fetching orders:', error);
     res.status(500).send('Internal Server Error');

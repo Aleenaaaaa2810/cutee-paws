@@ -2,6 +2,7 @@ const product = require('../../models/productSchema');
 const Category = require('../../models/categorySchema');
 const Cart = require('../../models/cartShema');
 const User = require('../../models/userSchema');
+const coupons=require('../../models/couponSchema')
 
 const getCart = async (req, res) => {
   const userId = req.session.user;
