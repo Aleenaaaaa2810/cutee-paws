@@ -46,6 +46,7 @@ const userSchema = new Schema({
     type: Date,
     default: Date.now,
   },
+  payments: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Payment' }] ,
   wishlist: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Product' }],
 });
 userSchema.pre('save', async function (next) {

@@ -48,8 +48,18 @@ const getSalesReport = async (req, res) => {
     }
 
     // Fetch orders with the applied filters
-    const orders = await Order.find(filter);
-
+    const orders = await Order.find(filter)
+    .populate({
+      path: 'user', // Populate the user details in the order
+      populate: { // Nested populate to include payment details for the user
+        path: 'payments', // Field in the User schema referencing Payment
+        model: 'Payment', // Explicitly mention the Payment model
+        select: 'paymentMethod amount status transactionId paymentDate', // Select fields to include
+      },
+    });
+  
+  console.log(orders);
+    
     // Calculating totals
     const totalOrders = orders.length;
     const totalPending = orders.filter(order => order.status === 'Pending').length;

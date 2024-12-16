@@ -39,7 +39,9 @@
           <th>Order ID</th>
           <th>Date</th>
           <th>Customer</th>
+          
           <th>Amount</th>
+          
           <th>Status</th>
         </tr>
       </thead>
@@ -48,7 +50,12 @@
           <tr>
             <td><%= order.orderId %></td>
             <td><%= new Date(order.createdOn).toLocaleDateString() %></td>
+
+
             <td><%= order.user.name %></td>
+            
+
+
             <td>₹<%= order.totalPrice %></td>
             <td><%= order.status %></td>
           </tr>

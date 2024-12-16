@@ -427,6 +427,52 @@
                 }
             });
         }
+
+        else if (selectedPayment.value === 'Wallet') {
+    // Handle Wallet Payment
+    const walletResponse = await fetch('/wallet-payment', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(orderDetails),
+    });
+
+    const walletData = await walletResponse.json();
+
+    if (walletResponse.ok && walletData.success) {
+        // Proceed to submit the order
+        const response = await fetch('/submitOrders', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(orderDetails),
+        });
+
+        const data = await response.json();
+
+        if (response.ok && data.success) {
+            Swal.fire({
+                icon: 'success',
+                title: 'Order Placed!',
+                text: 'Your wallet payment has been processed and order placed successfully!',
+            }).then(() => {
+                window.location.href = '/orderSummary';
+            });
+        } else {
+            Swal.fire({
+                icon: 'error',
+                title: 'Order Failed',
+                text: 'There was an issue with placing your order. Please try again.',
+            });
+        }
+    } else {
+        Swal.fire({
+            icon: 'error',
+            title: 'Payment Failed',
+            text: 'There was an issue with your wallet payment. Please check and try again.',
+        });
+    }
+}
+
+
     } catch (error) {
         console.error('Checkout Error:', error);
         Swal.fire({

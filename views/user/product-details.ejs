@@ -89,11 +89,11 @@
            <div class="product-actions mt-5">
             <% if (product.quantity > 0) { %>
               <!-- Quantity Selector -->
-              <div class="quantity-selector d-flex align-items-center">
+              <!-- <div class="quantity-selector d-flex align-items-center">
                 <button class="qty-btn" onclick="decrementQuantity()">-</button>
                 <span id="quantity" class="qty-value">1</span>
                 <button class="qty-btn" onclick="incrementQuantity()">+</button>
-              </div><br>
+              </div><br> -->
               <!-- Add to Cart Button -->
               <div class=a"mt-4">
                 <button class="btn btn-gradient add-to-cart-btn" 
@@ -143,28 +143,28 @@
   });
 
   // Quantity increment and decrement
-  function incrementQuantity() {
-    const qtyElement = document.getElementById("quantity");
-    let currentQty = parseInt(qtyElement.textContent);
+//   function incrementQuantity() {
+//     const qtyElement = document.getElementById("quantity");
+//     let currentQty = parseInt(qtyElement.textContent);
 
-    if (currentQty < 5) {
-        qtyElement.textContent = currentQty + 1;
-    } else {
-        Swal.fire({
-            icon: 'info',
-            title: 'Maximum Limit Reached',
-            text: 'You can only purchase up to 5 items.',
-        });
-    }
-}
+//     if (currentQty < 5) {
+//         qtyElement.textContent = currentQty + 1;
+//     } else {
+//         Swal.fire({
+//             icon: 'info',
+//             title: 'Maximum Limit Reached',
+//             text: 'You can only purchase up to 5 items.',
+//         });
+//     }
+// }
 
 
-  function decrementQuantity() {
-    const qtyElement = document.getElementById("quantity");
-    if (parseInt(qtyElement.textContent) > 1) {
-      qtyElement.textContent = parseInt(qtyElement.textContent) - 1;
-    }
-  }
+//   function decrementQuantity() {
+//     const qtyElement = document.getElementById("quantity");
+//     if (parseInt(qtyElement.textContent) > 1) {
+//       qtyElement.textContent = parseInt(qtyElement.textContent) - 1;
+//     }
+//   }
 
   // Add to cart function
   function addToCart(productId, productName, productPrice) {

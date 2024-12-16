@@ -112,6 +112,7 @@ router.post('/removefromwishlist', wishlistController.deletewishlist);
 
 router.get("/wallet", walletController.getWallet);
 router.post("/addwallet", walletController.addMoney);
+router.post('/wallet-payment',walletController.walletpay)
 
 
 

@@ -1,5 +1,7 @@
 const Wallet=require('../../models/walletSchema')
+const User=require('../../models/userSchema')
 const { v4: uuidv4 } = require('uuid'); 
+const Order = require('../../models/orderSchema');
 
 
 const getWallet = async (req, res) => {
@@ -73,12 +75,62 @@ const addMoney = async (req, res) => {
     res.status(500).send('Server Error');
   }
 };
+const walletpay = async (req, res) => {
+  console.log("Wallet payment initiated");
 
+  try {
+      const userId = req.session.user?.id;
+      const { totalPrice } = req.body;
+
+      if (!userId) {
+          return res.status(400).json({ success: false, message: 'User ID is missing or invalid!' });
+      }
+
+      if (!totalPrice || totalPrice <= 0) {
+          return res.status(400).json({ success: false, message: 'Invalid amount!' });
+      }
+
+      const user = await User.findById(userId);
+      if (!user) {
+          return res.status(404).json({ success: false, message: 'User not found!' });
+      }
+
+      const wallet = await Wallet.findOne({ userId });
+      if (!wallet) {
+          return res.status(404).json({ success: false, message: 'Wallet not found!' });
+      }
+
+      if (wallet.balance >= totalPrice) {
+         
+          wallet.balance -= totalPrice;
+
+          
+          wallet.transactions.push({
+              transactionId: uuidv4(),
+              description: 'Debit',
+              amount: totalPrice,
+              date: new Date(),
+          });
+
+          await wallet.save(); 
+
+       
+          return res.json({ success: true, redirectUrl: '/submitOrder' });
+      } else {
+          return res.status(400).json({ success: false, message: 'Insufficient wallet balance!' });
+      }
+  } catch (error) {
+      console.error('Error processing wallet payment:', error);
+      return res.status(500).json({ success: false, message: 'Something went wrong!' });
+  }
+};
 
 
 
 module.exports={
   getWallet,
-  addMoney
+  addMoney,
+  walletpay
+
 
 }
