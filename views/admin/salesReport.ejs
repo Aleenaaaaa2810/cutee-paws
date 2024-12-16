@@ -1,0 +1,62 @@
+<%- include("../../views/partials/admin/header.ejs") %>
+<head>
+  <title>Sales Report</title>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+  <div class="container mt-5" style="margin-left: 250px;">
+
+    <h2>Sales Report</h2>
+    <form method="GET" action="/admin/sales-report">
+      <label>Select Range:</label>
+      <select name="range" class="form-control">
+        <option value="daily" <%= range === 'daily' ? 'selected' : '' %>>Daily</option>
+        <option value="weekly" <%= range === 'weekly' ? 'selected' : '' %>>Weekly</option>
+        <option value="monthly" <%= range === 'monthly' ? 'selected' : '' %>>Monthly</option>
+        <option value="yearly" <%= range === 'yearly' ? 'selected' : '' %>>Yearly</option>
+      </select>
+
+      <label>Custom Date Range:</label>
+      <input type="date" name="startDate" class="form-control" value="<%= startDate %>">
+      <input type="date" name="endDate" class="form-control" value="<%= endDate %>">
+      
+      <button type="submit" class="btn btn-primary mt-2">Filter</button>
+    </form>
+    
+    <hr>
+    <h4>Summary</h4>
+    <p>Total Orders: <%= totalOrders %></p>
+    <p>Total Pendings: <%= totalPending %></p>
+    <p>Total Cancelled: <%= totalCancelled %></p>
+    <p>Total Processing: <%= totalProcessing %></p>
+    <p>Total Shipped: <%= totalShipped %></p>
+    <p>Total Delivered: <%= totalDelivered %></p>
+
+    <h4>Orders</h4>
+    <table class="table table-bordered">
+      <thead>
+        <tr>
+          <th>Order ID</th>
+          <th>Date</th>
+          <th>Customer</th>
+          <th>Amount</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% orders.forEach(order => { %>
+          <tr>
+            <td><%= order.orderId %></td>
+            <td><%= new Date(order.createdOn).toLocaleDateString() %></td>
+            <td><%= order.user.name %></td>
+            <td>₹<%= order.totalPrice %></td>
+            <td><%= order.status %></td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+    <a href="/admin/sales-report/download-pdf" class="btn btn-success">Download PDF</a>
+    <a href="/admin/sales-report/download-excel" class="btn btn-success">Download Excel</a>
+    
+  </div>
+</body>

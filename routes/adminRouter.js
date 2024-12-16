@@ -6,6 +6,7 @@ const categoryController=require('../controllers/admin/categoryController')
 const productController=require("../controllers/admin/productController")
 const orderController=require('../controllers/admin/orderController')
 const couponCOntroller=require('../controllers/admin/couponController')
+const salesController=require('../controllers/admin/salesController')
 const { updateProduct } = require('../controllers/admin/adminController');
 
 
@@ -90,6 +91,11 @@ router.post('/createcoupon',couponCOntroller.createcoupon)
 router.get("/editcoupon",couponCOntroller.editcoupon)
 router.post('/updateCoupon',couponCOntroller.updatecoupon)
 router.delete("/deletecoupon",couponCOntroller.deletecoupon)
+
+
+router.get('/sales-report',salesController. getSalesReport);
+router.get('/sales-report/download-pdf',salesController. downloadPDF);
+router.get('/sales-report/download-excel',salesController. downloadExcel);
 
 
 
