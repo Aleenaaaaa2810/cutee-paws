@@ -6,6 +6,8 @@ const Address = require('../../models/addressSchema');
 const User = require('../../models/userSchema');
 const Order = require('../../models/orderSchema');
 const Coupon=require('../../models/couponSchema')
+const Wallet=require('../../models/walletSchema')
+const { v4: uuidv4 } = require('uuid'); 
 
 const getorder = async (req, res) => {
   try {
@@ -160,82 +162,99 @@ const profileOderget = async (req, res) => {
 };
 
 const cancelOrder = async (req, res) => {
-
   try {
-    const { orderId } = req.body; // Extract orderId from request body
-    // Check if orderId is provided
+    const { orderId } = req.body;
+
     if (!orderId) {
       return res.status(400).send('Order ID is required.');
     }
 
-    // Ensure the user is logged in (session exists)
     if (!req.session?.user?.id) {
       return res.status(401).send('User not logged in.');
     }
 
-    // Find the order by orderId (use _id instead of orderId)
     const order = await Order.findOne({ orderId: orderId, user: req.session.user.id });
-    console.log(order)
+    console.log(order);
 
-    // Check if the order was found
     if (!order) {
       return res.status(404).json({ success: false, message: 'Order not found or you do not have permission to cancel this order.' });
     }
 
-    // Check if the order is already cancelled or not in a cancellable status
     if (order.status === 'Cancelled') {
-     
       return res.status(400).json({ success: false, message: 'This order has already been cancelled.' });
     }
 
-    // Update the order status to 'Cancelled'
+    // Proceed with cancellation
     order.status = 'Cancelled';
     await order.save();
 
-    // Send success response
-    return res.status(200).json({ success: true, message: 'Order successfully cancelled.' });
-    
+    const user = await User.findById(req.session.user.id);
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found.' });
+    }
+
+    const wallet = await Wallet.findOne({ userId: user._id });
+    if (!wallet) {
+      return res.status(404).json({ success: false, message: 'Wallet not found.' });
+    }
+
+    wallet.balance += order.finalAmount;
+
+    wallet.transactions.push({
+      transactionId: uuidv4(),
+      description: 'Refund for order cancellation',
+      amount: order.finalAmount,
+      date: new Date(),
+    });
+
+    await wallet.save();
+
+    return res.status(200).json({ success: true, message: 'Order successfully cancelled and amount added to wallet.' });
+
   } catch (error) {
     console.error('Error cancelling order:', error);
     res.status(500).send('An error occurred while cancelling the order.');
   }
 };
-const returnorder = async (req, res) => {
 
+
+const returnorder = async (req, res) => {
   try {
-    const { orderId } = req.body; // Extract orderId from request body
-    // Check if orderId is provided
+    const { orderId } = req.body;
+
     if (!orderId) {
       return res.status(400).send('Order ID is required.');
     }
 
-    // Ensure the user is logged in (session exists)
     if (!req.session?.user?.id) {
       return res.status(401).send('User not logged in.');
     }
 
-    // Find the order by orderId (use _id instead of orderId)
     const order = await Order.findOne({ orderId: orderId, user: req.session.user.id });
-    console.log(order)
+    console.log(order);
 
-    // Check if the order was found
     if (!order) {
       return res.status(404).json({ success: false, message: 'Order not found or you do not have permission to return this order.' });
     }
 
- 
-    // Update the order status to 'Cancelled'
+    // Ensure the order is in the "Delivered" status to allow return
+    if (order.status !== 'Delivered') {
+      return res.status(400).json({ success: false, message: 'Only delivered orders can be returned.' });
+    }
+
+    // Update the order status to "Returned"
     order.status = 'Returned';
     await order.save();
 
-    // Send success response
     return res.status(200).json({ success: true, message: 'Order successfully returned.' });
-    
+
   } catch (error) {
     console.error('Error returning order:', error);
     res.status(500).send('An error occurred while returning the order.');
   }
 };
+
+
 
 
 
