@@ -1,0 +1,166 @@
+<%- include("../../views/partials/user/header") %>
+<style>
+  /* Custom styles for wallet and transactions */
+  body {
+    background: #f3f4f6; /* Light background for modern appearance */
+    font-family: 'Poppins', sans-serif; /* Modern font */
+  }
+
+  .container {
+    max-width: 1100px;
+  }
+
+  .card {
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
+
+  .card-header {
+    background: linear-gradient(90deg, #007bff, #6c757d);
+    color: #fff;
+    text-align: center;
+    padding: 1.5rem;
+  }
+
+  .card-header h3, .card-header h4 {
+    margin: 0;
+    font-weight: 600;
+  }
+
+  .balance-text {
+    color: #28a745;
+    font-size: 1.5rem;
+    font-weight: bold;
+  }
+
+  .btn-custom {
+    background: linear-gradient(90deg, #17a2b8, #138496);
+    color: #fff;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+    border-radius: 5px;
+    transition: background 0.3s ease;
+  }
+
+  .btn-custom:hover {
+    background: linear-gradient(90deg, #d85555, #ea1043);
+  }
+
+  .form-control {
+    border: 1px solid #ced4da;
+    border-radius: 5px;
+    padding: 0.75rem;
+  }
+
+  .table {
+    width: 100%;
+    margin: 0 auto;
+    border-collapse: separate;
+    border-spacing: 0 10px; /* Add spacing between rows */
+  }
+
+  .table thead th {
+    background: #ee6161;
+    color: #fff;
+    font-weight: bold;
+    padding: 1rem;
+    border: none;
+  }
+
+  .table tbody td {
+    background: #fff;
+    color: #495057;
+    padding: 1rem;
+    border: none;
+    box-shadow: 0 2px 4px rgba(239, 127, 127, 0.05);
+  }
+
+  .table tbody tr:hover td {
+    background-color: rgba(214, 104, 30, 0.1); /* Light teal hover effect */
+  }
+
+  .text-muted {
+    font-style: italic;
+    color: #adb5bd;
+  }
+
+  main {
+    padding: 2rem 0;
+  }
+</style>
+
+<main class="main">
+  <div class="container my-5">
+    <!-- Wallet Section -->
+    <div class="row">
+      <div class="col-md-6 mx-auto">
+        <div class="card shadow-lg">
+          <div class="card-header">
+            <h3>Your Wallet</h3>
+          </div>
+          <div class="card-body text-center">
+            <h4 class="mb-4">
+              Balance: <span class="balance-text">₹<%= balance %></span>
+            </h4>
+            <form action="/addwallet" method="POST">
+              <input 
+                type="number" 
+                name="amount" 
+                required 
+                class="form-control mb-3" 
+                placeholder="Enter amount to add" 
+                min="1" 
+              />
+              <button type="submit" class="btn btn-custom">
+                Add Money
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Transaction History Section -->
+    <div class="row mt-5">
+      <div class="col-md-10 mx-auto">
+        <div class="card shadow-lg">
+          <div class="card-header">
+            <h4>Transaction History</h4>
+          </div>
+          <div class="card-body p-0">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Transaction ID</th>
+                  <th>Description</th>
+                  <th>Amount</th>
+                  <th>Date</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% if (transactions.length > 0) { %>
+                  <% transactions.forEach((transaction) => { %>
+                    <tr>
+                      <td><%= transaction.transactionId %></td>
+                      <td><%= transaction.description %></td>
+                      <td class="text-primary fw-bold">₹<%= transaction.amount %></td>
+                      <td><%= new Date(transaction.date).toLocaleString() %></td>
+                    </tr>
+                  <% }) %>
+                <% } else { %>
+                  <tr>
+                    <td colspan="4" class="text-center text-muted">No transactions found.</td>
+                  </tr>
+                <% } %>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<%- include("../../views/partials/user/footer") %>

@@ -7,6 +7,10 @@
 
    <link href="https://fonts.googleapis.com/css?family=Montserrat:300,400,500,600,700" rel="stylesheet">
    <link href="https://fonts.googleapis.com/css?family=Rokkitt:100,300,400,700" rel="stylesheet">
+   <head>
+      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    </head>
+    
    
    <!-- CSS files -->
    <link rel="stylesheet" href="css/animate.css">
@@ -132,12 +136,17 @@
                         <li><a href="/about">About</a></li>
                          <li class="contact-nav"><a href="/contact">Contact</a></li><li>
                            <a href="/cartPage"><i class="icon-shopping-cart" style="font-size: 25px;"></i></a></li>
+                           <a href="/wallet"><i class="fa-solid fa-wallet" style="font-size: 25px;"></i></a>
+
 
                        				<li class="wishlist">
 													<a href="/wishlist">
 															<img src="images/wishlist.webp" alt="Wishlist" style="width: 25px; height: auto;">
 													</a>
 												</li>
+                                   
+
+
 								<div class="dropdown">
                            <% if (user) { %>
                               <li> <%= user.name %></li>

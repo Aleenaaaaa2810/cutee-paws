@@ -7,6 +7,7 @@ const productController=require('../controllers/user/productController')
 const cartController=require('../controllers/user/cartController')
 const orederrController=require('../controllers/user/orederrController')
 const wishlistController=require('../controllers/user/wishlistController')
+const walletController=require('../controllers/user/walletController')
 const paymentController=require('../controllers/user/paymentcontroller')
 
 // Utility for handling async errors (optional)
@@ -108,6 +109,11 @@ router.post('/payment',paymentController.onlinepayment)
 router.get('/wishlist',wishlistController.loadwishlist)
 router.post('/addTowishlist',wishlistController.addTowishlist)
 router.post('/removefromwishlist', wishlistController.deletewishlist);
+
+router.get("/wallet", walletController.getWallet);
+router.post("/addwallet", walletController.addMoney);
+
+
 
 
 
