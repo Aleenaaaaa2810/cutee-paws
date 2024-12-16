@@ -75,6 +75,9 @@ const postorder = async (req, res) => {
       return res.status(401).json({ success: false, message: "Unauthorized access." });
     }
 
+
+    
+
     // Map cart items to order format
     const orderedItems = parsedItems.map((item) => ({
       product: item.productId?._id || item.productId,
@@ -95,6 +98,19 @@ const postorder = async (req, res) => {
     });
 
     await newOrder.save();
+
+
+    for (const item of orderedItems) {
+      const product = await Product.findById(item.product);
+      if (!product) {
+        console.warn(`Product not found for ID: ${item.product}`);
+        continue;
+      }
+
+      // Increase the product quantity
+      product.quantity -= item.quantity;
+      await product.save();
+    }
 
     // Delete items from cart
     const cart = await Cart.findOne({ userId });

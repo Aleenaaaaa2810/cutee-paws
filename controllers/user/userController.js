@@ -225,8 +225,8 @@ async function login(req, res) {
     if (!user) {
       return res.status(404).json({ success: false, message: "User not found" });
     }
-    if (User.blocked) {
-      return res.status(403).send("Your account has been blocked. Please contact support.");
+      if (user.isBlocked) {
+      return res.status(403).json({ success: false, message: "Your account has been blocked. Please contact support." });
     }
     
       const isPasswordValid = await user.matchPassword(password);
