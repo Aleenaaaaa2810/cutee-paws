@@ -56,7 +56,19 @@ const orderSchema = new Schema({
     type: Date,
     default: Date.now,
     required: true
-  }
+  },
+  paymentMethod:{
+    type: String,
+    required: true,
+    enum: ['Cash on Delivery', 'Razorpay', 'Wallet'],  // Limiting payment methods
+
+  },
+  razorpayDetails: {  // Added razorpayDetails to store payment information
+        paymentId: String,
+        orderId: String,
+        signature: String,
+        paymentStatus: String  // Store the payment status here
+    }
 });
 
 const Order = mongoose.model("Order", orderSchema);

@@ -1,55 +1,55 @@
 <%- include("../../views/partials/user/header") %>
 
 <div class="container mt-5">
-    <div class="shadow-lg rounded" style="background: linear-gradient(to right, #f9f9f9, #fef6e4);">
-        <h3 class="text-center py-4" style="color: #a27305; font-weight: bold; background-color: #ffefd5; border-radius: 8px 8px 0 0;">
+    <div class="shadow-lg rounded" style="background: linear-gradient(to right, #f9f9f9, #A64D79);">
+        <h3 class="text-center py-4" style="color: #040404; font-weight: bold; background-color: #6A1E55; border-radius: 8px 8px 0 0;">
             Create User Address
         </h3>
         <form id="addressForm" method="POST" action="/addAddress" class="p-5">
             <!-- Row 1 -->
             <div class="row g-4 mb-4">
                 <div class="form-group col-md-4">
-                    <label for="addressType" class="form-label fw-semibold text-primary">Address Type</label>
+                    <label for="addressType" class="form-label fw-semibold text-dark">Address Type</label>
                     <input type="text" class="form-control border-2 border-primary shadow-sm" id="addressType" name="addressType" placeholder="e.g., Home, Office" >
                 </div>
                 <div class="form-group col-md-4">
-                    <label for="name" class="form-label fw-semibold text-primary">Name</label>
+                    <label for="name" class="form-label fw-semibold text-dark">Name</label>
                     <input type="text" class="form-control border-2 border-primary shadow-sm" id="name" name="name" placeholder="Enter your name" >
                 </div>
                 <div class="form-group col-md-4">
-                    <label for="city" class="form-label fw-semibold text-primary">City</label>
+                    <label for="city" class="form-label fw-semibold text-dark">City</label>
                     <input type="text" class="form-control border-2 border-primary shadow-sm" id="city" name="city" placeholder="Enter city" >
                 </div>
             </div>
             <!-- Row 2 -->
             <div class="row g-4 mb-4">
                 <div class="form-group col-md-4">
-                    <label for="landMark" class="form-label fw-semibold text-success">Landmark</label>
+                    <label for="landMark" class="form-label fw-semibold text-dark">Landmark</label>
                     <input type="text" class="form-control border-2 border-success shadow-sm" id="landMark" name="landMark" placeholder="e.g., Near Park" >
                 </div>
                 <div class="form-group col-md-4">
-                    <label for="state" class="form-label fw-semibold text-success">State</label>
+                    <label for="state" class="form-label fw-semibold text-dark">State</label>
                     <input type="text" class="form-control border-2 border-success shadow-sm" id="state" name="state" placeholder="Enter state" >
                 </div>
                 <div class="form-group col-md-4">
-                    <label for="pincode" class="form-label fw-semibold text-success">Pincode</label>
+                    <label for="pincode" class="form-label fw-semibold text-dark">Pincode</label>
                     <input type="number" class="form-control border-2 border-success shadow-sm" id="pincode" name="pincode" placeholder="Enter pincode" >
                 </div>
             </div>
             <!-- Row 3 -->
             <div class="row g-4 mb-4">
                 <div class="form-group col-md-4">
-                    <label for="phone" class="form-label fw-semibold text-danger">Phone</label>
+                    <label for="phone" class="form-label fw-semibold text-dark">Phone</label>
                     <input type="number" class="form-control border-2 border-danger shadow-sm" id="phone" name="phone" placeholder="Enter phone number" >
                 </div>
                 <div class="form-group col-md-4">
-                    <label for="altPhone" class="form-label fw-semibold text-danger">Alternate Phone</label>
+                    <label for="altPhone" class="form-label fw-semibold text-dark">Alternate Phone</label>
                     <input type="number" class="form-control border-2 border-danger shadow-sm" id="altPhone" name="altPhone" placeholder="Enter alternate phone number" >
                 </div>
             </div>
             <!-- Submit Button -->
             <div class="text-center">
-                <a href="/profile"><button type="submit" id="submitButton" class="btn btn-primary px-5 py-2 shadow-sm" style="background: linear-gradient(to right, #34ebc9, #34aceb); border: none;">
+                <a href="/profile"><button type="submit" id="submitButton" class="btn btn-primary px-5 py-2 shadow-sm" style="background: linear-gradient(to right, #3B1C32, #3B1C32); border: none;">
                     Submit
                 </button></a>
             </div>

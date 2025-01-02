@@ -9,6 +9,9 @@ const orederrController=require('../controllers/user/orederrController')
 const wishlistController=require('../controllers/user/wishlistController')
 const walletController=require('../controllers/user/walletController')
 const paymentController=require('../controllers/user/paymentcontroller')
+const { userAuth } = require("../middelwares/auth");
+
+
 
 // Utility for handling async errors (optional)
 const asyncHandler = fn => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
@@ -18,12 +21,12 @@ router.get("/pageNotFound", asyncHandler(userController.pageNotFound));
 
 // Nav routes
 router.get("/", asyncHandler(userController.loadHomepage));
-router.get("/shop", asyncHandler(userController.loadshop));
-router.get("/about", asyncHandler(userController.loadabout));
-router.get("/cart", asyncHandler(userController.loadcart));
+router.get("/shop",userAuth, asyncHandler(userController.loadshop));
+router.get("/about",userAuth, asyncHandler(userController.loadabout));
+router.get("/cart", userAuth,asyncHandler(userController.loadcart));
 
-router.get("/contact", asyncHandler(userController.loadcontact));
-router.get("/otp", asyncHandler(userController.loadotp));
+router.get("/contact",userAuth, asyncHandler(userController.loadcontact));
+router.get("/otp",userAuth, asyncHandler(userController.loadotp));
 
 // Signup routes
 router.get("/signup", asyncHandler(userController.loadsignup));
@@ -72,7 +75,7 @@ router.get("/reset-password",profilecontroller.getResetpass)
 router.post('/resend-forgot-otp',profilecontroller.resendOtp)
 router.post('/reset-password',profilecontroller.postNewpassword)
 
-router.get('/profile',profilecontroller.userprofile)
+router.get('/profile',userAuth,profilecontroller.userprofile)
 router.get('/change-email',profilecontroller.changeEmail)
 router.post('/change-email',profilecontroller.changeEmailValid)
 router.post('/verify-email-otp',profilecontroller.verifyEmailOtp)
@@ -87,32 +90,38 @@ router.get('/edit-address',profilecontroller.editAddress)
 router.post('/edit-Address',profilecontroller.posteditAddress)
 router.get("/deleteAddress",profilecontroller.deleteAddress)
 
-router.get('/productDetails',productController.productDetails)
+router.get('/productDetails',userAuth,productController.productDetails)
 router.post('/rate-product', productController.rateProduct);
 
-router.get('/cartPage',cartController.getCart)
-router.post('/cart/add',cartController.postCart);
+router.get('/cartPage',userAuth,cartController.getCart)
+router.post('/cart/add',userAuth,cartController.postCart);
 router.post('/cart/increase', cartController.increaseQuantity);
 router.post('/cart/decrease', cartController.decreaseQuantity);
 router.post('/remove-item',cartController.removeCart);
 
 
 
-router.get('/Order',orederrController.getorder)
-router.post('/submitOrders',orederrController.postorder)
-router.get('/orderSummary',orederrController.orderPage)
-router.get('/profileOrder',orederrController.profileOderget)
-router.post('/cancel-order',orederrController.cancelOrder)
-router.post ('/return-order',orederrController.returnorder)
-router.post('/payment',paymentController.onlinepayment)
+router.get('/Order',userAuth,orederrController.getorder)
+router.post('/submitOrders',userAuth,orederrController.postorder)
+router.get('/orderSummary',userAuth,orederrController.orderPage)
+router.get('/profileOrder',userAuth,orederrController.profileOderget)
+router.post('/cancel-order',userAuth,orederrController.cancelOrder)
+router.post ('/return-order',userAuth,orederrController.returnorder)
 
-router.get('/wishlist',wishlistController.loadwishlist)
-router.post('/addTowishlist',wishlistController.addTowishlist)
-router.post('/removefromwishlist', wishlistController.deletewishlist);
+router.get('/getOrderDetails/:orderId', orederrController.getOrderDetails)
+router.post('/updatePaymentStatus/:orderId', orederrController.updatePaymentStatus)
 
-router.get("/wallet", walletController.getWallet);
-router.post("/addwallet", walletController.addMoney);
-router.post('/wallet-payment',walletController.walletpay)
+
+router.post('/payment',userAuth,paymentController.onlinepayment)
+router.get('/wishlist',userAuth,wishlistController.loadwishlist)
+router.post('/addTowishlist',userAuth,wishlistController.addTowishlist)
+router.post('/removefromwishlist',userAuth, wishlistController.deletewishlist);
+
+router.get("/wallet",userAuth, walletController.getWallet);
+router.post("/addwallet",userAuth, walletController.addMoney);
+router.post('/wallet-payment',userAuth,walletController.walletpay)
+
+router.get('/invoice/:orderId', userAuth, orederrController.generateInvoicePDF);
 
 
 

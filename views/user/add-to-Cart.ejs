@@ -1,5 +1,7 @@
 <%- include("../../views/partials/user/header") %>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
 
     <style>
       
@@ -62,7 +64,7 @@
         }
 
         .remove-btn {
-    background-color: #ff5722;
+    background-color: #6A1E55;
     color: white;
     border: none;
     padding: 8px 12px;
@@ -73,7 +75,7 @@
   }
 
         .remove-btn:hover {
-            background-color: #e64a19;
+            background-color: #A64D79;
         }
 
         /* Cart Total */
@@ -92,7 +94,7 @@
         }
 
         .checkout-btn {
-            background-color: #4caf50;
+            background-color: #3B1C32;
             color: white;
             border: none;
             padding: 12px 30px;
@@ -103,7 +105,7 @@
         }
 
         .checkout-btn:hover {
-            background-color: #388e3c;
+            background-color: #3B1C32;
         }
 
         /* Continue Shopping Section */
@@ -113,7 +115,7 @@
         }
 
         .continue-btn {
-            background-color: #2196f3;
+            background-color: #131313;
             color: white;
             border: none;
             padding: 12px 30px;
@@ -140,6 +142,35 @@
             margin: 0 auto;
             font-size: 1rem;
         }
+        .quantity-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.quantity-btn {
+  background-color: #A64D79;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  font-size: 1rem;
+  cursor: pointer;
+  border-radius: 5px;
+  transition: background-color 0.3s;
+}
+
+.quantity-btn:hover {
+  background-color: #A64D79;
+}
+
+.quantity {
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #333;
+  min-width: 30px;
+  text-align: center;
+}
+
     </style>
 </head>
 
@@ -163,9 +194,9 @@
                   <p>Price: ₹<%= item.price %></p>
                   <p>Total: ₹<%= item.totalPrice %></p>
                   <div class="quantity-controls">
-                    <button class="quantity-btn" onclick="updateQuantity('<%= item._id %>', 'decrease')">-</button>
-                    <span class="quantity"><%= item.quantity %></span>
-                    <button class="quantity-btn" onclick="updateQuantity('<%= item._id %>', 'increase')">+</button>
+                    <button class="quantity-btn decrease" data-action="decrease" data-item-id="<%= item._id %>">-</button>
+                    <span class="quantity" id="quantity-<%= item._id %>"><%= item.quantity %></span>
+                    <button class="quantity-btn increase" data-action="increase" data-item-id="<%= item._id %>">+</button>
                   </div>
                 </div>
               </div>
@@ -196,39 +227,36 @@
 
 
 <script>
- function updateQuantity(itemId, action) {
-  const url = action === 'increase' ? '/cart/increase' : '/cart/decrease';
-  fetch(url, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ itemId }),
-  })
-  .then(response => response.json())
-  .then(data => {
-    if (data.dbCart) {
-      // Reload or update the cart dynamically
-      location.reload();
-    } else {
-      Swal.fire(
-        'Error',
-        data.error || 'Unable to update quantity.',
-        'error'
-      );
-    }
-  })
-  .catch(error => {
-    console.error('Error:', error);
-    Swal.fire(
-      'Error',
-      'An unexpected error occurred.',
-      'error'
-    );
-  });
-}
+$(document).ready(function () {
+  $('.quantity-btn').on('click', function () {
+    const action = $(this).data('action'); // 'increase' or 'decrease'
+    const itemId = $(this).data('item-id');
+    const quantityElement = $(`#quantity-${itemId}`);
 
-  // Function to remove an item from the cart via AJAX
+    $.ajax({
+      url: action === 'increase' ? '/cart/increase' : '/cart/decrease',
+      type: 'POST',
+      contentType: 'application/json',
+      data: JSON.stringify({ itemId: itemId }),
+      success: function (data) {
+        if (data.dbCart) {
+          const newQuantity = data.dbCart.items.find(item => item._id === itemId).quantity;
+          quantityElement.text(newQuantity);
+          const newTotal = data.dbCart.items.reduce((total, item) => total + item.totalPrice, 0);
+          $('.cart-total p').html(`<strong>Total:</strong> ₹${newTotal}`);
+        } else {
+          Swal.fire('Error', data.error || 'Unable to update quantity.', 'error');
+        }
+      },
+      error: function (error) {
+        console.error('Error:', error);
+        Swal.fire('Error', 'minimum quantity -5', 'error');
+      }
+    });
+  });
+});
+
+ // Function to remove an item from the cart via AJAX
   function removeItem(itemId) {
   Swal.fire({
     title: 'Are you sure?',

@@ -65,7 +65,7 @@
   .btn {
     display: inline-block;
     padding: 10px 20px;
-    background-color: #e53e3e;
+    background-color: #3B1C32;
     color: #fff;
     text-decoration: none;
     border-radius: 5px;
@@ -75,7 +75,7 @@
     cursor: pointer;
   }
   .btn:hover {
-    background-color: #c53030;
+    background-color: #3B1C32;
   }
   .product-image {
   max-width: 100px;
@@ -83,8 +83,29 @@
   object-fit: cover; /* Ensures the image scales without distortion */
 }
 
+
+.invoice-btn {
+  display: inline-block;
+  padding: 10px 20px;
+  background-color: #3B1C32; /* Set background color */
+  color: #fff; /* Set text color */
+  text-decoration: none;
+  border: none;
+  border-radius: 5px;
+  font-size: 16px;
+  font-weight: bold;
+  text-align: center;
+  cursor: pointer;
+}
+
+.invoice-btn:hover {
+  background-color: #2A1424; /* Slightly darker shade for hover effect */
+}
+
+
 </style>
 </head>
+
 <body>
   <div class="container">
     <h1>Your Orders</h1>
@@ -98,6 +119,16 @@
               <p><strong>Date:</strong> <%= new Date(order.createdOn).toLocaleDateString() %></p>
               <p><strong>Status:</strong> <%= order.status %></p>
               <p><strong>Total Amount:</strong> ₹<%= order.finalAmount.toFixed(2) %></p>
+              <p><strong>Payment Method:</strong> <%= order.paymentMethod || 'Not Available' %></p>
+              
+              <!-- <p><strong>Payment Status:</strong> <%= order.razorpayDetails ? order.razorpayDetails.paymentStatus : 'Not Available' %></p> -->
+
+              <a href="/invoice/<%= order.orderId %>" class="invoice-btn">Invoice</a>
+
+              <% if (order.razorpayDetails && order.razorpayDetails.paymentStatus === 'failed') { %>
+<button class="btn return-button" data-order-id="<%= order.orderId %>">Retry payment</button>
+              <% } %>
+
             </div>
             <% if (order.status.toLowerCase() === 'delivered') { %>
               <button class="btn return-button" data-order-id="<%= order.orderId %>">Return Order</button>
@@ -105,11 +136,14 @@
               <button class="btn disabled" data-message="This order is already cancelled">Cancelled</button>
             <% } else if(order.status.toLowerCase() === 'returned'){ %>
               <button class="btn disabled" data-message="This order is already returned">Returned</button>
-            <% } else { %>
+            <% }else { %>
               <button class="btn cancel-button" data-order-id="<%= order.orderId %>">Cancel Order</button>
+
             <% } %>
-            
+
+           
           </div>
+         
 
           <table>
             <thead>
@@ -128,6 +162,7 @@
                   <td><%= item.quantity %></td>
                   <td>₹<%= item.price.toFixed(2) %></td>
                   <td>₹<%= (item.quantity * item.price).toFixed(2) %></td>
+                 
                   <td> 
                     <% if (item.product.productImage && item.product.productImage.length > 0) { %>
                       <img src="/uploads/<%= item.product.productImage[0] %>" alt="Product Image" class="product-image">
@@ -148,6 +183,7 @@
   </div>
 
   <%- include("../../views/partials/user/footer.ejs") %>
+  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 
   <script>
    // Handling the cancel button click
@@ -188,43 +224,83 @@
 });
 
 document.querySelectorAll('.return-button').forEach(button => {
-  button.addEventListener('click', function(event) {
+  button.addEventListener('click', async function () {
     const orderId = this.getAttribute('data-order-id');
 
-    Swal.fire({
-      title: 'Are you sure?',
-      text: "You are about to return this order!",
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonText: 'Yes, return it!',
-      cancelButtonText: 'No, keep it'
-    }).then((result) => {
-      if (result.isConfirmed) {
-        fetch('/return-order', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ orderId: orderId })
-        })
-        .then(response => response.json())
-        .then(data => {
-          if (data.success) {
-            Swal.fire('Returned', data.message, 'success');
-          } else {
-            Swal.fire('Error', data.message, 'error');
-          }
-        })
-        .catch(error => {
-          Swal.fire('Error', 'Failed to return the order. Please try again.', 'error');
-        });
-      } else {
-        Swal.fire('Cancelled', 'Your order is safe.', 'info');
+    try {
+      // Fetch order details
+      const orderResponse = await fetch(`/getOrderDetails/${orderId}`);
+      if (!orderResponse.ok) {
+        throw new Error('Failed to fetch order details');
       }
-    });
+
+      const orderData = await orderResponse.json();
+
+      if (!orderData || !orderData.refundAmount) {
+        throw new Error('Invalid order data');
+      }
+
+      const { refundAmount } = orderData;
+
+      // Razorpay configuration
+      const options = {
+        key: "<%= process.env.RAZORPAY_ID_KEY %>", // Razorpay Key
+        amount: refundAmount * 100, // Amount in paise
+        currency: "INR",
+        name: "Your Shop Name",
+        description: "Retry Payment",
+        handler: async function (response) {
+          // Update payment status in the backend
+          const updateResponse = await fetch(`/updatePaymentStatus/${orderId}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ paymentStatus: 'payment successfully' }),
+          });
+
+          if (!updateResponse.ok) {
+            throw new Error('Failed to update payment status');
+          }
+
+          Swal.fire({
+            icon: 'success',
+            title: 'payment Successful',
+            text: 'The payment status has been updated.',
+          }).then(() => {
+            window.location.reload();
+          });
+        },
+        theme: { color: "#F37254" },
+      };
+
+      const rzp = new Razorpay(options);
+      rzp.open();
+
+      rzp.on('payment.failed', function (response) {
+        console.error('Payment Failed:', response.error);
+        Swal.fire({
+          icon: 'error',
+          title: 'payment Failed',
+          text: 'The retry process could not be completed. Please try again.',
+        });
+      });
+
+    } catch (error) {
+      console.error('Error occurred:', error);
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'An error occurred while processing your refund. Please try again later.',
+      });
+    }
   });
 });
+
+
+
 
   </script>
 
     
 </body>
+
 </html>

@@ -7,6 +7,9 @@ const User = require('../../models/userSchema');
 const Order = require('../../models/orderSchema');
 const Coupon=require('../../models/couponSchema')
 const Wallet=require('../../models/walletSchema')
+const PDFDocument = require('pdfkit');
+
+
 const { v4: uuidv4 } = require('uuid'); 
 
 const getorder = async (req, res) => {
@@ -37,7 +40,8 @@ const getorder = async (req, res) => {
    
 
     
-    res.render('order', { userAddress: userAddress || [], cart, totalPrice ,coupon});
+    res.render('order', { userAddress: userAddress || [], cart, totalPrice ,coupon,
+    });
   } catch (error) {
     console.error('Error fetching orders:', error);
     res.status(500).send('Internal Server Error');
@@ -45,9 +49,11 @@ const getorder = async (req, res) => {
 };
 
 
+
+
 const postorder = async (req, res) => {
   try {
-    const { items, totalPrice, addressId } = req.body;
+    const { items, totalPrice, addressId ,paymentMethod ,razorpayDetails} = req.body;
 
     // Parse items if received as a string
     let parsedItems;
@@ -69,6 +75,11 @@ const postorder = async (req, res) => {
     if (!mongoose.Types.ObjectId.isValid(addressId)) {
       return res.status(400).json({ success: false, message: "Invalid address ID." });
     }
+//newwwwwwwwwwwwww
+    const validMethods = ['Cash on Delivery', 'Razorpay', 'Wallet'];
+    if (!validMethods.includes(paymentMethod)) {
+      return res.status(400).json({ success: false, message: 'Invalid payment method selected.' });
+    }
 
     const userId = req.session?.user?.id;
     if (!userId || !mongoose.Types.ObjectId.isValid(userId)) {
@@ -83,6 +94,9 @@ const postorder = async (req, res) => {
       product: item.productId?._id || item.productId,
       quantity: item.quantity,
       price: item.price,
+      payments:item.paymentMethod,
+     
+      
     }));
 
     // Save order
@@ -93,12 +107,17 @@ const postorder = async (req, res) => {
       finalAmount: totalPrice,
       address: addressId,
       status: "Pending",
-      invoiceDate: new Date(),
+paymentMethod: paymentMethod, // Ensure this matches a valid enum value      invoiceDate: new Date(),
       createdOn: new Date(),
+      razorpayDetails: razorpayDetails || null, // Save razorpay details here
     });
 
     await newOrder.save();
 
+
+
+
+ 
 
     for (const item of orderedItems) {
       const product = await Product.findById(item.product);
@@ -136,6 +155,7 @@ const postorder = async (req, res) => {
 const orderPage = async (req, res) => {
   try {
     const userId = req.session?.user?.id;
+
    
     const order = await Order.findOne({ user: userId })
       .sort({ createdOn: -1 }) 
@@ -149,6 +169,7 @@ const orderPage = async (req, res) => {
       orderId: order.orderId,
       orderDate: order.createdOn.toLocaleDateString(),
       totalPrice: order.finalAmount,
+      paymentMethods: order.paymentMethod, // Ensure this matches the schema field
       status: order.status,
     });
   } catch (error) {
@@ -156,6 +177,11 @@ const orderPage = async (req, res) => {
     res.status(500).send('An error occurred while rendering the order page.');
   }
 };
+
+
+
+
+
 
 const profileOderget = async (req, res) => {
   try {
@@ -273,6 +299,178 @@ const returnorder = async (req, res) => {
 
 
 
+const generateInvoicePDF = async (req, res) => {
+  try {
+    const userId = req.session?.user?.id;
+    const orderId = req.params?.orderId;
+
+    const order = await Order.findOne({ orderId: orderId, user: userId })
+      .populate('user', 'name') // Populate user name
+      .populate({
+        path: 'orderedItems.product',
+        select: 'name price', // Populate product name and price
+      })
+    
+      .lean();
+
+    if (!order) {
+      return res.status(404).send('Order not found!');
+    }
+
+  
+
+    if (!order.orderedItems || order.orderedItems.length === 0) {
+      return res.status(404).send('No products found in this order.');
+    }
+
+    const doc = new PDFDocument();
+
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `inline; filename="invoice-${orderId}.pdf"`);
+    doc.pipe(res);
+
+    // Add a page border
+    doc.rect(30, 30, 550, 750).stroke();
+
+    // Header Section
+    doc.fontSize(18).fillColor('green').text('Cutee Paws', { align: 'center' });
+    doc.fontSize(12).fillColor('black').text('email:cuteepaws@gmail.com', { align: 'center' });
+    doc.text('place:OOrakkad, pin:686868', { align: 'center' });
+    doc.text('pho:+91 2222334455', { align: 'center' });
+    
+
+    doc.moveDown(2);
+
+    // Invoice Title
+    doc.fontSize(24).fillColor('green').text('Invoice', { align: 'center' });
+    doc.moveDown();
+
+    // User Details Section
+    doc.fontSize(12).fillColor('black').text(`Username: ${order.user?.name || 'N/A'}`);
+    doc.moveDown();
+
+    // Order Details Section
+    doc.text(`Order ID: ${order._id}`);
+    doc.text(`Order Date: ${new Date(order.createdOn).toLocaleDateString()}`);
+    doc.text(`Payment Method: ${order.paymentMethod}`);
+    doc.moveDown();
+
+    // Products Table Header
+    doc.fontSize(14).fillColor('green').text('Products:', { underline: true });
+    doc.moveDown(0.5);
+
+    const tableStartX = 50; // Left margin for the table
+    const tableWidth = 500; // Total table width
+    const columnWidths = [50, 150, 100, 100, 100]; // Individual column widths
+    const columnPositions = columnWidths.reduce((acc, width, i) => {
+      acc.push((acc[i - 1] || tableStartX) + (i > 0 ? columnWidths[i - 1] : 0));
+      return acc;
+    }, []);
+
+    // Draw Table Header
+    const headerY = doc.y;
+    doc.fontSize(10).fillColor('green');
+    const headers = ['S.No', 'Product Name', 'Quantity', 'Price', 'Total'];
+    headers.forEach((header, index) => {
+      doc.text(header, columnPositions[index], headerY, { width: columnWidths[index], align: 'center' });
+    });
+
+    // Add a line below the header
+    doc.strokeColor('#aaaaaa').lineWidth(1).moveTo(tableStartX, doc.y).lineTo(tableStartX + tableWidth, doc.y).stroke();
+    doc.moveDown(0.5);
+
+    // Draw Table Rows
+    let isEvenRow = true;
+    order.orderedItems.forEach((item, index) => {
+      const { product, quantity, price } = item;
+      const rowY = doc.y;
+
+      // Alternate Row Background
+      doc.rect(tableStartX, rowY - 2, tableWidth, 18).fill(isEvenRow ? '#f0f0f0' : '#ffffff').stroke();
+
+      // Draw Row Data
+      const rowData = [
+        `${index + 1}`,
+        `${product?.name || 'N/A'}`,
+        `${quantity}`,
+        `₹${price}`,
+        `₹${quantity * price}`,
+      ];
+      doc.fontSize(12).fillColor('black');
+      rowData.forEach((data, colIndex) => {
+        doc.text(data, columnPositions[colIndex], rowY, {
+          width: columnWidths[colIndex],
+          align: 'center',
+        });
+      });
+
+      doc.moveDown(0.5);
+      isEvenRow = !isEvenRow;
+    });
+
+    // Add a line below the table
+    doc.strokeColor('#aaaaaa').lineWidth(1).moveTo(tableStartX, doc.y).lineTo(tableStartX + tableWidth, doc.y).stroke();
+
+    // Total Amount Section
+    doc.moveDown();
+    doc.fontSize(16).fillColor('black').text(`Total Amount: ₹${order.finalAmount}`, { align: 'right' });
+
+    doc.end();
+  } catch (error) {
+    console.error('Error generating invoice PDF:', error);
+    res.status(500).send('An error occurred while generating the invoice PDF.');
+  }
+};
+
+
+const getOrderDetails= async (req, res) => {
+  try {
+    const orderId = req.params.orderId;
+    const order = await Order.findOne({ orderId });
+
+    if (!order) {
+      return res.status(404).json({ error: 'Order not found' });
+    }
+
+    res.json({ refundAmount: order.finalAmount });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+}
+
+const updatePaymentStatus= async (req, res) => {
+  try {
+    const orderId = req.params.orderId;
+    const { paymentStatus } = req.body;
+
+    const order = await Order.findOneAndUpdate(
+      { orderId },
+      { 'razorpayDetails.paymentStatus': paymentStatus },
+      { new: true }
+    );
+
+    if (!order) {
+      return res.status(404).json({ error: 'Order not found' });
+    }
+
+    res.json({ success: true, message: 'Payment status updated successfully' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+}
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -284,4 +482,7 @@ module.exports = {
   profileOderget,
   cancelOrder,
   returnorder,
+  generateInvoicePDF,
+  getOrderDetails,
+  updatePaymentStatus
 };

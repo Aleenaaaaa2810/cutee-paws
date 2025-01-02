@@ -25,11 +25,9 @@
     
     <hr>
     <h4>Summary</h4>
+    <p>Total Revenue: ₹<%= totalRevenue.toFixed(2) %></p>
     <p>Total Orders: <%= totalOrders %></p>
-    <p>Total Pendings: <%= totalPending %></p>
-    <p>Total Cancelled: <%= totalCancelled %></p>
-    <p>Total Processing: <%= totalProcessing %></p>
-    <p>Total Shipped: <%= totalShipped %></p>
+ 
     <p>Total Delivered: <%= totalDelivered %></p>
 
     <h4>Orders</h4>
@@ -43,6 +41,7 @@
           <th>Amount</th>
           
           <th>Status</th>
+          <th>payment Method</th>
         </tr>
       </thead>
       <tbody>
@@ -50,20 +49,18 @@
           <tr>
             <td><%= order.orderId %></td>
             <td><%= new Date(order.createdOn).toLocaleDateString() %></td>
-
-
             <td><%= order.user.name %></td>
-            
-
-
             <td>₹<%= order.totalPrice %></td>
             <td><%= order.status %></td>
+            <td><%= order.paymentMethod || 'Not Available' %></td>
           </tr>
         <% }) %>
       </tbody>
+      
     </table>
     <a href="/admin/sales-report/download-pdf" class="btn btn-success">Download PDF</a>
     <a href="/admin/sales-report/download-excel" class="btn btn-success">Download Excel</a>
     
   </div>
+  
 </body>

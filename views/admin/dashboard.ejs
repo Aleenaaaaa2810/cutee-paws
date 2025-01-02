@@ -1,32 +1,139 @@
+<%- include("../../views/partials/admin/header.ejs") %>
 
-<%-include("../../views/partials/admin/header.ejs")%>
-    <div class="main-content">
-        <div class="header">
-            <h1>Dashboard</h1>
-          
-            
-           
-        </div>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f9fcf4;
+  }
 
-        <div class="cards">
-            <h1>welcome to the dashborad</h1>
-            <!-- <div class="card">
-                <h3>Total Sales</h3>
-                <p>$5,000</p>
-            </div>
-            <div class="card">
-                <h3>Total Customers</h3>
-                <p>350</p>
-            </div>
-            <div class="card">
-                <h3>Total Products</h3>
-                <p>120</p>
-            </div>
-            <div class="card">
-                <h3>New Orders</h3>
-                <p>75</p>
-            </div>
-        </div> -->
-    </div>
+  .main-content {
+    padding: 20px;
+  }
 
-    <%-include("../../views/partials/admin/footer.ejs")%>
+  .header {
+    background-color: #4e73df;
+    color: white;
+    padding: 15px;
+    border-radius: 5px;
+    margin-bottom: 20px;
+    text-align: center;
+  }
+
+  .filter {
+    text-align: right;
+    margin-bottom: 20px;
+  }
+
+  #range {
+    padding: 8px;
+    border-radius: 5px;
+    border: 1px solid #ddd;
+    font-size: 16px;
+  }
+
+  .chart-container {
+    margin-top: 20px;
+    background-color: white;
+    border-radius: 5px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    text-align: center;
+  }
+
+  #revenueChart {
+    width: 100% !important;
+    height: 400px;
+  }
+</style>
+
+<div class="main-content">
+  <div class="header">
+    <h1>Dashboard</h1>
+    <p>Total Revenue: ₹<%= totalRevenue %></p>
+    <p>Total Orders: <%= totalOrders %></p>
+  </div>
+
+  <div class="filter">
+    <label for="range">Select Range: </label>
+    <select id="range" name="range" onchange="fetchSalesReport()">
+      <option value="daily" <%= range === 'daily' ? 'selected' : '' %>>Daily</option>
+      <option value="weekly" <%= range === 'weekly' ? 'selected' : '' %>>Weekly</option>
+      <option value="monthly" <%= range === 'monthly' ? 'selected' : '' %>>Monthly</option>
+      <option value="yearly" <%= range === 'yearly' ? 'selected' : '' %>>Yearly</option>
+    </select>
+  </div>
+
+  <div class="chart-container">
+    <canvas id="revenueChart"></canvas>
+  </div>
+</div>
+
+<%- include("../../views/partials/admin/footer.ejs") %>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+  const salesData = <%- JSON.stringify(salesData) %>;
+  const ctx = document.getElementById('revenueChart').getContext('2d');
+  let chart;
+
+  function renderChart() {
+    if (chart) chart.destroy();
+
+    chart = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: salesData.labels,
+        datasets: [
+          {
+            label: 'Revenue (₹)',
+            data: salesData.revenue,
+            backgroundColor: 'rgba(75, 192, 192, 0.6)',
+            borderColor: 'rgba(75, 192, 192, 1)',
+            borderWidth: 1,
+          },
+          {
+            label: 'Total Orders',
+            data: salesData.orders,
+            backgroundColor: 'rgba(255, 99, 132, 0.6)',
+            borderColor: 'rgba(255, 99, 132, 1)',
+            borderWidth: 1,
+          },
+        ],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            display: true,
+          },
+        },
+        scales: {
+          x: {
+            title: {
+              display: true,
+              text: 'Time Period',
+            },
+          },
+          y: {
+            beginAtZero: true,
+            title: {
+              display: true,
+              text: 'Values',
+            },
+          },
+        },
+      },
+    });
+  }
+
+  renderChart();
+
+  function fetchSalesReport() {
+    const range = document.getElementById('range').value;
+    window.location.href = `/admin/dashboard?range=${range}`;
+  }
+</script>

@@ -8,6 +8,8 @@ const orderController=require('../controllers/admin/orderController')
 const couponCOntroller=require('../controllers/admin/couponController')
 const salesController=require('../controllers/admin/salesController')
 const { updateProduct } = require('../controllers/admin/adminController');
+const { adminAuth } = require("../middelwares/auth");
+
 
 
 const multer = require('multer');
@@ -16,7 +18,6 @@ const multer = require('multer');
 
 const path = require('path'); // Add this line
 const fs = require('fs');
-const { adminAuth } = require("../middelwares/auth");
 // const upload = require('../config/multerConfig'); 
 // Set up multer for file uploads
 const storage = multer.diskStorage({
@@ -52,7 +53,7 @@ router.get("/pageerror", adminController.pageerror);
 
 router.get("/login", adminController.loadLogin);
 router.post("/login", adminController.login);
-router.get("/", adminAuth, adminController.loadDashboard);
+router.get("/dashboard", adminAuth, adminController.loadDashboard);
 router.get("/logout", adminController.logout);
 
 router.get("/customers", adminAuth, customerController.customerManagement);
@@ -62,41 +63,40 @@ router.post("/customers/unblock/:id", adminAuth, customerController.unblockCusto
 router.get("/category",adminAuth,categoryController.CategoryInfo);
 router.post("/category/add",adminAuth,categoryController.addCategory)
 router.get("/category/edit/:id",adminAuth,categoryController.getcategoryedit)
-router.post("/category/edit/:id",categoryController.editcategory);
-router.put('/category/toggle/:id', categoryController.CategoryListing);
+router.post("/category/edit/:id",adminAuth,categoryController.editcategory);
+router.put('/category/toggle/:id', adminAuth,categoryController.CategoryListing);
 router.post('/addcategoryoffer',adminAuth,categoryController.addcategoryoffer)
 router.post('/removecategoryOffer',adminAuth,categoryController.removecategoryoffer)
 
 
-router.get('/addproducts',productController.getproductAddpage)
+router.get('/addproducts',adminAuth,productController.getproductAddpage)
 router.post('/addproducts',upload.array("image",3),productController.postProductAdd)
-router.get('/products',productController.getproduct)
+router.get('/products',adminAuth,productController.getproduct)
 router.post('/addProductOffer',adminAuth,productController.addproductoffer)
 router.post('/removeProductOffer',adminAuth,productController.removeproductoffer)
 
 
 
-router.get("/editProduct",productController.editProduct)
+router.get("/editProduct",adminAuth,productController.editProduct)
 router.post("/updateProduct/:id", upload.array("images", 3), productController.updateProduct);
-router.delete('/delete-image/:productId/:imageId', productController.removeImage);
-router.post('/blockProduct/:productId',productController. blockProduct);
-router.post('/admin/unblockProduct/:productId',productController. unblockProduct);
+router.delete('/delete-image/:productId/:imageId',adminAuth, productController.removeImage);
+router.post('/blockProduct/:productId',adminAuth,productController. blockProduct);
+router.post('/admin/unblockProduct/:productId',adminAuth,productController. unblockProduct);
 
-router.get('/orders',orderController.getorder)
-router.put('/orders/:orderId',orderController.updateStatusorder)
-router.delete('/orders/:orderId',orderController.deleteOrder);
+router.get('/orders',adminAuth,orderController.getorder)
+router.put('/orders/:orderId',adminAuth,orderController.updateStatusorder)
+router.delete('/orders/:orderId',adminAuth,orderController.deleteOrder);
 
-router.get('/coupons',couponCOntroller.loadcoupon)
-router.post('/createcoupon',couponCOntroller.createcoupon)
-router.get("/editcoupon",couponCOntroller.editcoupon)
-router.post('/updateCoupon',couponCOntroller.updatecoupon)
-router.delete("/deletecoupon",couponCOntroller.deletecoupon)
+router.get('/coupons',adminAuth,couponCOntroller.loadcoupon)
+router.post('/createcoupon',adminAuth,couponCOntroller.createcoupon)
+router.get("/editcoupon",adminAuth,couponCOntroller.editcoupon)
+router.post('/updateCoupon',adminAuth,couponCOntroller.updatecoupon)
+router.delete("/deletecoupon",adminAuth,couponCOntroller.deletecoupon)
 
 
-router.get('/sales-report',salesController. getSalesReport);
-router.get('/sales-report/download-pdf',salesController. downloadPDF);
-router.get('/sales-report/download-excel',salesController. downloadExcel);
-
+router.get('/sales-report',adminAuth,salesController. getSalesReport);
+router.get('/sales-report/download-pdf',adminAuth,salesController. downloadPDF);
+router.get('/sales-report/download-excel',adminAuth,salesController. downloadExcel);
 
 
 

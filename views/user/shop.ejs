@@ -5,6 +5,12 @@
 
 
 <style>
+   a.active, .price-button.active {
+
+  transform: scale(1.05);
+  font-weight: bold;
+   margin-left: 50px;
+}
  .main-container {
    max-width: 1200px;
    margin: 0 auto;
@@ -38,7 +44,7 @@
 
  .search-button {
    padding: 8px 15px;
-   background-color: #1e918b;
+   background-color: #6A1E55;
    color: #fff;
    border: none;
    cursor: pointer;
@@ -49,7 +55,7 @@
  }
 
  .search-button:hover {
-   background-color: #0056b3;
+   background-color: #A64D79;
    transform: scale(1.05);
  }
  .sidebar {
@@ -86,7 +92,7 @@
 }
 
 .filter-item a:hover {
-  color: #007bff;
+  color: #A64D79;
 }
 
 .filter-section ul {
@@ -134,7 +140,7 @@
  }
 
  .add-to-cart-btn {
-   background-color: #46698f;
+   background-color: #3B1C32;
    color: #fff;
    padding: 10px;
    border: none;
@@ -160,7 +166,7 @@
  }
 
  .pagination .active {
-   background-color: #007bff;
+   background-color: #A64D79;
    color: #fff;
  }
 
@@ -194,7 +200,7 @@
 }
 
 .price-button:hover {
-  background-color: #007bff;
+  background-color: #A64D79;
   color: white;
   transform: scale(1.05);
 }
@@ -203,14 +209,14 @@
  }
 
  a.active, .price-button.active {
-  background-color: #007bff;
-  color: white;
+  /* background-color: #eae3e6; */
+  /* color: white; */
   transform: scale(1.05);
   font-weight: bold;
 }
 
 .price-button.active {
-  border: 2px solid #007bff;
+  border: 2px solid #A64D79;
 }
 .sort-list {
   list-style-type: none; /* Remove default bullets */
@@ -230,13 +236,13 @@
 }
 
 .sort-list li:hover {
-  background-color: #007bff;
+  background-color: #A64D79;
   color: white;
   transform: scale(1.05);
 }
 
 .sort-list li.active {
-  background-color: #007bff;
+  background-color: #A64D79;
   color: white;
   font-weight: bold;
 }
@@ -265,6 +271,7 @@
          <div class="category-brand-container">
            <!-- Removed brand section -->
            <ul>
+            
             <% for (let i = 0; i < category.length; i++) { %>
               <li class="filter-item">
                 <a href="/shop?category=<%= category[i]._id %>&gte=<%= minPrice %>&lte=<%= maxPrice %>"
@@ -307,7 +314,8 @@
            </div>
          </form>
        </div>
-       <div>
+       
+       <!-- <div>
         <ul  class="sort-list"></ul>>
           <li  class="sort-list">
             <a href="" class="<%= selectedSort === 'default' ? 'active' : '' %>">Sort list</a>
@@ -328,8 +336,29 @@
           </li>
         </ul>
         
-       </div>
+       </div> -->
+       <div>
+        <ul class="sort-list">
+          <li>
+            <a href="/shop" class="<%= selectedSort === 'default' ? 'active' : '' %>">FILTER</a>
+          </li>
+          <li>
+            <a href="/shop?sort=lowToHigh" class="<%= selectedSort === 'lowToHigh' ? 'active' : '' %>">Price: Low to High</a>
+          </li>
+          <li>
+            <a href="/shop?sort=highToLow" class="<%= selectedSort === 'highToLow' ? 'active' : '' %>">Price: High to Low</a>
+          </li>
+          <li>
+            <a href="/shop?sort=aToZ" class="<%= selectedSort === 'aToZ' ? 'active' : '' %>">Name: A to Z</a>
+          </li>
+          <li>
+            <a href="/shop?sort=zToA" class="<%= selectedSort === 'zToA' ? 'active' : '' %>">Name: Z to A</a>
+          </li>
+        </ul>
+      </div>
+      
      </aside>
+
 
      <main class="product-grid">
       <% for (let i = 0; i < products.length; i++) { %>

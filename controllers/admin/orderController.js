@@ -10,7 +10,8 @@ const getorder = async (req, res) => {
   try {
     
     const orders = await Order.find({})
-      .populate('user', 'name email') 
+    .sort({ _id: -1 })    
+       .populate('user', 'name email') 
       .populate('orderedItems.product', 'name price');
 
     if (!orders || orders.length === 0) {

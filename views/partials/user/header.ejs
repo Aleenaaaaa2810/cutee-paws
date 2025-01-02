@@ -26,73 +26,82 @@
    <link rel="stylesheet" href="css/style.css">
 
    <style>
-      /* Custom CSS for Navbar */
-      .menu-1 {
+      /* Navbar Styling */
+      .colorlib-nav {
+         background-color: rgb(4, 4, 4);
+         padding: 1px 0; /* Reduce the height */
+      }
+   
+      .colorlib-nav .menu-1 ul {
          display: flex;
-         justify-content: space-between;
+         justify-content: space-between; /* Distribute items in one line */
          align-items: center;
+         list-style: none;
+         margin: 0;
+         padding: 0;
       }
-      .menu-1 .main-nav {
-         display: flex;
-         gap: 70px;
+   
+      .colorlib-nav .menu-1 ul li {
+         margin: 0 15px; /* Add spacing between items */
       }
-      .menu-1 .right-nav {
-         display: flex;
-         gap: 15px;
-         font-size: 12px;
+   
+      .colorlib-nav .menu-1 ul li a {
+         color: white;
+         text-decoration: none;
+         font-size: 14px;
+         font-weight: 500;
+      }
+   
+      .colorlib-nav .menu-1 ul li a:hover {
+         text-decoration: underline;
+      }
+   
+      .colorlib-nav #colorlib-logo a {
+         color: white;
+         font-size: 20px;
          font-weight: bold;
-         align-items: center;
-      }
-      .menu-1 .right-nav a {
          text-decoration: none;
+      }
+   
+      .colorlib-nav .search-wrap .form-control {
+         height: 30px; /* Adjust input height */
+         font-size: 14px;
          color: black;
-         padding: 5px 8px;
       }
-      .menu-1 .right-nav .wishlist img {
-         width: 18px;
-         height: 18px;
-      }
-      .menu-1 .contact-nav {
-         margin-right: 20px; /* Space after Contact */
-      }
-      .menu-1 .contact-nav + li {
-         margin-left: 20px; /* Space before Cart */
-      }
-
-      .dropdown{
-         position: relative;
-         display: inline-block;}
-
-      .dropdown-content{
-         display:none;
-         position: absolute;
-         background-color: yellowgreen;
-         min-width: 160px;
-         box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
-         z-index:1000;
-         right: 0;
-      }
-
-      .dropdown-content a{
+   
+      .colorlib-nav .search-wrap .submit-search {
+         background-color: white;
+         border: none;
          color: black;
-         padding: 12px 16px;
-         text-decoration: none;
-         display: block;
-         width:100%;
+         font-size: 14px;
       }
-      .dropdown-content a:hover{
-         background-color: aliceblue;
-
+   
+      /* Dropdown Styling */
+      .dropdown-content {
+         background-color: black;
+         border: 1px solid white;
       }
-      .dropdown:hover.dropdown-content{
-         display: block;
+   
+      .dropdown-content a {
+         color: white;
       }
-      .header{
-         position: relative;
-         z-index: 500;
-
+   
+      .dropdown-content a:hover {
+         background-color: grey;
       }
-
+   
+      /* Icon Styling */
+      .menu-1 ul li i,
+      .menu-1 ul li img {
+         color: white;
+         width: 25px;
+         height: auto;
+      }
+   
+      /* Wishlist Icon */
+      .wishlist img {
+         filter: brightness(0) invert(1); /* Make it white */
+      }
    </style>
    
 
@@ -109,14 +118,14 @@
                   <div class="col-sm-7 col-md-9">
                      <div id="colorlib-logo"><a href="/">Cutee Paws</a></div>
                   </div>
-                  <div class="col-sm-5 col-md-3">
+                  <!-- <div class="col-sm-5 col-md-3">
                      <form action="#" class="search-wrap">
                         <div class="form-group">
                            <input type="search" class="form-control search" placeholder="Search">
                            <button class="btn btn-primary submit-search text-center" type="submit"><i class="icon-search"></i></button>
                         </div>
                      </form>
-                  </div>
+                  </div> -->
                </div>
                <div class="row">
                   <div class="col-sm-12 text-left menu-1">
@@ -151,7 +160,7 @@
                            <% if (user) { %>
                               <li> <%= user.name %></li>
                               <li><a href="/profile">Profile</a></li>
-                              <li><a href="/logout">Logout</a></li>
+                              <!-- <li><a href="/logout">Logout</a></li> -->
                             <% } else { %>
                               <li><a href="/login">Login</a></li>
                               <li><a href="/signup">Signup</a></li>
