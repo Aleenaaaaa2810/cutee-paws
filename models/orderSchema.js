@@ -50,7 +50,7 @@ const orderSchema = new Schema({
   status: {
     type: String,
     required: true,
-    enum: ['Pending', 'Processing', 'Shipped', 'Delivered', 'Cancelled', 'Returned']
+    enum: ['Pending', 'Processing', 'Shipped', 'Delivered', 'Cancelled', 'Return Requested']
   },
   createdOn: {
     type: Date,
@@ -63,12 +63,16 @@ const orderSchema = new Schema({
     enum: ['Cash on Delivery', 'Razorpay', 'Wallet'],  // Limiting payment methods
 
   },
-  razorpayDetails: {  // Added razorpayDetails to store payment information
+  returnRequested: { 
+    type: Boolean, 
+    default: false 
+  },  razorpayDetails: {  // Added razorpayDetails to store payment information
         paymentId: String,
         orderId: String,
         signature: String,
         paymentStatus: String  // Store the payment status here
-    }
+    },
+   
 });
 
 const Order = mongoose.model("Order", orderSchema);

@@ -126,21 +126,20 @@
               <a href="/invoice/<%= order.orderId %>" class="invoice-btn">Invoice</a>
 
               <% if (order.razorpayDetails && order.razorpayDetails.paymentStatus === 'failed') { %>
-<button class="btn return-button" data-order-id="<%= order.orderId %>">Retry payment</button>
+<button class="btn retry-button" data-order-id="<%= order.orderId %>">Retry payment</button>
               <% } %>
 
             </div>
             <% if (order.status.toLowerCase() === 'delivered') { %>
               <button class="btn return-button" data-order-id="<%= order.orderId %>">Return Order</button>
-            <% } else if(order.status.toLowerCase() === 'cancelled'){ %>
+            <% } else if (order.status.toLowerCase() === 'cancelled') { %>
               <button class="btn disabled" data-message="This order is already cancelled">Cancelled</button>
-            <% } else if(order.status.toLowerCase() === 'returned'){ %>
+            <% } else if (order.status.toLowerCase() === 'returned') { %>
               <button class="btn disabled" data-message="This order is already returned">Returned</button>
-            <% }else { %>
+            <% } else { %>
               <button class="btn cancel-button" data-order-id="<%= order.orderId %>">Cancel Order</button>
-
             <% } %>
-
+            
            
           </div>
          
@@ -224,6 +223,67 @@
 });
 
 document.querySelectorAll('.return-button').forEach(button => {
+  button.addEventListener('click', function () {
+    const orderId = this.getAttribute('data-order-id');
+    
+    // Hide the return button immediately to prevent multiple clicks
+    this.style.display = 'none';
+
+    Swal.fire({
+      title: 'Are you sure?',
+      text: "You are requesting to return this order!",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Yes, return it!',
+      cancelButtonText: 'No, keep it'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        // Show loading spinner while waiting for the request to be processed
+        Swal.fire({
+          title: 'Processing...',
+          text: 'Please wait while we process your return request.',
+          showConfirmButton: false,
+          willOpen: () => {
+            Swal.showLoading();
+          }
+        });
+
+        fetch('/return-order', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ orderId: orderId })
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            Swal.fire('Requested', 'Your return request has been sent.', 'success')
+              .then(() => {
+                const parentSection = this.closest('.order-section');
+                const newButton = document.createElement('button');
+                newButton.className = 'btn disabled';
+                newButton.textContent = 'Return Requested';
+                newButton.disabled = true;
+                parentSection.querySelector('.order-header').appendChild(newButton);
+              });
+          } else {
+            Swal.fire('Error', data.message, 'error');
+            this.style.display = 'inline-block'; // Restore button if failed
+          }
+        })
+        .catch(error => {
+          Swal.fire('Error', 'Failed to process your request. Please try again.', 'error');
+          this.style.display = 'inline-block'; // Restore button if failed
+        });
+      } else {
+        Swal.fire('Cancelled', 'Your order return request was canceled.', 'info');
+        this.style.display = 'inline-block'; // Restore button if cancelled
+      }
+    });
+  });
+});
+
+
+document.querySelectorAll('.retry-button').forEach(button => {
   button.addEventListener('click', async function () {
     const orderId = this.getAttribute('data-order-id');
 

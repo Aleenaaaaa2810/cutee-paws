@@ -149,6 +149,20 @@
         .actions-btns button:hover {
             background-color: #e0911c;
         }
+
+        .approve-return-button:disabled {
+    background-color: #f5a623; /* Light background color */
+    color: #ffffff; /* White text */
+    opacity: 0.3; /* Lightened button */
+    cursor: not-allowed; /* Cursor shows it's disabled */
+    filter: blur(0px); /* No blur */
+    transition: opacity 0.3s ease; /* Smooth transition on hover or state change */
+}
+
+.approve-return-button:disabled:hover {
+    background-color: #f5a623; /* Keep background light on hover */
+    opacity: 0.3; /* Keep opacity light on hover */
+}
     </style>
 </head>
 <body>
@@ -162,6 +176,7 @@
         <a href="/admin/products">Products</a>
         <a href="/admin/orders">Order manage</a>
         <a href="/admin/coupons">coupon manage</a>
+        <a href="/admin/sales-report"> salesReport</a>
         <a href="/admin/logout" class="logout-btn">Logout</a>
     </div>
 
@@ -207,7 +222,17 @@
                         <td><%= order.paymentMethod || 'Not Available' %></td>
                         <td class="actions-btns">
                             <button onclick="updateStatus('<%= order._id %>')">Update Status</button>
-                            <button onclick="deleteOrder('<%= order._id %>')">Delete</button>
+                            <% if (order.returnRequested) { %>
+                                <button class="btn approve-return-button" 
+                                        data-order-id="<%= order._id %>" 
+                                        data-user-id="<%= order.userId %>" 
+                                        data-refund-amount="<%= order.refundAmount %>" 
+                                        onclick="approveReturn('<%= order._id %>')">
+                                    Approve Return
+                                </button>
+                            <% } else { %>
+                                <button class="btn approve-return-button disabled" disabled>Approve Return</button>
+                            <% } %>
                         </td>
                     </tr>
                 <% }) %>
@@ -254,6 +279,37 @@
         }
     });
 };
+
+function approveReturn(orderId) {
+   
+    // Check if the values are valid before sending
+    if (orderId !== null) {
+     
+
+        fetch('/approve-return', {
+            method: 'POST',
+            headers: { 
+                'Content-Type': 'application/json' 
+            },
+            body: JSON.stringify({ orderId, userId, totalPrice })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                Swal.fire('Approved', 'The return has been approved and the wallet updated.', 'success');
+                window.location.reload();  // Refresh the page to reflect changes
+            } else {
+                Swal.fire('Error', data.message, 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            Swal.fire('Error', `Something went wrong! ${error.message}`, 'error');
+        });
+    } else {
+        Swal.fire('Error', 'Invalid data, please try again.', 'error');
+    }
+}
 
 const deleteOrder = (orderId) => {
     Swal.fire({

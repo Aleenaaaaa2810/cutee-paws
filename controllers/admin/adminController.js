@@ -3,7 +3,10 @@ const mongoose =require("mongoose");
 const bcrypt =require("bcrypt")
 const Swal = require('sweetalert2');
 const moment = require('moment');
+const Products=require("../../models/productSchema")
+const Category = require('../../models/categorySchema');
 const Order = require('../../models/orderSchema');
+
 
 
 const pageerror= async (req,res)=>{
@@ -131,7 +134,31 @@ const loadDashboard = async (req, res) => {
     const totalOrders = orders.length;
     const totalRevenue = orders.reduce((sum, order) => sum + order.totalPrice, 0);
 
-    res.render('dashboard', { salesData, totalOrders, totalRevenue, range });
+// Query for top 10 best-selling products
+const topProducts = await Products.find().sort({ salesCount: -1 }).limit(10);
+
+  // Query for top 10 best-selling categories
+  const topCategories = await Products.aggregate([
+    { $group: { _id: '$category', totalSales: { $sum: '$salesCount' } } },
+    { $sort: { totalSales: -1 } },
+    { $limit: 10 },
+    { $lookup: {
+        from: 'categories', // Use the exact collection name for categories
+        localField: '_id',
+        foreignField: '_id',
+        as: 'categoryInfo'
+      }
+    },
+    { $unwind: '$categoryInfo' },
+    { $project: { categoryName: '$categoryInfo.name', totalSales: 1 } }
+  ]);
+  
+
+
+
+
+    res.render('dashboard', { salesData, totalOrders, totalRevenue, range,topProducts, 
+      topCategories });
   } catch (err) {
     console.error(err);
     res.status(500).send('Error fetching dashboard data');

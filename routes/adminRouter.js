@@ -85,6 +85,8 @@ router.post('/admin/unblockProduct/:productId',adminAuth,productController. unbl
 
 router.get('/orders',adminAuth,orderController.getorder)
 router.put('/orders/:orderId',adminAuth,orderController.updateStatusorder)
+router.post('/approve-return',adminAuth,orderController.approvereturn)
+
 router.delete('/orders/:orderId',adminAuth,orderController.deleteOrder);
 
 router.get('/coupons',adminAuth,couponCOntroller.loadcoupon)

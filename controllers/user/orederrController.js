@@ -116,9 +116,6 @@ paymentMethod: paymentMethod, // Ensure this matches a valid enum value      inv
 
 
 
-
- 
-
     for (const item of orderedItems) {
       const product = await Product.findById(item.product);
       if (!product) {
@@ -259,42 +256,53 @@ const cancelOrder = async (req, res) => {
   }
 };
 
-
 const returnorder = async (req, res) => {
+  console.log("jubgft")
   try {
     const { orderId } = req.body;
+    console.log(orderId)
 
     if (!orderId) {
-      return res.status(400).send('Order ID is required.');
+      return res.status(400).json({ success: false, message: 'Order ID is required.' });
     }
 
     if (!req.session?.user?.id) {
-      return res.status(401).send('User not logged in.');
+      return res.status(401).json({ success: false, message: 'User not logged in.' });
     }
 
+    // Find the order by orderId and userId (from session)
     const order = await Order.findOne({ orderId: orderId, user: req.session.user.id });
-    console.log(order);
 
     if (!order) {
       return res.status(404).json({ success: false, message: 'Order not found or you do not have permission to return this order.' });
     }
 
-    // Ensure the order is in the "Delivered" status to allow return
+    // Check if the return has already been requested
+    if (order.returnRequested) {
+      return res.status(400).json({ success: false, message: 'Return has already been requested for this order.' });
+    }
+
+    // Only allow returns for delivered orders
     if (order.status !== 'Delivered') {
       return res.status(400).json({ success: false, message: 'Only delivered orders can be returned.' });
     }
 
-    // Update the order status to "Returned"
-    order.status = 'Returned';
+    // Update returnRequested status to true and update the order status
+    order.returnRequested = true;
+    order.status = 'Return Requested';
+    
     await order.save();
 
-    return res.status(200).json({ success: true, message: 'Order successfully returned.' });
+    return res.json({ success: true, message: 'Return request has been submitted successfully.' });
 
   } catch (error) {
-    console.error('Error returning order:', error);
-    res.status(500).send('An error occurred while returning the order.');
+    console.error(error);
+    return res.status(500).json({ success: false, message: 'An error occurred while processing your return request.' });
   }
 };
+
+
+
 
 
 

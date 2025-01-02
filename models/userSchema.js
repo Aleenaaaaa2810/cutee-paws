@@ -24,6 +24,7 @@ const userSchema = new Schema({
     unique: true,
     
   },
+   refundAmount: { type: Number },
 
   password: {
     type: String,

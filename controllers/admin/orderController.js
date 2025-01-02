@@ -56,6 +56,31 @@ const updateStatusorder = async (req, res) => {
   }
 };
 
+const approvereturn = async (req, res) => {
+  console.log("jijijiij")
+  try {
+    const { orderId } = req.body;
+
+    const order = await Order.findOne({ orderId: orderId });
+
+    if (!order) {
+      return res.status(404).json({ success: false, message: 'Order not found' });
+    }
+
+    // Mark the order as returned
+    order.status = 'Returned';
+    order.returnRequested = false; // Optionally reset the returnRequested flag
+
+    await order.save();
+
+    return res.json({ success: true, message: 'Return has been approved.' });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ success: false, message: 'An error occurred while processing the return approval.' });
+  }
+};
+
+
 const deleteOrder = async (req, res) => {
   try {
     const { orderId } = req.params;
@@ -75,5 +100,6 @@ const deleteOrder = async (req, res) => {
 module.exports = {
   getorder,
   updateStatusorder,
+  approvereturn,
   deleteOrder
 };

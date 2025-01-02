@@ -59,6 +59,10 @@ const productSchema = new Schema({
     type:Number,
     default:0
 },
+salesCount: {
+  type: Number, // Track the number of times the product was sold
+  default: 0,
+},
 
 }, 
 { timestamps: true }); 

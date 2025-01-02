@@ -46,6 +46,60 @@
     width: 100% !important;
     height: 400px;
   }
+
+
+/* General table styling */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 20px 0;
+  font-size: 18px;
+  text-align: left;
+}
+
+/* Table header styling */
+table thead th {
+  background-color: #f4f4f4;
+  color: #5e7a11;
+  font-weight: bold;
+  padding: 10px;
+  border: 1px solid #ddd;
+}
+
+/* Table row styling */
+table tbody tr {
+  border: 1px solid #ddd;
+}
+
+/* Alternating row colors for better readability */
+table tbody tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+table tbody tr:nth-child(odd) {
+  background-color: #fff;
+}
+
+/* Table cell padding */
+table td, table th {
+  padding: 10px;
+}
+
+/* Hover effect for rows */
+table tbody tr:hover {
+  background-color: #f2f484;
+  cursor: pointer;
+}
+
+/* Table heading style */
+h2 {
+  font-size: 24px;
+  margin-bottom: 10px;
+  color: #007BFF; /* Updated color to a blue shade */
+  text-align: center; /* Centers the heading */
+}
+
+
 </style>
 
 <div class="main-content">
@@ -68,7 +122,52 @@
   <div class="chart-container">
     <canvas id="revenueChart"></canvas>
   </div>
+
+
+  <div>
+    <h2>Top 10 Best-Selling Products</h2>
+    <table border="1" style="border-collapse: collapse; width: 100%;">
+      <thead>
+        <tr>
+          <th>Product Name</th>
+          <th>Sales Count</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% topProducts.forEach(product => { %>
+          <tr>
+            <td><%= product.name %></td>
+            <td><%= product.salesCount %></td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+  
+  <div>
+    <h2>Top  Best-Selling Categories</h2>
+    <table border="1" style="border-collapse: collapse; width: 100%;">
+      <thead>
+        <tr>
+          <th>Category Name</th>
+          <th>Total Sales</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% topCategories.forEach(category => { %>
+          <tr>
+            <td><%= category.categoryName %></td>
+            <td><%= category.totalSales %></td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+  
+  
+
 </div>
+
 
 <%- include("../../views/partials/admin/footer.ejs") %>
 
