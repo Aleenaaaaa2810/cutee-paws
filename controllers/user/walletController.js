@@ -5,19 +5,20 @@ const Order = require('../../models/orderSchema');
 
 
 const getWallet = async (req, res) => {
-  const userId = req.session.user?.id; 
-  console.log(userId)
+  const user = req.session.user || null;  
+
 
   try {
    
-    const wallet = await Wallet.findOne({ userId });
+    const wallet = await Wallet.findOne({  userId: user.id });
+  
 
     if (!wallet) {
       return res.render('wallet', { balance: 0, transactions: [] });
     }
 
    
-    res.render('wallet', { balance: wallet.balance, transactions: wallet.transactions });
+    res.render('wallet', { balance: wallet.balance, transactions: wallet.transactions ,user});
   }
    catch (err) {
     console.error(err);

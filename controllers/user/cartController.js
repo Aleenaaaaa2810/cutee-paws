@@ -1,13 +1,13 @@
 const product = require('../../models/productSchema');
 const Category = require('../../models/categorySchema');
 const Cart = require('../../models/cartShema');
-const User = require('../../models/userSchema');
+const User = require("../../models/userSchema");
 const coupons=require('../../models/couponSchema')
 
 const getCart = async (req, res) => {
-  const userId = req.session.user;
+  const user = req.session.user || null;
   try {
-    const cart = await Cart.findOne({ userId: userId.id }).populate('items.productId');
+    const cart = await Cart.findOne({ userId: user.id }).populate('items.productId');
     console.log(JSON.stringify(cart, null, 2));
 
     cart.items.forEach(item => {
@@ -19,7 +19,7 @@ const getCart = async (req, res) => {
       return res.status(404).json({ error: 'Cart not found' });
     }
 
-    res.render('add-to-cart', { cart });
+    res.render('add-to-cart', { cart,user });
   } catch (error) {
     res.status(500).json({ error: 'Error fetching cart', details: error.message });
   }

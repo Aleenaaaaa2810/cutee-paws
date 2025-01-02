@@ -58,8 +58,9 @@ async function loadHomepage(req, res) {
 
 
 async function loadabout(req, res) {
+  const user = req.session.user || null;
   try {
-    res.render("about");
+    res.render("about",{user});
   } catch (error) {
     console.error("Error loading about page:", error);
     res.redirect("/pageNotFound");
@@ -67,8 +68,10 @@ async function loadabout(req, res) {
 }
 
 async function loadcart(req, res) {
+  const user = req.session.user || null;
+
   try {
-    res.render("add-to-Cart");
+    res.render("add-to-Cart",{user});
   } catch (error) {
     console.error("Error loading cart page:", error);
     res.redirect("/pageNotFound");
@@ -76,8 +79,10 @@ async function loadcart(req, res) {
 }
 
 async function loadcontact(req, res) {
+  const user = req.session.user || null;
+
   try {
-    res.render("contact");
+    res.render("contact",{user});
   } catch (error) {
     console.error("Error loading contact page:", error);
     res.redirect("/pageNotFound");

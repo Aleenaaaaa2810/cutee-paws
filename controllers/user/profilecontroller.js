@@ -115,6 +115,8 @@ console.log("Session OTP:", req.session.userOtp);
 
 
 const userprofile = async (req, res) => {
+  
+
   try {
     const userId = req.session.user?.id; 
     console.log(userId);
@@ -148,7 +150,7 @@ const userprofile = async (req, res) => {
     
     res.render('profile', {
       user: userData,
-      userAddress: addressData,
+      userAddress: addressData
     });
   } catch (error) {
     console.error('Error retrieving profile data:', error);

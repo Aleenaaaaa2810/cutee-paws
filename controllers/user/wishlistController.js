@@ -2,6 +2,7 @@ const User = require('../../models/userSchema');
 const Product = require('../../models/productSchema');
 
 const loadwishlist = async (req, res) => {
+  const user = req.session.user || null; 
   try {
    
     if (!req.session || !req.session.user) {
@@ -18,7 +19,7 @@ const loadwishlist = async (req, res) => {
   
     const products = await Product.find({ _id: { $in: user.wishlist } }).populate('category');
 
-    res.render("wishlist", { Wishlist: products });
+    res.render("wishlist", { Wishlist: products ,user});
   } catch (error) {
     console.error("Error loading wishlist:", error);
     res.status(500).redirect('/pageNotFound'); 
