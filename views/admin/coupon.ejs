@@ -194,26 +194,31 @@
             </tr>
           </thead>
           <tbody>
-
-
-            <%for (let i=0;i<coupon.length;i++){%>
-            <tr>
-              <td class="text-start"><%=coupon[i].name%></td>
-              <td class="text-start"><%=new Date (coupon[i].createdOn).toLocaleDateString('en-US')%></td>
-              <td class="text-start"><%=new Date (coupon[i].expireOn).toLocaleDateString('en-US')%></td>
-              <td class="text-start"><%=coupon[i].offerPrice%></td>
-              <td class="text-start"><%=coupon[i].minimumPrice%></td>
-              <td class="text-start"><%=coupon[i].isList%></td>
-              <td class="text-start">
-                <a href="/admin/editcoupon?id=<%=coupon[i]._id%>" class="btn btn-primary btn-sm">Edit</a>
-               
-              </td>
-              <td> <a href="#" onclick="confirmDelete('<%=coupon[i]._id%>')" class="btn btn-danger btn-sm" style="height: 35px;width: 105px;"">Delete</a>
-
-                <!-- <a href=""  onclick="  class="btn btn-primary btn-sm">Delete</a></td> -->
-            </tr>
-            <%}%>
+            <% for (let i = 0; i < coupon.length; i++) { %>
+              <% const currentDate = new Date(); %>
+              <% const expireDate = new Date(coupon[i].expireOn); %>
+              <tr>
+                <td class="text-start"><%= coupon[i].name %></td>
+                <td class="text-start"><%= new Date(coupon[i].createdOn).toLocaleDateString('en-US') %></td>
+                <td class="text-start">
+                  <%= new Date(coupon[i].expireOn).toLocaleDateString('en-US') %>
+                  <% if (expireDate < currentDate) { %>
+                    <span style="color: red; font-weight: bold;">(Expired)</span>
+                  <% } %>
+                </td>
+                <td class="text-start"><%= coupon[i].offerPrice %></td>
+                <td class="text-start"><%= coupon[i].minimumPrice %></td>
+                <td class="text-start"><%= coupon[i].isList %></td>
+                <td class="text-start">
+                  <a href="/admin/editcoupon?id=<%= coupon[i]._id %>" class="btn btn-primary btn-sm">Edit</a>
+                </td>
+                <td>
+                  <a href="#" onclick="confirmDelete('<%= coupon[i]._id %>')" class="btn btn-danger btn-sm" style="height: 35px; width: 105px;">Delete</a>
+                </td>
+              </tr>
+            <% } %>
           </tbody>
+          
         </table>
       </div>
     </div>

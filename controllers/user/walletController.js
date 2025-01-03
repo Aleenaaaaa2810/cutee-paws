@@ -2,6 +2,8 @@ const Wallet=require('../../models/walletSchema')
 const User=require('../../models/userSchema')
 const { v4: uuidv4 } = require('uuid'); 
 const Order = require('../../models/orderSchema');
+const Coupon=require('../../models/couponSchema')
+
 
 
 const getWallet = async (req, res) => {
@@ -76,18 +78,53 @@ const addMoney = async (req, res) => {
     res.status(500).send('Server Error');
   }
 };
+
+
+
 const walletpay = async (req, res) => {
-  console.log("Wallet payment initiated");
+  console.log("Wallet payment initiated"); 
+  
+  const userId = req.session?.user?.id;
+  const coupon= await Coupon.find({})
+
+    
+    
+   
+  const order = await Order.findOne({ user: userId })
+    .sort({ createdOn: -1 }) 
+    .lean();
+
+  if (!order) {
+    return res.status(404).send('Order not found!');
+  }
+  
+  
 
   try {
       const userId = req.session.user?.id;
-      const { totalPrice } = req.body;
+      const { totalPrice ,selectedCoupon} = req.body;
+      let discount = 0;
+      let couponDetails = null; // Renaming to avoid conflict
+      if (selectedCoupon) {
+        couponDetails = await Coupon.findOne({ name: selectedCoupon });
+       
+          discount = Number(couponDetails.offerPrice);
+          console.log(discount)
+  
+        
+       
+      }
+     
+      // Calculate final amount (including shipping fee)
+      let finalAmount = totalPrice - discount + 60; // Assuming 60 is a fixed shipping fee
+  
+      console.log("finalprice",finalAmount)
 
       if (!userId) {
           return res.status(400).json({ success: false, message: 'User ID is missing or invalid!' });
       }
 
-      if (!totalPrice || totalPrice <= 0) {
+      if (!finalAmount || finalAmount <= 0) {
           return res.status(400).json({ success: false, message: 'Invalid amount!' });
       }
 
@@ -101,16 +138,17 @@ const walletpay = async (req, res) => {
           return res.status(404).json({ success: false, message: 'Wallet not found!' });
       }
 
-      if (wallet.balance >= totalPrice) {
+      if (wallet.balance >= finalAmount) {
          
-          wallet.balance -= totalPrice;
+          wallet.balance -= finalAmount;
 
           
           wallet.transactions.push({
               transactionId: uuidv4(),
               description: 'Debit',
-              amount: totalPrice,
+              amount: finalAmount,
               date: new Date(),
+
           });
 
           await wallet.save(); 

@@ -37,11 +37,39 @@
       <p><strong>Order Date:</strong> <%= orderDate %></p>
             <p><strong>Payment Method:</strong> <%= paymentMethods || 'Not Available' %></p>
 
-      <p><strong>Total Price:</strong> ₹<%=totalPrice %></p>
-      <p><strong>Status:</strong> <%= status %></p>
+            
+      <p><strong>Status:</strong> <%= status %></p><br>
+      <h3 >Discount: ₹<span id="discount"><%= discount%></span></h3>
+            <h3>Delivery Charge: ₹60</h3>
+            <h3>Total Price: ₹<span id="totalPrice"><%= totalPrice%></span></h3>
+            <h3>Final Total Price: ₹<span id="finalTotalPrice"><%= finalTotalPrice %></span></h3>
+
+
 
       <a href="/shop" class="btn-shop">Continue with Shop</a>
     </div>
   </body>
+  <script>
+           
+function discountAmount(){
+    const totalPrice = parseFloat(document.getElementById('totalPrice').textContent);
+
+    const selectedCoupon = document.querySelector('input[name="selectedCoupon"]:checked');
+    if (selectedCoupon) {
+        const couponName = selectedCoupon.value;
+        const discount = parseFloat(selectedCoupon.getAttribute('data-discount')); // Ensure it's a number
+        document.getElementById('couponCode').value = couponName; // Set the coupon name in the input box
+        document.getElementById('discountAmount').textContent = discount; // Show the discount amount
+        
+        document.getElementById('finalTotalPrice').textContent =totalPrice-discount+60; 
+
+        closeModal();
+    } else {
+        alert('Please select a coupon!');
+    }
+}
+
+
+  </script>
 <%- include("../../views/partials/user/footer") %>
 </html>

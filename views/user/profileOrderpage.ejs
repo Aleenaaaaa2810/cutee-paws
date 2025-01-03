@@ -122,8 +122,9 @@
               <p><strong>Payment Method:</strong> <%= order.paymentMethod || 'Not Available' %></p>
               
               <!-- <p><strong>Payment Status:</strong> <%= order.razorpayDetails ? order.razorpayDetails.paymentStatus : 'Not Available' %></p> -->
-
+              <% if (order.status.toLowerCase() === 'delivered') { %>
               <a href="/invoice/<%= order.orderId %>" class="invoice-btn">Invoice</a>
+              <%}%>
 
               <% if (order.razorpayDetails && order.razorpayDetails.paymentStatus === 'failed') { %>
 <button class="btn retry-button" data-order-id="<%= order.orderId %>">Retry payment</button>

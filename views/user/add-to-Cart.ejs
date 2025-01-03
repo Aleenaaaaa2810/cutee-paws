@@ -186,30 +186,52 @@
         <!-- Dynamic Cart Items -->
         <ul class="cart-items-list">
           <% cart.items.forEach(item => { %>
-            <li class="cart-item" data-item-id="<%= item._id %>">
-              <div class="cart-item-details">
-                <img src="/uploads/<%= item?.productId?.productImage[0] %>" alt="Product Image">
-                <div>
-                  <strong><%= item.productId?.name %></strong>
-                  <p>Price: ₹<%= item.price %></p>
-                  <p>Total: ₹<%= item.totalPrice %></p>
-                  <div class="quantity-controls">
-                    <button class="quantity-btn decrease" data-action="decrease" data-item-id="<%= item._id %>">-</button>
-                    <span class="quantity" id="quantity-<%= item._id %>"><%= item.quantity %></span>
-                    <button class="quantity-btn increase" data-action="increase" data-item-id="<%= item._id %>">+</button>
+            <% if (item.productId?.quantity > 0) { %>
+              <li class="cart-item" data-item-id="<%= item._id %>" data-stock="<%= item.productId?.quantity %>">
+                <div class="cart-item-details">
+                  <img src="/uploads/<%= item?.productId?.productImage[0] %>" alt="Product Image">
+                  <div>
+                    <strong><%= item.productId?.name %></strong>
+                    <p>Price: ₹<%= item.price %></p>
+                    <p>Total: ₹<%= item.totalPrice %></p>
+                    <div class="quantity-controls">
+                      <button 
+                        class="quantity-btn decrease" 
+                        data-action="decrease" 
+                        data-item-id="<%= item._id %>" 
+                        <%= item.quantity <= 1 ? 'disabled' : '' %>>-</button>
+                      <span class="quantity" id="quantity-<%= item._id %>"><%= item.quantity %></span>
+                      <button 
+                        class="quantity-btn increase" 
+                        data-action="increase" 
+                        data-item-id="<%= item._id %>" 
+                        <%= item.quantity >= item.productId?.quantity ? 'disabled' : '' %>>+</button>
+                    </div>
                   </div>
                 </div>
-              </div>
-              <!-- Remove Button -->
-              <button class="remove-btn" onclick="removeItem('<%= item._id %>')">Remove</button>
-            </li>
+                <button class="remove-btn" onclick="removeItem('<%= item._id %>')">Remove</button>
+              </li>
+            <% } else { %>
+              <li class="cart-item out-of-stock">
+                <div class="cart-item-details">
+                  <img src="/uploads/<%= item?.productId?.productImage[0] %>" alt="Product Image">
+                  <div>
+                    <strong><%= item.productId?.name %></strong>
+                    <p style="color: red; font-weight: bold;">Out of Stock</p>
+                  </div>
+                </div>
+              </li>
+            <% } %>
           <% }) %>
+          
         </ul>
         
         <!-- Cart Total -->
         <div class="cart-total">
           <p><strong>Total:</strong> ₹<%= cart.items.reduce((total, item) => total + item.totalPrice, 0) %></p>
+
           <button class="checkout-btn" onclick="window.location.href='/Order'">Proceed to Checkout</button>
+          
         </div>
       </div>
     </section>
@@ -232,6 +254,8 @@ $(document).ready(function () {
     const action = $(this).data('action'); // 'increase' or 'decrease'
     const itemId = $(this).data('item-id');
     const quantityElement = $(`#quantity-${itemId}`);
+    const itemRow = $(`.cart-item[data-item-id="${itemId}"]`);
+    const totalElement = $('.cart-total p');
 
     $.ajax({
       url: action === 'increase' ? '/cart/increase' : '/cart/decrease',
@@ -239,25 +263,68 @@ $(document).ready(function () {
       contentType: 'application/json',
       data: JSON.stringify({ itemId: itemId }),
       success: function (data) {
-        if (data.dbCart) {
-          const newQuantity = data.dbCart.items.find(item => item._id === itemId).quantity;
-          quantityElement.text(newQuantity);
-          const newTotal = data.dbCart.items.reduce((total, item) => total + item.totalPrice, 0);
-          $('.cart-total p').html(`<strong>Total:</strong> ₹${newTotal}`);
-        } else {
-          Swal.fire('Error', data.error || 'Unable to update quantity.', 'error');
-        }
-      },
-      error: function (error) {
-        console.error('Error:', error);
-        Swal.fire('Error', 'minimum quantity -5', 'error');
+  if (data.dbCart && data.dbCart.items) {
+    const updatedItem = data.dbCart.items.find(item => item._id === itemId);
+
+    if (updatedItem) {
+      const newQuantity = updatedItem.quantity;
+      const newTotalPrice = updatedItem.totalPrice;
+
+      // Update UI
+      quantityElement.text(newQuantity);
+      itemRow.find('.cart-item-details p:nth-of-type(2)').text(`Total: ₹${newTotalPrice}`);
+
+      const newCartTotal = data.dbCart.items.reduce((total, item) => total + item.totalPrice, 0);
+      totalElement.html(`<strong>Total:</strong> ₹${newCartTotal}`);
+
+      // Toggle disable state of buttons based on quantity
+      itemRow.find('.quantity-btn.decrease').prop('disabled', newQuantity <= 1);
+      const maxStock = Number(itemRow.data('stock'));
+      itemRow.find('.quantity-btn.increase').prop('disabled', newQuantity >= maxStock);
+
+      // SweetAlert when quantity reaches minimum limit (1)
+      if (newQuantity === 1) {
+        Swal.fire({
+          icon: 'info',
+          title: 'Minimum Limit Reached',
+          text: 'Minimum Limit is 1',
+          timer: 2000,
+          showConfirmButton: false
+        });
       }
+
+      // SweetAlert when quantity exceeds or equals stock limit
+      if (newQuantity ===5) {
+        Swal.fire({
+          icon: 'warning',
+          title: 'Maximum Limit Reached',
+          text: 'Maximum Limit is 5',
+          timer: 2000,
+          showConfirmButton: false
+        });
+      }
+    } else {
+      Swal.fire('Error', 'Item not found in the cart data.', 'error');
+    }
+  } else {
+    Swal.fire('Error', data.error || 'Unable to update quantity.', 'error');
+  }
+}
+
+
+
+
     });
   });
 });
 
+
  // Function to remove an item from the cart via AJAX
-  function removeItem(itemId) {
+ window.onload = function () {
+  console.log("Page fully loaded!");
+};
+
+function removeItem(itemId) {
   Swal.fire({
     title: 'Are you sure?',
     text: "Do you want to remove this item from your cart?",
@@ -276,38 +343,44 @@ $(document).ready(function () {
         },
         body: JSON.stringify({ itemId: itemId })
       })
-      .then(response => response.json())
-      .then(data => {
-        if (data.success) {
-          // Remove the item from the UI
-          const itemElement = document.querySelector(`.cart-item[data-item-id="${itemId}"]`);
-          itemElement.remove();
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            // Remove the item from the UI
+            const itemElement = document.querySelector(`.cart-item[data-item-id="${itemId}"]`);
+            if (itemElement) {
+              itemElement.remove();
+            }
 
-          // Show success alert
-          Swal.fire(
-            'Removed!',
-            'The item has been removed from your cart.',
-            'success'
-          );
-        } else {
+            // Show success alert and refresh the page
+            Swal.fire(
+              'Removed!',
+              'The item has been removed from your cart.',
+              'success'
+            ).then(() => {
+              // Refresh the page
+              location.reload();
+            });
+          } else {
+            Swal.fire(
+              'Error',
+              'There was a problem removing the item.',
+              'error'
+            );
+          }
+        })
+        .catch(error => {
+          console.error('Error:', error);
           Swal.fire(
             'Error',
-            'There was a problem removing the item.',
+            'An unexpected error occurred.',
             'error'
           );
-        }
-      })
-      .catch(error => {
-        console.error('Error:', error);
-        Swal.fire(
-          'Error',
-          'An unexpected error occurred.',
-          'error'
-        );
-      });
+        });
     }
   });
 }
+
 
 </script>
 

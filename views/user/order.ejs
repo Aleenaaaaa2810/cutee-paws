@@ -217,18 +217,25 @@
             <div style="background-color: white; padding: 20px; border-radius: 10px; width: 50%; max-height: 80%; overflow-y: auto;">
                 <h3>Available Coupons</h3>
                 <form id="couponForm">
-                    <% for (let i = 0; i < coupon.length; i++) { %>
-                        <label style="display: block; margin-bottom: 10px;">
-                            <input 
-                                type="radio" 
-                                name="selectedCoupon" 
-                                value="<%= coupon[i].name %>" 
-                                data-discount="<%= coupon[i].offerPrice %>" 
-                                style="margin-right: 10px;" 
-                            />
-                            <%= coupon[i].name %> - Valid from <%= new Date(coupon[i].createdOn).toLocaleDateString('en-US') %> to <%= new Date(coupon[i].expireOn).toLocaleDateString('en-US') %> | Offer Price: ₹<%= coupon[i].offerPrice %> | Minimum Price: ₹<%= coupon[i].minimumPrice %>
-                        </label>
-                    <% } %>
+                    <% for (let i = 0; i < coupon.length; i++) { 
+                        const isCouponValid = totalPrice >= coupon[i].minimumPrice && new Date() <= new Date(coupon[i].expireOn); 
+                        if (isCouponValid) { %>
+                            <label style="display: block; margin-bottom: 10px;">
+                                <input 
+                                    type="radio" 
+                                    name="selectedCoupon" 
+                                    value="<%= coupon[i].name %>" 
+                                    data-discount="<%= coupon[i].offerPrice %>" 
+                                    data-minimum-price="<%= coupon[i].minimumPrice %>" 
+                                    data-expire-on="<%= coupon[i].expireOn %>" 
+                                    style="margin-right: 10px;" 
+                                />
+                                <%= coupon[i].name %> - Valid from <%= new Date(coupon[i].createdOn).toLocaleDateString('en-US') %> to <%= new Date(coupon[i].expireOn).toLocaleDateString('en-US') %> | Offer Price: ₹<%= coupon[i].offerPrice %> | Minimum Price: ₹<%= coupon[i].minimumPrice %>
+                            </label>
+                    <%  } } %>
+                
+                    <div id="couponMessage" style="color: red; margin-top: 10px; display: none;">Invalid coupon selection. Please check the minimum price or expiry date.</div>
+                
                     <div style="margin-top: 20px;">
                         <button type="button" onclick="selectCouponFromModal()" style="padding: 10px 20px; background-color: #28a745; color: white; border: none; border-radius: 5px; cursor: pointer;">OK</button>
                         <button type="button" onclick="closeModal()" style="padding: 10px 20px; background-color: #dc3545; color: white; border: none; border-radius: 5px; cursor: pointer;">Close</button>
@@ -243,6 +250,39 @@
             <h3>Total Price: ₹<span id="totalPrice"><%= totalPrice %></span></h3>
             <h3>Final Total Price: ₹<span id="finalTotalPrice"><%= totalPrice + 60 %></span></h3>
         </div>
+        
+        <script>
+            function selectCouponFromModal() {
+                const selectedCoupon = document.querySelector('input[name="selectedCoupon"]:checked');
+                const totalPrice = parseFloat(document.getElementById('totalPrice').innerText);
+                const messageDiv = document.getElementById('couponMessage');
+        
+                if (selectedCoupon) {
+                    const minimumPrice = parseFloat(selectedCoupon.dataset.minimumPrice);
+                    const expireOn = new Date(selectedCoupon.dataset.expireOn);
+                    const currentDate = new Date();
+                    const discount = parseFloat(selectedCoupon.dataset.discount);
+        
+                    if (totalPrice >= minimumPrice && currentDate <= expireOn) {
+                        document.getElementById('discountAmount').innerText = discount;
+                        document.getElementById('finalTotalPrice').innerText = totalPrice + 60 - discount;
+                        alert("Coupon applied successfully!");
+                        messageDiv.style.display = 'none';
+                        closeModal();
+                    } else {
+                        messageDiv.style.display = 'block';
+                        messageDiv.textContent = "Invalid coupon selection. The total price must be at least ₹" + minimumPrice + " and the coupon must not be expired.";
+                    }
+                } else {
+                    messageDiv.style.display = 'block';
+                    messageDiv.textContent = "Please select a coupon.";
+                }
+            }
+        
+           
+
+        </script>
+        
         <!-- Address Section -->
         <div class="address-section">
             <h3>Choose Delivery Address</h3>
@@ -301,6 +341,9 @@
    async function proceedToCheckout() {
     const selectedAddress = document.querySelector('input[name="address"]:checked');
     const selectedPayment = document.querySelector('input[name="paymentMethod"]:checked');
+    const selectedCoupon = document.getElementById("couponCode").value; // Coupon code/name
+
+   
 
     if (!selectedAddress) {
         Swal.fire({
@@ -325,12 +368,14 @@
         totalPrice,
         addressId: selectedAddress.value,
         paymentMethod: selectedPayment.value,
+        selectedCoupon,
     };
+
 
     try {
         if (selectedPayment.value === 'Cash on Delivery') {
     // Check if the order amount exceeds the limit for Cash on Delivery
-    if (totalPrice > 1000) {
+    if (finalTotalPrice > 1000) {
         Swal.fire("Cash on Delivery is only available for orders below ₹1000");
         return; // Stop further execution if the condition is not met
     }
@@ -359,10 +404,12 @@
 
 
          else if (selectedPayment.value === 'Razorpay') {
+            const finalTotalPrice = parseFloat(document.getElementById('finalTotalPrice').textContent); // Get final price
+
             // Handle Razorpay
             const options = {
                 key: "<%= process.env.RAZORPAY_ID_KEY %>",
-                amount: totalPrice * 100,
+                amount: finalTotalPrice *100,
                 currency: "INR",
                 name: "Your Shop Name",
                 description: "Order Payment",
@@ -442,6 +489,8 @@
 
 
         else if (selectedPayment.value === 'Wallet') {
+            const finalTotalPrice = parseFloat(document.getElementById('finalTotalPrice').textContent); // Get final price
+
     // Handle Wallet Payment
     const walletResponse = await fetch('/wallet-payment', {
         method: 'POST',
@@ -509,6 +558,7 @@ function selectCouponFromModal() {
         const discount = parseFloat(selectedCoupon.getAttribute('data-discount')); // Ensure it's a number
         document.getElementById('couponCode').value = couponName; // Set the coupon name in the input box
         document.getElementById('discountAmount').textContent = discount; // Show the discount amount
+
         document.getElementById('finalTotalPrice').textContent =totalPrice-discount+60; 
 
         closeModal();

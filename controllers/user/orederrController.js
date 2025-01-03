@@ -16,14 +16,13 @@ const getorder = async (req, res) => {
   try {
     const userId = req.session?.user?.id;
     const coupon= await Coupon.find({})
-    console.log(coupon)
+ 
 
     // Check if user is authenticated
     if (!userId || !mongoose.Types.ObjectId.isValid(userId)) {
       return res.status(401).json({ success: false, message: 'Unauthorized access.' });
     }
 
-    console.log('User ID:', userId);
 
     
     const userAddress = await Address.find({ userId });
@@ -50,10 +49,10 @@ const getorder = async (req, res) => {
 
 
 
-
 const postorder = async (req, res) => {
   try {
-    const { items, totalPrice, addressId ,paymentMethod ,razorpayDetails} = req.body;
+    const { items, totalPrice, addressId, paymentMethod, razorpayDetails, selectedCoupon } = req.body;
+    console.log("selectedCoupon",selectedCoupon)
 
     // Parse items if received as a string
     let parsedItems;
@@ -75,7 +74,8 @@ const postorder = async (req, res) => {
     if (!mongoose.Types.ObjectId.isValid(addressId)) {
       return res.status(400).json({ success: false, message: "Invalid address ID." });
     }
-//newwwwwwwwwwwwww
+
+    // Validate payment method
     const validMethods = ['Cash on Delivery', 'Razorpay', 'Wallet'];
     if (!validMethods.includes(paymentMethod)) {
       return res.status(400).json({ success: false, message: 'Invalid payment method selected.' });
@@ -86,36 +86,49 @@ const postorder = async (req, res) => {
       return res.status(401).json({ success: false, message: "Unauthorized access." });
     }
 
-
-    
-
     // Map cart items to order format
     const orderedItems = parsedItems.map((item) => ({
       product: item.productId?._id || item.productId,
       quantity: item.quantity,
       price: item.price,
-      payments:item.paymentMethod,
-     
-      
+      payments: item.paymentMethod,
     }));
+
+    let discount = 0;
+    let couponDetails = null; // Renaming to avoid conflict
+    if (selectedCoupon) {
+      couponDetails = await Coupon.findOne({ name: selectedCoupon });
+     
+        discount = Number(couponDetails.offerPrice);
+        console.log(discount)
+
+      
+     
+    }
+   
+    // Calculate final amount (including shipping fee)
+    let finalAmount = totalPrice - discount + 60; // Assuming 60 is a fixed shipping fee
 
     // Save order
     const newOrder = new Order({
       user: userId,
       orderedItems,
       totalPrice,
-      finalAmount: totalPrice,
+      finalAmount,
       address: addressId,
       status: "Pending",
-paymentMethod: paymentMethod, // Ensure this matches a valid enum value      invoiceDate: new Date(),
+      discount,
+      paymentMethod: paymentMethod, // Ensure this matches a valid enum value
+      invoiceDate: new Date(),
       createdOn: new Date(),
-      razorpayDetails: razorpayDetails || null, // Save razorpay details here
+      razorpayDetails: razorpayDetails || null,
+      coupon: couponDetails // Save coupon details here if applicable
     });
 
-    await newOrder.save();
+    const orderrr = await newOrder.save();
+    console.log("Order saved:", orderrr);
 
-
-
+    // Update product quantities based on ordered items
     for (const item of orderedItems) {
       const product = await Product.findById(item.product);
       if (!product) {
@@ -123,14 +136,13 @@ paymentMethod: paymentMethod, // Ensure this matches a valid enum value      inv
         continue;
       }
 
-      // Increase the product quantity
+      // Decrease the product quantity
       product.quantity -= item.quantity;
       await product.save();
     }
 
     // Delete items from cart
     const cart = await Cart.findOne({ userId });
-    console.log("cart:",cart)
     if (cart) {
       cart.items = []; 
       await cart.save();
@@ -149,9 +161,11 @@ paymentMethod: paymentMethod, // Ensure this matches a valid enum value      inv
 };
 
 
+
 const orderPage = async (req, res) => {
   try {
     const userId = req.session?.user?.id;
+    const coupon= await Coupon.find({})
 
    
     const order = await Order.findOne({ user: userId })
@@ -161,13 +175,18 @@ const orderPage = async (req, res) => {
     if (!order) {
       return res.status(404).send('Order not found!');
     }
+    let finalAmount =order.totalPrice - order.discount+ 60;
+    console.log("finalprice",finalAmount)
+
 
     res.render('orderplaced', {
       orderId: order.orderId,
       orderDate: order.createdOn.toLocaleDateString(),
-      totalPrice: order.finalAmount,
-      paymentMethods: order.paymentMethod, // Ensure this matches the schema field
-      status: order.status,
+      totalPrice: order.totalPrice,
+            paymentMethods: order.paymentMethod, // Ensure this matches the schema field
+      status: order.status,coupon,
+      finalTotalPrice:finalAmount,
+      discount:order.discount
     });
   } catch (error) {
     console.error('Error rendering order page:', error);
@@ -213,7 +232,6 @@ const cancelOrder = async (req, res) => {
     }
 
     const order = await Order.findOne({ orderId: orderId, user: req.session.user.id });
-    console.log(order);
 
     if (!order) {
       return res.status(404).json({ success: false, message: 'Order not found or you do not have permission to cancel this order.' });
@@ -257,10 +275,8 @@ const cancelOrder = async (req, res) => {
 };
 
 const returnorder = async (req, res) => {
-  console.log("jubgft")
   try {
     const { orderId } = req.body;
-    console.log(orderId)
 
     if (!orderId) {
       return res.status(400).json({ success: false, message: 'Order ID is required.' });
@@ -311,6 +327,11 @@ const generateInvoicePDF = async (req, res) => {
   try {
     const userId = req.session?.user?.id;
     const orderId = req.params?.orderId;
+    const coupon= await Coupon.find({})
+
+
+
+
 
     const order = await Order.findOne({ orderId: orderId, user: userId })
       .populate('user', 'name') // Populate user name
@@ -324,6 +345,9 @@ const generateInvoicePDF = async (req, res) => {
     if (!order) {
       return res.status(404).send('Order not found!');
     }
+     
+    let finalAmount =order.totalPrice - order.discount+ 60;
+  
 
   
 
@@ -333,98 +357,109 @@ const generateInvoicePDF = async (req, res) => {
 
     const doc = new PDFDocument();
 
-    res.setHeader('Content-Type', 'application/pdf');
-    res.setHeader('Content-Disposition', `inline; filename="invoice-${orderId}.pdf"`);
-    doc.pipe(res);
+res.setHeader('Content-Type', 'application/pdf');
+res.setHeader('Content-Disposition', `inline; filename="invoice-${orderId}.pdf"`);
+doc.pipe(res);
 
-    // Add a page border
-    doc.rect(30, 30, 550, 750).stroke();
+// Add a page border
+doc.rect(30, 30, 550, 750).stroke();
 
-    // Header Section
-    doc.fontSize(18).fillColor('green').text('Cutee Paws', { align: 'center' });
-    doc.fontSize(12).fillColor('black').text('email:cuteepaws@gmail.com', { align: 'center' });
-    doc.text('place:OOrakkad, pin:686868', { align: 'center' });
-    doc.text('pho:+91 2222334455', { align: 'center' });
+// Header Section with Logo (Optional)
+doc.fontSize(18).fillColor('green').text('Cutee Paws', { align: 'center', font: 'Helvetica-Bold' });
+doc.fontSize(12).fillColor('black').text('Email: cuteepaws@gmail.com', { align: 'center' });
+doc.text('Place: OOrakkad, Pin: 686868', { align: 'center' });
+doc.text('Phone: +91 2222334455', { align: 'center' });
+
+doc.moveDown(2);
+
+// Invoice Title
+doc.fontSize(24).fillColor('green').text('Invoice', { align: 'center', font: 'Helvetica-Bold' });
+doc.moveDown(1);
+
+// User Details Section
+doc.fontSize(12).fillColor('black')
+  .text(`Username: ${order.user?.name || 'N/A'}`, { align: 'left' })
+  .moveDown()
+  .text(`Order ID: ${order._id}`, { align: 'left' })
+  .moveDown()
+  .text(`Order Date: ${new Date(order.createdOn).toLocaleDateString()}`, { align: 'left' })
+  .moveDown()
+
+  .text(`Payment Method: ${order.paymentMethod}`, { align: 'left' })
+  .moveDown();
+  
+  
+
+// Products Table Header
+doc.fontSize(14).fillColor('green').text('Products:', { underline: true });
+doc.moveDown(0.5);
+
+const tableStartX = 50; // Left margin for the table
+const tableWidth = 500; // Total table width
+const columnWidths = [50, 150, 100, 100, 100]; // Individual column widths
+const columnPositions = columnWidths.reduce((acc, width, i) => {
+  acc.push((acc[i - 1] || tableStartX) + (i > 0 ? columnWidths[i - 1] : 0));
+  return acc;
+}, []);
+
+// Draw Table Header
+const headerY = doc.y;
+doc.fontSize(12).fillColor('green');
+const headers = ['S.No', 'Product Name', 'Quantity', 'Price', 'Total'];
+headers.forEach((header, index) => {
+  doc.text(header, columnPositions[index], headerY, { width: columnWidths[index], align: 'center' });
+});
+
+// Add a line below the header
+doc.strokeColor('#aaaaaa').lineWidth(1).moveTo(tableStartX, doc.y).lineTo(tableStartX + tableWidth, doc.y).stroke();
+doc.moveDown(0.5);
+
+// Draw Table Rows
+let isEvenRow = true;
+order.orderedItems.forEach((item, index) => {
+  const { product, quantity, price } = item;
+  const rowY = doc.y;
+
+  // Alternate Row Background
+  doc.rect(tableStartX, rowY - 2, tableWidth, 18).fill(isEvenRow ? '#f0f0f0' : '#ffffff').stroke();
+
+  // Draw Row Data
+  const rowData = [
+    `${index + 1}`,
+    `${product?.name || 'N/A'}`,
+    `${quantity}`,
+    `₹${price}`,
+    `₹${quantity * price}`,
+  ];
+  doc.fontSize(12).fillColor('black');
+  rowData.forEach((data, colIndex) => {
+    doc.text(data, columnPositions[colIndex], rowY, { width: columnWidths[colIndex], align: 'center' });
+  });
+
+  doc.moveDown(0.5);
+  isEvenRow = !isEvenRow;
+});
+
+// Add a line below the table
+doc.strokeColor('#aaaaaa').lineWidth(1).moveTo(tableStartX, doc.y).lineTo(tableStartX + tableWidth, doc.y).stroke();
+
+// Total Amount Section
+doc.moveDown(1);
+doc.fontSize(10).fillColor('black').text(`Total Amount: ₹${order.totalPrice}`, { align: 'right',  });
+doc.fontSize(10).fillColor('black').text(`Discount: ₹${order.discount}`, { align: 'right',   });
+doc.fontSize(11).fillColor('red').text(`Final Amount: ₹${order.finalAmount}`, { align: 'right', font: 'Helvetica-Bold' });
+
+// Optional Footer Section (e.g., Terms, Contact Info)
+doc.moveDown(2);
+// doc.fontSize(18).fillColor('gray').text('Cutee Paws', { align: 'center', font: 'Helvetica-Bold' });
+// doc.fontSize(12).fillColor('black').text('Email: cuteepaws@gmail.com', { align: 'center' });
+doc.fontSize(10).fillColor('gray').text('Thank you for order.', { align: 'center' });
+
+doc.end();
+
     
-
-    doc.moveDown(2);
-
-    // Invoice Title
-    doc.fontSize(24).fillColor('green').text('Invoice', { align: 'center' });
-    doc.moveDown();
-
-    // User Details Section
-    doc.fontSize(12).fillColor('black').text(`Username: ${order.user?.name || 'N/A'}`);
-    doc.moveDown();
-
-    // Order Details Section
-    doc.text(`Order ID: ${order._id}`);
-    doc.text(`Order Date: ${new Date(order.createdOn).toLocaleDateString()}`);
-    doc.text(`Payment Method: ${order.paymentMethod}`);
-    doc.moveDown();
-
-    // Products Table Header
-    doc.fontSize(14).fillColor('green').text('Products:', { underline: true });
-    doc.moveDown(0.5);
-
-    const tableStartX = 50; // Left margin for the table
-    const tableWidth = 500; // Total table width
-    const columnWidths = [50, 150, 100, 100, 100]; // Individual column widths
-    const columnPositions = columnWidths.reduce((acc, width, i) => {
-      acc.push((acc[i - 1] || tableStartX) + (i > 0 ? columnWidths[i - 1] : 0));
-      return acc;
-    }, []);
-
-    // Draw Table Header
-    const headerY = doc.y;
-    doc.fontSize(10).fillColor('green');
-    const headers = ['S.No', 'Product Name', 'Quantity', 'Price', 'Total'];
-    headers.forEach((header, index) => {
-      doc.text(header, columnPositions[index], headerY, { width: columnWidths[index], align: 'center' });
-    });
-
-    // Add a line below the header
-    doc.strokeColor('#aaaaaa').lineWidth(1).moveTo(tableStartX, doc.y).lineTo(tableStartX + tableWidth, doc.y).stroke();
-    doc.moveDown(0.5);
-
-    // Draw Table Rows
-    let isEvenRow = true;
-    order.orderedItems.forEach((item, index) => {
-      const { product, quantity, price } = item;
-      const rowY = doc.y;
-
-      // Alternate Row Background
-      doc.rect(tableStartX, rowY - 2, tableWidth, 18).fill(isEvenRow ? '#f0f0f0' : '#ffffff').stroke();
-
-      // Draw Row Data
-      const rowData = [
-        `${index + 1}`,
-        `${product?.name || 'N/A'}`,
-        `${quantity}`,
-        `₹${price}`,
-        `₹${quantity * price}`,
-      ];
-      doc.fontSize(12).fillColor('black');
-      rowData.forEach((data, colIndex) => {
-        doc.text(data, columnPositions[colIndex], rowY, {
-          width: columnWidths[colIndex],
-          align: 'center',
-        });
-      });
-
-      doc.moveDown(0.5);
-      isEvenRow = !isEvenRow;
-    });
-
-    // Add a line below the table
-    doc.strokeColor('#aaaaaa').lineWidth(1).moveTo(tableStartX, doc.y).lineTo(tableStartX + tableWidth, doc.y).stroke();
-
-    // Total Amount Section
-    doc.moveDown();
-    doc.fontSize(16).fillColor('black').text(`Total Amount: ₹${order.finalAmount}`, { align: 'right' });
-
-    doc.end();
-  } catch (error) {
+  } 
+  catch (error) {
     console.error('Error generating invoice PDF:', error);
     res.status(500).send('An error occurred while generating the invoice PDF.');
   }

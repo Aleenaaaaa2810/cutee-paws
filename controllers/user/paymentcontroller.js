@@ -21,6 +21,7 @@ function ensureLoggedIn(req, res, next) {
 
 // Online payment handler
 const onlinepayment = async (req, res) => {
+    console.log("paymeeeeeeeeeeeeeeeeeeeeee")
     // Initialize Razorpay instance
     const razorpay = new Razorpay({
         key_id: process.env.RAZORPAY_ID_KEY,
@@ -34,6 +35,10 @@ const onlinepayment = async (req, res) => {
         receipt: `receipt_${Date.now()}`,
         payment_capture: 1, // Auto-capture payment
     };
+    console.log("amounttttttt".amount)
+    console.log("amouuu".req.body.amount * 100)
+
+
 
     try {
         // Create Razorpay order
