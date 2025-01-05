@@ -37,8 +37,9 @@
           <th>Order ID</th>
           <th>Date</th>
           <th>Customer</th>
+          <th>Discount</th>
           
-          <th>Amount</th>
+          <th> Total Amount</th>
           
           <th>Status</th>
           <th>payment Method</th>
@@ -50,6 +51,7 @@
             <td><%= order.orderId %></td>
             <td><%= new Date(order.createdOn).toLocaleDateString() %></td>
             <td><%= order.user.name %></td>
+            <td><%= order.discount%></td>
             <td>₹<%= order.totalPrice %></td>
             <td><%= order.status %></td>
             <td><%= order.paymentMethod || 'Not Available' %></td>

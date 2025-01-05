@@ -100,27 +100,97 @@ const orders = await Order.find(filter)
 const downloadPDF = async (req, res) => {
   try {
     // Fetch only "Delivered" orders
-    const orders = await Order.find({ status: 'Delivered' });
+    const orders = await Order.find({ status: 'Delivered' }).populate('user', 'name');
+
     const totalRevenue = orders.reduce((sum, order) => sum + order.totalPrice, 0);
 
-    const doc = new PDFDocument();
+    const PDFDocument = require('pdfkit');
+
+    const doc = new PDFDocument({ margin: 30 }); // Set margin to ensure spacing
     res.setHeader('Content-Disposition', 'attachment; filename="sales-report-delivered.pdf"');
-
+    
     doc.pipe(res);
-    doc.fontSize(16).text('Sales Report (Delivered Orders)', { align: 'center' });
-    doc.moveDown();
-
-    doc.fontSize(12).text('Order Summary:');
-    doc.text(`Total Orders: ${orders.length}`);
-    doc.text(`Total Revenue: ₹${totalRevenue.toFixed(2)}`);
-    doc.moveDown();
-
-    doc.text('Order Details:');
-    orders.forEach(order => {
-      doc.text(`Order ID: ${order.orderId}, Amount: ₹${order.totalPrice}, Status: ${order.status}`);
+    
+    const colWidths = [20, 100, 50, 60, 100, 50, 80]; // Column widths for No., Order ID, Amount, Status, Username, Discount, Payment Method
+    const rowHeight = 18;
+    const maxRowsPerPage = Math.floor((doc.page.height - 100) / rowHeight); // Height available for rows
+    
+    let rowNumber = 1; // To keep track of row numbers
+    
+    // Function to draw a page border and table header
+    function drawPageHeader() {
+      // Draw page border
+      doc.rect(20, 20, doc.page.width - 60, doc.page.height - 60).stroke();
+    
+      // Title
+      doc.fontSize(18).text('Sales Report (Delivered Orders)', { align: 'center' });
+      doc.moveDown();
+    
+      // Order Summary
+      doc.fontSize(10).text('Order Summary:');
+      doc.text(`Total Orders: ${orders.length}`);
+      doc.text(`Total Revenue: ₹${totalRevenue.toFixed(2)}`);
+      doc.moveDown();
+    
+      // Draw table header
+      const tableTop = doc.y;
+      doc.fontSize(7).font('Helvetica-Bold');
+    
+      let xPos = 50;
+      const headers = ['No.', 'Order ID', 'Amount (₹)', 'Status', 'Username', 'Discount (₹)', 'Payment Method'];
+    
+      headers.forEach((header, i) => {
+        doc.rect(xPos, tableTop, colWidths[i], rowHeight).stroke().text(header, xPos + 5, tableTop + 5);
+        xPos += colWidths[i];
+      });
+    
+      return tableTop + rowHeight;
+    }
+    
+    // Draw the first page header
+    let rowY = drawPageHeader();
+    
+    doc.font('Helvetica');
+    
+    // Draw rows, adding pages as needed
+    orders.forEach((order, index) => {
+      if (index > 0 && index % maxRowsPerPage === 0) {
+        doc.addPage();
+        rowY = drawPageHeader(); // Draw header on new page
+      }
+    
+      const fillColor = index % 2 === 0 ? '#f0f0f0' : '#ffffff'; // Alternating row color
+      let xPos = 50;
+    
+      const rowData = [
+        rowNumber++, // Row number
+        order.orderId, // Order ID
+        `₹${order.totalPrice}`, // Amount
+        order.status, // Status
+        order.user ? order.user.name: 'Unknown',// Username (safeguard for missing user)
+        `₹${order.discount || 0}`, // Discount
+        order.paymentMethod || 'N/A' // Payment Method
+      ];
+    
+      rowData.forEach((data, i) => {
+        doc
+          .rect(xPos, rowY, colWidths[i], rowHeight)
+          .fillAndStroke(fillColor, 'black')
+          .fillColor('black')
+          .text(data, xPos + 5, rowY + 5);
+        xPos += colWidths[i];
+      });
+    
+      rowY += rowHeight;
     });
-
+    
+    // Finish the document
     doc.end();
+    
+
+    
+    
+
   } catch (error) {
     console.error(error);
     res.status(500).send('Error generating PDF');
@@ -141,8 +211,11 @@ const downloadExcel = async (req, res) => {
       { header: 'Order ID', key: 'orderId', width: 30 },
       { header: 'Date', key: 'date', width: 20 },
       { header: 'Customer', key: 'customer', width: 20 },
-      { header: 'Amount', key: 'amount', width: 15 },
+      { header: 'discount', key: 'discount', width: 15 },
+      { header: 'Total Amount', key: 'amount', width: 15 },
       { header: 'Status', key: 'status', width: 15 },
+      { header: 'payment Method', key: 'paymentmethod', width: 15 },
+
     ];
 
     orders.forEach((order) => {
@@ -150,8 +223,10 @@ const downloadExcel = async (req, res) => {
         orderId: order.orderId,
         date: moment(order.createdOn).format('YYYY-MM-DD'),
         customer: order.user ? order.user.name : 'Unknown', // Safeguard in case user is not populated
+        discount:order.discount,
         amount: order.totalPrice,
         status: order.status,
+        paymentmethod:order.paymentMethod
       });
     });
 
