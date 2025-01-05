@@ -34,7 +34,7 @@ router.post("/signup", asyncHandler(userController.signup));
 
 // OTP verification routes
 router.post("/verify-otp", asyncHandler(userController.verifyOtp));
-router.post("/resendotp", asyncHandler(userController.resendOtp));
+router.post("/resendotp", userController.resendOtp);
 
 // Login routes
 router.get("/login", asyncHandler(userController.loadLogin));
@@ -108,8 +108,8 @@ router.get('/profileOrder',userAuth,orederrController.profileOderget)
 router.post('/cancel-order',userAuth,orederrController.cancelOrder)
 router.post ('/return-order',userAuth,orederrController.returnorder)
 
-router.get('/getOrderDetails/:orderId', orederrController.getOrderDetails)
-router.post('/updatePaymentStatus/:orderId', orederrController.updatePaymentStatus)
+router.get('/getOrderDetails/:orderId',userAuth, orederrController.getOrderDetails)
+router.post('/updatePaymentStatus/:orderId',userAuth, orederrController.updatePaymentStatus)
 
 
 router.post('/payment',userAuth,paymentController.onlinepayment)

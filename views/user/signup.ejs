@@ -97,6 +97,18 @@
         .signup-footer a:hover {
             text-decoration: underline;
         }
+
+
+        .toggle-password {
+    position: relative;
+    left: 357px;
+    cursor: pointer;
+    font-size: 18px;
+    color: #5e2c5d;
+    margin-left: -20px;
+    top: -42px;
+}
+
     </style>
 </head>
 <body>
@@ -113,11 +125,16 @@
             <div class="error-message" id="phoneError"></div>
 
             <input type="password" class="form-input" id="password" name="password" placeholder="Password">
+            <i class="fas fa-eye toggle-password" id="togglePassword"></i>
             <div class="error-message" id="passwordError"></div>
-
+            
             <input type="password" class="form-input" id="cpassword" name="cpassword" placeholder="Confirm Password">
+            <i class="fas fa-eye toggle-password" id="toggleCPassword"></i>
             <div class="error-message" id="cpasswordError"></div>
 
+            <label for="referralCode">Referral Code (Optional):</label>
+            <input type="text" class="form-input" id="referralCode" name="referralCode" placeholder="Enter referral code">
+            
             <button type="submit" class="form-button"> Sign Up</button>
         </form>
 
@@ -192,6 +209,28 @@
         event.preventDefault();
     }
 });
+
+
+
+// Function to toggle password visibility
+function togglePasswordVisibility(inputId, iconId) {
+    const passwordInput = document.getElementById(inputId);
+    const toggleIcon = document.getElementById(iconId);
+
+    toggleIcon.addEventListener('click', function () {
+        const type = passwordInput.type === 'password' ? 'text' : 'password';
+        passwordInput.type = type;
+
+        // Change icon class based on visibility
+        toggleIcon.classList.toggle('fa-eye-slash');
+    });
+}
+
+// Attach event listeners for both password fields
+togglePasswordVisibility('password', 'togglePassword');
+togglePasswordVisibility('cpassword', 'toggleCPassword');
+
+
 
     </script>
 </body>

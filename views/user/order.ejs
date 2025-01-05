@@ -398,7 +398,7 @@
             window.location.href = '/orderSummary';
         });
     } else {
-        throw new Error(data.error || 'Failed to place order');
+        throw new Error(data.error || 'unavialable stock please increse your quantity or remove the product');
     }
 }
 

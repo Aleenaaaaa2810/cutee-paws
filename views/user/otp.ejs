@@ -10,7 +10,7 @@
   <style>
     body {
       font-family: 'Montserrat', sans-serif;
-      background-color: #ffcece;
+      background-color: #e4aeae;
       margin: 0;
       padding: 0;
       display: flex;
@@ -22,7 +22,7 @@
       background-color: #fff;
       border-radius: 10px;
       box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-      padding: 20px 30px;
+      padding: 70px 100px;
       text-align: center;
       max-width: 400px;
       width: 100%;
@@ -73,20 +73,24 @@
 <body>
   <div class="container">
     <h1>Verify Your OTP</h1>
-    <p id="timer">OTP expires in: 5:00</p>
+    <p id="timer">OTP expires in: 1:00</p>
     <form id="otpForm">
       <label for="otp">Enter OTP:</label>
       <input type="text" id="otp" name="otp" placeholder="Enter your OTP" required>
       <button type="button" onclick="verifyOtp()">Verify</button>
+      
+
     </form>
     <p class="expired-message" id="expiredMessage" style="display: none;">
       OTP has expired. Please request a new one.
+      <button type="button" onclick="resent()">Resent Otp</button>
     </p>
+    
   </div>
 
   <script>
     // Timer countdown (5 minutes)
-    let timeLeft = 5 * 60; // 5 minutes in seconds
+    let timeLeft = 1 * 60; // 5 minutes in seconds
     const timerElement = document.getElementById("timer");
     const expiredMessage = document.getElementById("expiredMessage");
 
@@ -135,12 +139,81 @@
         error: function () {
           Swal.fire({
             icon: "error",
-            title: "Server Error",
-            text: "Unable to verify OTP. Please try again later.",
+            title: "OTP ",
+            text: "Incorrect otp",
           });
         },
       });
     }
+
+
+
+    // Function to handle Resend OTP
+function resent() {
+  // Reset the timer to 1 minute
+  timeLeft = 60;
+  
+  // Hide the expired message
+  expiredMessage.style.display = "none";
+  
+  // Show the OTP form again
+  document.getElementById("otpForm").style.display = "block";
+  
+  // Restart the timer countdown
+  clearInterval(timerInterval); // Clear the old interval
+  startTimer(); // Start a new timer
+
+  // Simulate an AJAX call to resend the OTP
+  $.ajax({
+    type: "POST",
+    url: "/resendotp", // Your backend route for resending OTP
+    success: function (response) {
+      if (response.success) {
+        Swal.fire({
+          icon: "success",
+          title: "OTP Sent",
+          text: "A new OTP has been sent to your phone.",
+          timer: 2000,
+          showConfirmButton: false,
+        });
+      } else {
+        Swal.fire({
+          icon: "error",
+          title: "Error",
+          text: "Failed to send OTP. Please try again.",
+        });
+      }
+    },
+    error: function () {
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: "Something went wrong. Please try again later.",
+      });
+    }
+  });
+}
+
+// Function to start the timer
+function startTimer() {
+  const timerInterval = setInterval(() => {
+    const minutes = Math.floor(timeLeft / 60);
+    const seconds = timeLeft % 60;
+    timerElement.textContent = `OTP expires in: ${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
+    timeLeft--;
+
+    if (timeLeft < 0) {
+      clearInterval(timerInterval);
+      timerElement.textContent = "";
+      expiredMessage.style.display = "block";
+      document.getElementById("otpForm").style.display = "none";
+    }
+  }, 1000);
+}
+
+// Start the timer initially when the page loads
+startTimer();
+
   </script>
 </body>
 </html>

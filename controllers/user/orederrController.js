@@ -52,7 +52,7 @@ const getorder = async (req, res) => {
 const postorder = async (req, res) => {
   try {
     const { items, totalPrice, addressId, paymentMethod, razorpayDetails, selectedCoupon } = req.body;
-    console.log("selectedCoupon",selectedCoupon)
+    console.log("selectedCoupon", selectedCoupon);
 
     // Parse items if received as a string
     let parsedItems;
@@ -86,28 +86,37 @@ const postorder = async (req, res) => {
       return res.status(401).json({ success: false, message: "Unauthorized access." });
     }
 
+    // Validate product stock
+    for (const item of parsedItems) {
+      const product = await Product.findById(item.productId);
+      if (!product) {
+        return res.status(404).json({ success: false, message: `Product not found for ID: ${item.productId}` });
+      }
+
+      if (item.quantity > product.quantity) {
+        return res.status(400).json({
+          success: false,
+          message: `Insufficient stock for product ${product.name}. Available quantity: ${product.quantity}`,
+        });
+      }
+    }
+
     // Map cart items to order format
     const orderedItems = parsedItems.map((item) => ({
       product: item.productId?._id || item.productId,
       quantity: item.quantity,
       price: item.price,
-      payments: item.paymentMethod,
     }));
 
     let discount = 0;
-    let couponDetails = null; // Renaming to avoid conflict
+    let couponDetails = null;
     if (selectedCoupon) {
       couponDetails = await Coupon.findOne({ name: selectedCoupon });
-     
-        discount = Number(couponDetails.offerPrice);
-        console.log(discount)
-
-      
-     
+      discount = Number(couponDetails.offerPrice);
     }
-   
+
     // Calculate final amount (including shipping fee)
-    let finalAmount = totalPrice - discount + 60; // Assuming 60 is a fixed shipping fee
+    let finalAmount = totalPrice - discount + 60;
 
     // Save order
     const newOrder = new Order({
@@ -118,11 +127,11 @@ const postorder = async (req, res) => {
       address: addressId,
       status: "Pending",
       discount,
-      paymentMethod: paymentMethod, // Ensure this matches a valid enum value
+      paymentMethod,
       invoiceDate: new Date(),
       createdOn: new Date(),
       razorpayDetails: razorpayDetails || null,
-      coupon: couponDetails // Save coupon details here if applicable
+      coupon: couponDetails,
     });
 
     const orderrr = await newOrder.save();
@@ -136,7 +145,6 @@ const postorder = async (req, res) => {
         continue;
       }
 
-      // Decrease the product quantity
       product.quantity -= item.quantity;
       await product.save();
     }
@@ -144,7 +152,7 @@ const postorder = async (req, res) => {
     // Delete items from cart
     const cart = await Cart.findOne({ userId });
     if (cart) {
-      cart.items = []; 
+      cart.items = [];
       await cart.save();
     }
 
@@ -159,6 +167,7 @@ const postorder = async (req, res) => {
     res.status(500).json({ success: false, message: "Failed to place order. Please try again." });
   }
 };
+
 
 
 
@@ -201,6 +210,8 @@ const orderPage = async (req, res) => {
 
 const profileOderget = async (req, res) => {
   try {
+    const user = req.session.user || null;
+
     const userId = req.session?.user?.id;
 
     const orders = await Order.find({ user: userId })
@@ -212,7 +223,7 @@ const profileOderget = async (req, res) => {
       return res.render('profileOrderpage', { orders: [] }); // Pass empty array if no orders
     }
 
-    res.render('profileOrderpage', { orders });
+    res.render('profileOrderpage', { orders,user });
   } catch (error) {
     console.error('Error rendering orders page:', error);
     res.status(500).send('An error occurred while rendering the orders page.');
@@ -378,7 +389,7 @@ doc.moveDown(1);
 
 // User Details Section
 doc.fontSize(12).fillColor('black')
-  .text(`Username: ${order.user?.name || 'N/A'}`, { align: 'left' })
+  .text(`Name of user: ${order.user?.name || 'N/A'}`, { align: 'left' })
   .moveDown()
   .text(`Order ID: ${order._id}`, { align: 'left' })
   .moveDown()

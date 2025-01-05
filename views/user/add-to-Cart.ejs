@@ -218,6 +218,11 @@
                   <div>
                     <strong><%= item.productId?.name %></strong>
                     <p style="color: red; font-weight: bold;">Out of Stock</p>
+                    <div>
+                      <button class="remove-btn" onclick="removeItem('<%= item._id %>')">Remove</button>
+
+                    </div>
+
                   </div>
                 </div>
               </li>

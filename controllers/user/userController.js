@@ -4,6 +4,11 @@ const bcrypt = require("bcrypt");
 const category=require('../../models/categorySchema')
 const Product = require('../../models/productSchema');
 const Category = require("../../models/categorySchema");
+const Wallet=require('../../models/walletSchema')
+const { v4: uuidv4 } = require('uuid'); 
+
+
+
  const env=require("dotenv").config();
 
 // Helper function to generate OTP
@@ -116,28 +121,80 @@ async function pageNotFound(req, res) {
     res.status(500).send("Server Error");
   }
 }
+function generateReferralCode() {
+  return Math.random().toString(36).substring(2, 10).toUpperCase(); // Example: 'A3D4E5F7'
+}
 
 // Signup process
 async function signup(req, res) {
-  const { name, email, phone, password, cpassword } = req.body;
+  const { name, email, phone, password, cpassword, referralCode } = req.body;
 
+  // Check if all required fields are provided
   if (!name || !email || !phone || !password || !cpassword) {
     return res.render("signup", { message: "All fields are required" });
   }
 
+  // Check if passwords match
   if (password !== cpassword) {
     return res.render("signup", { message: "Passwords do not match" });
   }
 
   try {
+    // Check if the user already exists
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.render("signup", { message: "User already exists" });
     }
 
+    let referredBy = null;
+    let pointsToAdd = 25;  // Default points for new user (no referral)
+
+    if (referralCode) {
+      // Validate referral code
+      const referrer = await User.findOne({ referralId: referralCode });
+      if (referrer) {
+        referredBy = referrer._id;
+
+        // Add 100 points to the referrer for their successful referral
+        referrer.points += 100;
+        await referrer.save();
+
+        // Update referrer's wallet
+        let referrerWallet = await Wallet.findOne({ userId: referrer._id });
+        if (!referrerWallet) {
+          referrerWallet = new Wallet({
+            userId: referrer._id,
+            balance: pointsToAdd+100, // Adding the 100 points for the referral
+            transactions: [{
+              transactionId: uuidv4(),
+              description: 'Referral Reward (Referrer)',
+              amount: 100,
+              date: new Date(),
+            }],
+          });
+        } else {
+          referrerWallet.balance =pointsToAdd+100;
+          referrerWallet.transactions.push({
+            transactionId: uuidv4(),
+            description: 'Referral Reward (Referrer)',
+            amount: 100,
+            date: new Date(),
+          });
+        }
+        await referrerWallet.save();
+
+        // User gets 50 points for using the referral code
+        // pointsToAdd += 50;  // Add 50 points for using the referral code
+      } else {
+        return res.render("signup", { message: "Invalid referral code" });
+      }
+    }
+
+    // Generate referral ID and OTP
+    const referralId = generateReferralCode();
     const otp = generateOTP();
     req.session.userOtp = otp;
-    req.session.userData = { name, email, phone, password };
+    req.session.userData = { name, email, phone, password, referralId, referredBy, pointsToAdd };
 
     const emailSent = await sendVerificationEmail(email, otp);
     if (!emailSent) {
@@ -151,13 +208,11 @@ async function signup(req, res) {
   }
 }
 
-
-// OTP Verification
+// OTP verification
 async function verifyOtp(req, res) {
   try {
     const { otp } = req.body;
 
-    // Check if session data exists
     if (!req.session.userOtp || !req.session.userData) {
       return res.status(401).json({
         success: false,
@@ -165,7 +220,6 @@ async function verifyOtp(req, res) {
       });
     }
 
-    // Verify the OTP
     if (parseInt(otp, 10) !== parseInt(req.session.userOtp, 10)) {
       return res.status(400).json({
         success: false,
@@ -173,28 +227,45 @@ async function verifyOtp(req, res) {
       });
     }
 
-    // Extract user data and hash the password
-    const { name, email, phone, password } = req.session.userData;
-
-
+    const { name, email, phone, password, referralId, referredBy, pointsToAdd } = req.session.userData;
     const hashedPassword = await bcrypt.hash(password, 10);
-const newUser = new User({
-  name,
-  email,
-  phone,
-  password: hashedPassword,  // Ensure hashed password is set here
-  isValid:true,
-});
-await newUser.save();
+
+    // Create the new user
+    const newUser = new User({
+      name,
+      email,
+      phone,
+      password: hashedPassword,
+      isValid: true,
+      referralId,
+      referredBy,
+      points: pointsToAdd,  // Add points (25 for new user, +50 if referral code used)
+    });
+
+    await newUser.save();
+
+    // Create a wallet for the new user
+    const wallet = new Wallet({
+      userId: newUser._id,
+      balance: pointsToAdd,  // Initialize wallet with points from signup and referral
+      transactions: [{
+        transactionId: uuidv4(),
+        description: 'Signup Bonus (New User)',
+        amount: 25,  // Add points based on signup and referral
+        date: new Date(),
+      }],
+    });
+
+    await wallet.save();
+
     // Clear session data
     req.session.userOtp = null;
     req.session.userData = null;
 
-    // Respond with success
     return res.status(200).json({
       success: true,
       message: "OTP verified successfully!",
-    }); 
+    });
   } catch (error) {
     console.error("OTP verification error:", error.message);
     return res.status(500).json({
@@ -203,6 +274,79 @@ await newUser.save();
     });
   }
 }
+
+// Login process
+async function login(req, res) {
+  try {
+    const { email, password } = req.body;
+
+    // Find the user by email
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return res.status(404).json({ success: false, message: "User not found" });
+    }
+
+    // Check if the user's account is blocked
+    if (user.isBlocked) {
+      return res.status(403).json({ success: false, message: "Your account has been blocked. Please contact support." });
+    }
+
+    // Validate the password
+    const isPasswordValid = await user.matchPassword(password);
+    if (!isPasswordValid) {
+      return res.status(401).json({ success: false, message: "Incorrect password" });
+    }
+
+    // Set session
+    req.session.user = {
+      id: user._id,
+      name: user.name,
+      email: user.email,
+    };
+
+    // Check referral status and update wallet if necessary
+    if (user.referredBy !=null) {
+      // Add points to the user’s wallet if the referral code hasn’t been applied
+      let wallet = await Wallet.findOne({ userId: user._id });
+
+      // If no wallet exists, create one
+      if (!wallet) {
+        wallet = new Wallet({
+          userId: user._id,
+          balance: pointsToAdd+50,  // Add the user’s points to the wallet
+          transactions: [{
+            transactionId: uuidv4(),
+            description: 'Referral Bonus',
+            amount: 50,
+            date: new Date(),
+          }],
+        });
+      } else {
+        wallet.balance += 50;
+        wallet.transactions.push({
+          transactionId: uuidv4(),
+          description: 'Referral Bonus',
+          amount: 50,
+          date: new Date(),
+        });
+      }
+
+      // Mark the referral as applied
+      user.referredBy = null
+      // Save changes to user and wallet
+      await user.save();
+      await wallet.save();
+    }
+
+    // Respond with success
+    return res.status(200).json({ success: true, message: "Login successful" });
+  } catch (error) {
+    console.error("Login error:", error.message);
+    return res.status(500).json({ success: false, message: "Server error. Please try again." });
+  }
+}
+
 
 
 
@@ -219,74 +363,44 @@ async function loadLogin(req, res) {
   }
 }
 
-// Login process
-async function login(req, res) {
-
-  try {
-    const { email, password } = req.body;
-  
-    const user = await User.findOne({ email });
-    
-    if (!user) {
-      return res.status(404).json({ success: false, message: "User not found" });
-    }
-      if (user.isBlocked) {
-      return res.status(403).json({ success: false, message: "Your account has been blocked. Please contact support." });
-    }
-    
-      const isPasswordValid = await user.matchPassword(password);
-if (!isPasswordValid) {
-  return res.status(401).json({ success: false, message: "Incorrect password" });
-}
-   
-    req.session.user = {
-      id: user._id,
-      name: user.name,
-      email: user.email,
-    };
-  
-    res.status(200).json({ success: true, message: "Login successful" });
-  } catch (error) {
-    console.error("Login error:", error.message);
-    res.status(500).json({ success: false, message: "Server error. Please try again." });
-  }
-  
-}
-
-
 
 const resendOtp = async (req, res) => {
   try {
     if (!req.session.userData || !req.session.userData.email) {
-      return res.render("signup", {
+      return res.json({
+        success: false,
         message: "Session expired. Please sign up again.",
       });
     }
 
     const email = req.session.userData.email;
-
     const otp = generateOTP();
     req.session.userOtp = otp;
 
     const emailSent = await sendVerificationEmail(email, otp);
 
     if (emailSent) {
-      return res.render("otp", {
+      return res.json({
+        success: true,
         message: "A new OTP has been sent to your email.",
       });
     } else {
-      return res.render("otp", {
+      return res.json({
+        success: false,
         message: "Failed to resend OTP. Please try again.",
       });
     }
   } catch (error) {
     console.error("Resend OTP error:", error.message);
 
-    return res.render("otp", {
+    return res.json({
+      success: false,
       message: "Server error. Please try again later.",
     });
   }
 };
+
+
 
 
 
