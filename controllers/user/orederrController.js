@@ -252,38 +252,42 @@ const cancelOrder = async (req, res) => {
       return res.status(400).json({ success: false, message: 'This order has already been cancelled.' });
     }
 
-    // Proceed with cancellation
+    // Check if payment status is failed; if so, skip refund
+    if (order.razorpayDetails?.paymentStatus !== 'failed') {
+      const user = await User.findById(req.session.user.id);
+      if (!user) {
+        return res.status(404).json({ success: false, message: 'User not found.' });
+      }
+
+      const wallet = await Wallet.findOne({ userId: user._id });
+      if (!wallet) {
+        return res.status(404).json({ success: false, message: 'Wallet not found.' });
+      }
+
+      wallet.balance += order.finalAmount;
+
+      wallet.transactions.push({
+        transactionId: uuidv4(),
+        description: 'Refund for order cancellation',
+        amount: order.finalAmount,
+        date: new Date(),
+      });
+
+      await wallet.save();
+    }
+
+    // Proceed with order cancellation
     order.status = 'Cancelled';
     await order.save();
 
-    const user = await User.findById(req.session.user.id);
-    if (!user) {
-      return res.status(404).json({ success: false, message: 'User not found.' });
-    }
-
-    const wallet = await Wallet.findOne({ userId: user._id });
-    if (!wallet) {
-      return res.status(404).json({ success: false, message: 'Wallet not found.' });
-    }
-
-    wallet.balance += order.finalAmount;
-
-    wallet.transactions.push({
-      transactionId: uuidv4(),
-      description: 'Refund for order cancellation',
-      amount: order.finalAmount,
-      date: new Date(),
-    });
-
-    await wallet.save();
-
-    return res.status(200).json({ success: true, message: 'Order successfully cancelled and amount added to wallet.' });
+    return res.status(200).json({ success: true, message: 'Order successfully cancelled.' });
 
   } catch (error) {
     console.error('Error cancelling order:', error);
     res.status(500).send('An error occurred while cancelling the order.');
   }
 };
+
 
 const returnorder = async (req, res) => {
   try {
