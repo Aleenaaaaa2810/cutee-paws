@@ -5,27 +5,27 @@ const User = require('../../models/userSchema');
 const excel = require('exceljs');
 const moment = require('moment');
 
-// Fetch and display sales report
 const getSalesReport = async (req, res) => {
-  console.log("sales report requested");
   const moment = require('moment');
-
   try {
     const { range, startDate, endDate } = req.query;
-    let filter = { 
-      status: 'Delivered', 
-    };
+    let filter = { status: 'Delivered' };
 
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    // Apply range filters
-    if (range === 'daily') {
+    // Handle custom date range first (higher priority)
+    if (startDate && endDate) {
+      const start = moment(startDate, 'YYYY-MM-DD').startOf('day').toDate();
+      const end = moment(endDate, 'YYYY-MM-DD').endOf('day').toDate();
+      filter.createdOn = { $gte: start, $lte: end };
+    } 
+    // Handle range-based filters only if no custom range is provided
+    else if (range === 'daily') {
       filter.createdOn = { $gte: today, $lt: new Date(today.getTime() + 24 * 60 * 60 * 1000) };
     } else if (range === 'weekly') {
       const startOfWeek = new Date(today);
       startOfWeek.setDate(today.getDate() - today.getDay());
-      startOfWeek.setHours(0, 0, 0, 0);
       const endOfWeek = new Date(startOfWeek);
       endOfWeek.setDate(startOfWeek.getDate() + 6);
       endOfWeek.setHours(23, 59, 59, 999);
@@ -40,53 +40,36 @@ const getSalesReport = async (req, res) => {
       const endOfYear = new Date(today.getFullYear(), 11, 31);
       endOfYear.setHours(23, 59, 59, 999);
       filter.createdOn = { $gte: startOfYear, $lte: endOfYear };
-    } else if (startDate && endDate) {
-      const start = moment(startDate, 'YYYY-MM-DD').startOf('day').toDate();
-      const end = moment(endDate, 'YYYY-MM-DD').endOf('day').toDate();
-      
-      if (!moment(start).isValid() || !moment(end).isValid()) {
-        return res.status(400).send('Invalid startDate or endDate');
-      }
+    }
 
-      filter.createdOn = { $gte: start, $lte: end };
+    // Handle 'all' range (no date filtering)
+    if (range === 'all') {
+      delete filter.createdOn;
     }
 
     // Fetch orders with the applied filters
-   // Fetch orders with the applied filters
-const orders = await Order.find(filter)
-.sort({ createdOn: -1 }) // Sort by `createdOn` in descending order
-.populate({
-  path: 'user', // Populate the user details in the order
-  populate: { // Nested populate to include payment details for the user
-    path: 'payments', // Field in the User schema referencing Payment
-    model: 'Payment', // Explicitly mention the Payment model
-    select: 'paymentMethod amount status transactionId paymentDate', // Select fields to include
-  },
-});
+    const orders = await Order.find(filter)
+      .sort({ createdOn: -1 })
+      .populate({
+        path: 'user',
+        populate: {
+          path: 'payments',
+          model: 'Payment',
+          select: 'paymentMethod amount status transactionId paymentDate',
+        },
+      });
 
-  
-  console.log(orders);
-    
-    // Calculating totals
+    // Calculate totals
     const totalOrders = orders.length;
-    const totalPending = orders.filter(order => order.status === 'Pending').length;
-    const totalCancelled = orders.filter(order => order.status === 'Cancelled').length;
-    const totalProcessing = orders.filter(order => order.status === 'Processing').length;
-    const totalShipped = orders.filter(order => order.status === 'Shipped').length;
     const totalDelivered = orders.filter(order => order.status === 'Delivered').length;
     const totalRevenue = orders.reduce((sum, order) => sum + order.totalPrice, 0);
 
-    // Rendering the filtered sales report
     res.render('salesReport', {
       orders,
       totalOrders,
-      totalPending,
-      totalCancelled,
-      totalProcessing,
-      totalShipped,
       totalDelivered,
-      totalRevenue, 
-      range: range || 'custom',  // Use 'range' instead of 'filterRange'
+      totalRevenue,
+      range: range || 'custom',
       startDate: startDate || '',
       endDate: endDate || ''
     });
@@ -95,6 +78,9 @@ const orders = await Order.find(filter)
     res.status(500).send('Error fetching sales report');
   }
 };
+
+
+
 
 
 const downloadPDF = async (req, res) => {
@@ -111,7 +97,7 @@ const downloadPDF = async (req, res) => {
     
     doc.pipe(res);
     
-    const colWidths = [20, 100, 50, 60, 100, 50, 80]; // Column widths for No., Order ID, Amount, Status, Username, Discount, Payment Method
+    const colWidths = [20, 150, 50, 60, 80, 50, 80]; // Column widths for No., Order ID, Amount, Status, Username, Discount, Payment Method
     const rowHeight = 18;
     const maxRowsPerPage = Math.floor((doc.page.height - 100) / rowHeight); // Height available for rows
     

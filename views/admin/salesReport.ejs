@@ -3,6 +3,7 @@
   <title>Sales Report</title>
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 </head>
+
 <body>
   <div class="container mt-5" style="margin-left: 250px;">
 
@@ -10,18 +11,21 @@
     <form method="GET" action="/admin/sales-report">
       <label>Select Range:</label>
       <select name="range" class="form-control">
+        <option value="all" <%= range === 'all' ? 'selected' : '' %>>All</option>
         <option value="daily" <%= range === 'daily' ? 'selected' : '' %>>Daily</option>
         <option value="weekly" <%= range === 'weekly' ? 'selected' : '' %>>Weekly</option>
         <option value="monthly" <%= range === 'monthly' ? 'selected' : '' %>>Monthly</option>
         <option value="yearly" <%= range === 'yearly' ? 'selected' : '' %>>Yearly</option>
       </select>
-
+    
       <label>Custom Date Range:</label>
       <input type="date" name="startDate" class="form-control" value="<%= startDate %>">
       <input type="date" name="endDate" class="form-control" value="<%= endDate %>">
-      
+    
       <button type="submit" class="btn btn-primary mt-2">Filter</button>
     </form>
+    
+    
     
     <hr>
     <h4>Summary</h4>
