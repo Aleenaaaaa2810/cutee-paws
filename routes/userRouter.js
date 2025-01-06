@@ -84,6 +84,11 @@ router.get('/change-password',profilecontroller.changepassword)
 router.post('/change-password',profilecontroller.changepasswordVaild)
 router.post('/verify-changepassword-otp',profilecontroller.verifyChangepassOtp)
 
+router.get('/manageAddress',profilecontroller.showAddress)
+router.get('/addAddresseses',profilecontroller.orderAddadres)
+
+router.post('/addAddressorder',profilecontroller.orderaddAddress)
+
 router.get('/addAddress',profilecontroller.addAddress)
 router.post('/addAddress',profilecontroller.postAddAddress)
 router.get('/edit-address',profilecontroller.editAddress)

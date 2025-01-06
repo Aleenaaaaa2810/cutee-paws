@@ -1,0 +1,330 @@
+<%- include("../../views/partials/user/header") %>
+
+<style>
+  /* General Styles */
+  body {
+    background-color: #f2f5fa;
+    color: #000;
+    font-family: 'Poppins', sans-serif;
+  }
+
+  .main {
+    padding: 30px 0;
+  }
+
+  /* Breadcrumb Styles */
+  .breadcrumb-wrap {
+    background-color: #6A1E55;
+    padding: 15px 0;
+    border-radius: 8px;
+  }
+
+  .breadcrumb a {
+    color: #3B1C32;
+    text-decoration: none;
+    font-weight: bold;
+    transition: color 0.3s ease;
+  }
+
+  .breadcrumb a:hover {
+    color: #1c3b68;
+  }
+
+  /* Dashboard Sidebar Styles */
+  .dashboard-menu {
+    background-color: #A64D79;
+    border-radius: 12px;
+    padding: 15px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  }
+
+  .dashboard-menu .nav-link {
+    font-weight: bold;
+    color: #2e5894;
+    padding: 10px 15px;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+  }
+
+  .dashboard-menu .nav-link:hover,
+  .dashboard-menu .nav-link.active {
+    background-color: #3B1C32;
+    color: #000;
+    box-shadow: 0 4px 15px rgba(179, 199, 230, 0.3);
+  }
+
+  /* Card Styles */
+  .card {
+    border-radius: 12px;
+    background: linear-gradient(145deg, #A64D79, #ffc9e4);
+    box-shadow: 8px 8px 15px rgba(0, 0, 0, 0.1), -4px -4px 10px rgba(255, 255, 255, 0.7);
+    margin-bottom: 20px;
+  }
+
+  .card-header {
+    background-color: #A64D79;
+    color: #000;
+    font-weight: bold;
+    border-radius: 12px 12px 0 0;
+    text-align: center;
+  }
+
+  /* Button Styles */
+  .btn {
+    background-color: #A64D79;
+    border: none;
+    color: #000;
+    font-weight: bold;
+    padding: 10px 15px;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+  }
+
+  .btn:hover {
+    background-color: #6A1E55;
+    box-shadow: 0 4px 10px rgba(179, 199, 230, 0.3);
+  }
+
+  /* Address Section Styles */
+  .address-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: center;
+  }
+
+  .address-card {
+    background-color: #ffcdf1;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    width: 300px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    position: relative;
+  }
+
+  .address-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
+  }
+
+  .address-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    font-weight: bold;
+  }
+
+  .address-details {
+    font-size: 14px;
+    line-height: 1.6;
+    color: #333;
+  }
+
+  .address-actions {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 15px;
+  }
+
+  .edit-address-btn {
+    background-color: #edaedb;
+  }
+
+  .delete-address-btn {
+    background-color: #f27474;
+    color: #fff;
+  }
+
+  .add-address-btn {
+    background-color: #6A1E55;
+    margin-top: 20px;
+  }
+
+  .add-address-btn:hover {
+    background-color: #6A1E55;
+  }
+/* Dashboard Sidebar Styles */
+.dashboard-menu {
+    background-color: #ffffff;
+    border-radius: 12px;
+    padding: 15px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+}
+
+.dashboard-menu .nav-link {
+    font-weight: bold;
+    color: #4a4a4a;
+    padding: 10px 20px;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    transition: all 0.3s ease;
+}
+
+.dashboard-menu .nav-link:hover,
+.dashboard-menu .nav-link.active {
+    background-color: #4A90E2;
+    color: #ffffff;
+    box-shadow: 0 4px 15px rgba(74, 144, 226, 0.2);
+}
+
+  
+
+</style>
+
+<main class="main">
+  <!-- Breadcrumb Section -->
+  <div class="breadcrumb-wrap">
+    <div class="container">
+      <p><span><a href="/">Home</a></span> / <span>Profile</span></p>
+    </div>
+  </div>
+
+ 
+  <section class="pt-10 pb-10">
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-10 m-auto">
+          <div class="row">
+            <!-- Dashboard Sidebar -->
+            <div class="col-md-4">
+              <div class="dashboard-menu">
+                <ul class="nav flex-column">
+                  <li class="nav-item">
+                    <a class="nav-link active" data-tab="dashboard">Dashboard</a>
+                  </li>
+                  <li class="nav-item">
+                    <a class="nav-link" data-tab="my-address">My Address</a>
+                  </li>
+                  <li class="nav-item">
+                    <a class="nav-link" data-tab="orders">Orders</a>
+                  </li>
+                  <li class="nav-item">
+                    <a class="nav-link" href="/logout">Logout</a>
+                  </li>
+                </ul>
+              </div>
+            </div>
+
+            <!-- Dashboard Content -->
+            <div class="col-md-8">
+              <div class="tab-content">
+                <!-- Dashboard Tab -->
+                <div id="dashboard" class="tab-pane show active">
+                  <div class="card">
+                    <div class="card-header">User Profile</div>
+                    <div class="card-body text-center">
+                      <h5>Welcome <%= user.name %></h5>
+                      <p><strong>Phone:</strong> <%= user.phone %></p>
+                      <p><strong>Email:</strong> <%= user.email %></p>
+                      <p><strong>Email:</strong> <%= user.referralId %></p>
+
+                      <a href="/change-email" class="btn btn-sm">Change Email</a>
+                      <a href="/change-password" class="btn btn-sm">Change Password</a>
+                    </div>
+                  </div>
+                </div>
+
+                <div id="my-address" class="tab-pane">
+                  <div class="card">
+                      <div class="card-header">My Addresses</div>
+                      <div class="card-body">
+                          <div class="address-container">
+                              <% if (userAddress && Array.isArray(userAddress.address) && userAddress.address.length > 0) { %>
+                                  <% userAddress.address.forEach((address, index) => { %>
+                                      <div class="address-card">
+                                          <div class="address-header">
+                                              <span><%= address.addressType %></span>
+                                          </div>
+                                          <div class="address-details">
+                                              <p><strong>Name:</strong> <%= address.name %></p>
+                                              <p><strong>City:</strong> <%= address.city %></p>
+                                              <p><strong>State:</strong> <%= address.state %></p>
+                                              <p><strong>Pincode:</strong> <%= address.pincode %></p>
+                                              <p><strong>Landmark:</strong> <%= address.landMark %></p>
+                                              <p><strong>Phone:</strong> <%= address.phone %></p>
+                                              <p><strong>Alt Phone:</strong> <%= address.altPhone %></p>
+                                          </div>
+                                          <div class="address-actions">
+                                              <a href="/edit-address?id=<%= address.id %>">
+                                                  <button class="btn edit-address-btn">Edit</button>
+                                              </a>
+                                              <a href="/deleteAddress?id=<%= address.id %>">
+                                                  <button class="btn delete-address-btn">Delete</button>
+                                              </a>
+                                          </div>
+                                      </div>
+                                  <% }) %>
+                              <% } else { %>
+                                  <p>No addresses available.</p>
+                              <% } %>
+                          </div>
+                          <a href="/addAddress" class="btn add-address-btn">Add New Address</a>
+                      </div>
+                  </div>
+              </div> 
+                <!-- Orders Tab -->
+                <div id="orders" class="tab-pane">
+                  <div class="card">
+                    <div class="card-header">Welcome</div>
+                    <div class="card-body">
+                      
+                      <div class="card">
+                        <div class="card-header text-center">
+                          <h4><strong>Your Orders</strong></h4>
+                        </div>
+                        <div class="card-body text-center">
+                          <a href="/profileOrder" class="btn btn-lg btn-primary font-weight-bold">View</a>
+                        </div>
+                      </div>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<%- include("../../views/partials/user/footer") %>
+
+<script> 
+  <!-- // Tab Switching Script
+  const tabs = document.querySelectorAll('.nav-link[data-tab]');
+  const tabPanes = document.querySelectorAll('.tab-pane');
+
+  tabs.forEach(tab => {
+    tab.addEventListener('click', function () {
+      tabs.forEach(t => t.classList.remove('active'));
+      this.classList.add('active');
+
+      tabPanes.forEach(pane => {
+        pane.classList.remove('show', 'active');
+      });
+
+      const targetPane = document.getElementById(this.dataset.tab);
+      targetPane.classList.add('show', 'active');
+    });
+  });
+</script> 
+
+
+
+
+
+
+
+
+
+
+
+
+

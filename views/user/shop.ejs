@@ -217,6 +217,8 @@
 
 .price-button.active {
   border: 2px solid #A64D79;
+  
+  margin-left: 30px;
 }
 .sort-list {
   list-style-type: none; /* Remove default bullets */
@@ -255,14 +257,88 @@
 
 <div class="main-container">
  <section class="shop-page container">
-   <div class="shop-topbar">
-     <div class="search-bar">
-      <form action="/shop" method="GET" class="search-form">
-         <input type="text" name="search" placeholder="Search items..." class="search-input" />
-         <button type="submit" class="search-button">Search</button>
-       </form>
-     </div>
-   </div>
+<div class="shop-topbar">
+  <div class="search-bar">
+    <form action="/shop" method="GET" class="search-form">
+      <input type="text" name="search" placeholder="Search items..." class="search-input" id="searchInput" />
+      <button type="submit" class="search-button">Search</button>
+      <button type="button" class="cancel-button" id="cancelButton" onclick="clearSearch()">
+        <i class="fas fa-times"></i>
+      </button>
+    </form>
+  </div>
+</div>
+
+<script>
+  // Function to clear the search input
+  function clearSearch() {
+    document.getElementById("searchInput").value = ""; // Clear the input field
+  }
+</script>
+
+<style>
+  /* Styling the cancel button */
+  .cancel-button {
+    background: transparent;
+    border: none;
+    font-size: 18px;
+    color: #aaa;
+    cursor: pointer;
+    padding: 0 10px;
+    display: none; /* Initially hidden */
+  }
+
+  /* Show the cancel button only when there is text in the search input */
+  .search-input:focus + .cancel-button,
+  .search-input:not(:placeholder-shown) + .cancel-button {
+    display: inline-block;
+  }
+
+  .search-bar {
+    position: relative; /* Required for positioning the cancel button */
+  }
+
+  .search-form {
+    display: flex;
+    align-items: center;
+    background-color: #f1f1f1;
+    border-radius: 25px;
+    overflow: hidden;
+    max-width: 289px;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+  }
+
+  .search-input {
+    flex: 1;
+    padding: 8px 10px;
+    font-size: 14px;
+    border: none;
+    outline: none;
+    background-color: transparent;
+  }
+
+  .search-button {
+    padding: 8px 15px;
+    background-color: #6A1E55;
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    font-size: 14px;
+    border-radius: 15px;
+    margin-right: 5px;
+    transition: background-color 0.3s, transform 0.2s;
+  }
+
+  .search-button:hover {
+    background-color: #A64D79;
+    transform: scale(1.05);
+  }
+
+  .search-input:focus {
+    background-color: #fff; /* Add a slight background change when focused */
+  }
+</style>
+
   
    <div class="product-list-container">
      <aside class="sidebar">
@@ -343,10 +419,10 @@
             <a href="/shop" class="<%= selectedSort === 'default' ? 'active' : '' %>">FILTER</a>
           </li>
           <li>
-            <a href="/shop?sort=lowToHigh" class="<%= selectedSort === 'lowToHigh' ? 'active' : '' %>">Price: Low to High</a>
+            <a href="/shop?sort=lowToHigh" class="<%= selectedSort === 'lowToHigh' ? 'active' : '' %>">₹: Low to High</a>
           </li>
           <li>
-            <a href="/shop?sort=highToLow" class="<%= selectedSort === 'highToLow' ? 'active' : '' %>">Price: High to Low</a>
+            <a href="/shop?sort=highToLow" class="<%= selectedSort === 'highToLow' ? 'active' : '' %>">₹: High to Low</a>
           </li>
           <li>
             <a href="/shop?sort=aToZ" class="<%= selectedSort === 'aToZ' ? 'active' : '' %>">Name: A to Z</a>

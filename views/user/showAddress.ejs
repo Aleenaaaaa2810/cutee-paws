@@ -1,0 +1,171 @@
+<%-include("../../views/partials/user/header") %>
+
+<!-- BREADCRUMB -->
+<div id="breadcrumb" class="section">
+  <!-- container -->
+  <div class="container">
+    <!-- row -->
+    <div class="row">
+     
+          <li>      <p><span><a href="/">Home/profile</a></p>
+          </li>
+          
+        </ul>
+      </div>
+    </div>
+    <!-- /row -->
+  </div>
+  <!-- /container -->
+</div>
+<!-- /BREADCRUMB -->
+
+<!--Side bar seciton-->
+<%- include("../../views/partials/user/profileSidebar") %>
+
+      <!-- Main Content -->
+      <div class="col-md-9">
+        <div class="content">
+          <div class="info-box">
+            <h2>My Addresses</h2>
+            <div class="address-container">
+              <% if (userAddress && Array.isArray(userAddress.address) && userAddress.address.length > 0) { %>
+                <% userAddress.address.forEach((address, index) => { %>
+                  <div class="address-card">
+                    <div class="address-header">
+                      <span><%= address.addressType %></span>
+                    </div>
+                    <div class="address-details">
+                      <p><strong>Name:</strong> <%= address.name %></p>
+                      <p><strong>City:</strong> <%= address.city %></p>
+                      <p><strong>State:</strong> <%= address.state %></p>
+                      <p><strong>Pincode:</strong> <%= address.pincode %></p>
+                      <p><strong>Landmark:</strong> <%= address.landMark %></p>
+                      <p><strong>Phone:</strong> <%= address.phone %></p>
+                      <p><strong>Alt Phone:</strong> <%= address.altPhone %></p>
+                    </div>
+                    <div class="address-actions">
+                      <a href="/edit-address?id=<%= address.id %>">
+                        <button class="btn edit-address-btn">Edit</button>
+                      </a>
+                      <a href="/deleteAddress?id=<%= address.id %>">
+                        <button class="btn delete-address-btn">Delete</button>
+                      </a>
+                    </div>
+                  </div>
+                <% }) %>
+              <% } else { %>
+                <p>No addresses available.</p>
+              <% } %>
+            </div>
+            <a href="/addAddress" class="btn add-address-btn">Add New Address</a>
+          </div>
+        </div>
+      </div>
+      <!-- /Address Content -->
+    </div>
+  </div>
+  
+  <!-- Footer -->
+  <%- include("../../views/partials/user/footer") %>
+
+<style>
+  .info-box, .card {
+    background-color: #fff;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+  }
+
+  .address-card {
+    padding: 15px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    margin-bottom: 15px;
+  }
+
+  .address-actions .btn {
+    margin-right: 10px;
+    padding: 8px 15px;
+    background-color: #3B1C32;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+  }
+
+  .address-actions .btn:hover,
+  .add-address-btn:hover {
+    background-color: #2A1226;
+  }
+  .info-box {
+    background-color: #fff;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+    position: relative;
+  }
+
+  .form-group {
+    margin-bottom: 25px;
+  }
+
+  .form-group label {
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 8px;
+  }
+
+  .form-group input {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    transition: border-color 0.3s;
+  }
+
+  .form-group input:focus {
+    border-color: #3B1C32;
+    outline: none;
+  }
+
+  .form-group input:read-only {
+    background-color: #f8f9fa;
+  }
+
+  .password-info {
+    margin-top: 5px;
+  }
+
+  .password-info a {
+    color: #3B1C32;
+    text-decoration: none;
+    font-size: 14px;
+  }
+
+  .password-info a:hover {
+    text-decoration: underline;
+  }
+
+  .submit-btn {
+    background-color: #3B1C32;
+    color: #fff;
+    padding: 12px 30px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background-color 0.3s;
+    margin-right: 10px;
+  }
+
+  .submit-btn:hover {
+    background-color: #3B1C32;
+  }
+
+  
+
+ 
+</style>
+
+<!-- Add userProfile.js -->
+<script src="/js/userProfile.js"></script> <!--In public folder-->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>

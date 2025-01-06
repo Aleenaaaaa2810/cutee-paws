@@ -375,6 +375,48 @@ const verifyChangepassOtp=async(req,res)=>{
 }
 
 
+const showAddress=async(req,res)=>{
+  try {
+    const userId = req.session.user?.id; 
+    console.log(userId);
+
+   
+    if (!userId) {
+      console.error('User session not found. Redirecting to login.');
+      return res.redirect('/login');
+    }
+
+    // Validate and convert the userId to an ObjectId
+    if (!mongoose.Types.ObjectId.isValid(userId)) {
+      console.error('Invalid User ID format.');
+      return res.redirect('/pageNotFound');
+    }
+    const objectId = new mongoose.Types.ObjectId(userId);
+
+    
+    const userData = await User.findById(objectId);
+    console.log(userData);
+    console.log('User ID:', userId);
+
+    if (!userData) {
+      console.error('User not found in the database.');
+      return res.redirect('/pageNotFound');
+    }
+
+    
+    const addressData = await Address.findOne({ userId: objectId });
+
+    
+    res.render('showAddress', {
+      user: userData,
+      userAddress: addressData
+    });
+  } catch (error) {
+    console.error('Error retrieving profile data:', error);
+    res.redirect('/pageNotFound');
+  }
+};
+
 const addAddress=async(req,res)=>{
   try {
     const user=req.session.user;
@@ -383,6 +425,59 @@ const addAddress=async(req,res)=>{
     res.redirect("/pageNotFound")
   }
 }
+
+const orderAddadres=async(req,res)=>{
+  try {
+    const user=req.session.user;
+    res.render("orderAddress-address",{user:user})
+  } catch (error) {
+    res.redirect("/pageNotFound")
+  }
+}
+
+const  orderaddAddress=async (req,res) => {
+  try {
+    const userId = req.session.user?.id;
+    console.log(userId)
+    console.log(req.session)
+
+    if (!userId) {
+      return res.redirect("/login");
+    }
+    console.log("hai")
+    const { addressType, name, city, landMark, state, pincode, phone, altPhone } = req.body;
+    console.log(req.body)
+
+    if (!addressType || !name || !city || !state ||!landMark || !pincode || !phone || !altPhone) {
+      console.error("Missing required fields in request body");
+      return res.status(400).send("All required fields must be filled.");
+    }
+
+   
+    let userAddress = await Address.findOne({ userId });
+
+    if (!userAddress) {
+     
+      const newAddress = new Address({
+        userId,
+        address: [{ addressType, name, city, landMark, state, pincode, phone, altPhone }],
+      });
+      await newAddress.save();
+      console.log("New address added for user:", userId);
+    } else {
+      
+      userAddress.address.push({ addressType, name, city, landMark, state, pincode, phone, altPhone });
+      await userAddress.save();
+      console.log("Address appended for user:", userId);
+    }
+
+    res.redirect("/Order");
+  } catch (error) {
+    console.error("Error adding address:", error);
+    res.status(500).redirect("/pageNotFound");
+  }
+};
+
 
 
 const postAddAddress = async (req,res) => {
@@ -569,9 +664,12 @@ module.exports = {
   changepassword,
   changepasswordVaild,
   verifyChangepassOtp,
+  showAddress,
   addAddress,
   postAddAddress,
   editAddress,
   posteditAddress,
-  deleteAddress
+  deleteAddress,orderaddAddress
+  ,orderAddadres
+
 };
