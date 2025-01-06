@@ -106,6 +106,15 @@
 </style>
 </head>
 
+<title>Your Orders</title>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<style>
+  /* CSS Styles as you provided */
+</style>
+</head>
+
 <body>
   <div class="container">
     <h1>Your Orders</h1>
@@ -120,30 +129,28 @@
               <p><strong>Status:</strong> <%= order.status %></p>
               <p><strong>Total Amount:</strong> ₹<%= order.finalAmount.toFixed(2) %></p>
               <p><strong>Payment Method:</strong> <%= order.paymentMethod || 'Not Available' %></p>
-              
-              <!-- <p><strong>Payment Status:</strong> <%= order.razorpayDetails ? order.razorpayDetails.paymentStatus : 'Not Available' %></p> -->
+
               <% if (order.status.toLowerCase() === 'delivered') { %>
               <a href="/invoice/<%= order.orderId %>" class="invoice-btn">Invoice</a>
-              <%}%>
-
-              <% if (order.razorpayDetails && order.razorpayDetails.paymentStatus === 'failed') { %>
-<button class="btn retry-button" data-order-id="<%= order.orderId %>">Retry payment</button>
               <% } %>
 
+              <% if (order.razorpayDetails && order.razorpayDetails.paymentStatus === 'failed') { %>
+                <button class="btn retry-button" data-order-id="<%= order.orderId %>">Retry payment</button>
+              <% } %>
             </div>
+
             <% if (order.status.toLowerCase() === 'delivered') { %>
               <button class="btn return-button" data-order-id="<%= order.orderId %>">Return Order</button>
             <% } else if (order.status.toLowerCase() === 'cancelled') { %>
               <button class="btn disabled" data-message="This order is already cancelled">Cancelled</button>
             <% } else if (order.status.toLowerCase() === 'returned') { %>
               <button class="btn disabled" data-message="This order is already returned">Returned</button>
-            <% } else { %>
+              <% } else if (order.status.toLowerCase() === 'return requested') { %>
+                <button class="btn disabled" data-message="Your return request has been submitted">Return Requested</button>
+              <% } else { %>
               <button class="btn cancel-button" data-order-id="<%= order.orderId %>">Cancel Order</button>
             <% } %>
-            
-           
           </div>
-         
 
           <table>
             <thead>
@@ -162,15 +169,13 @@
                   <td><%= item.quantity %></td>
                   <td>₹<%= item.price.toFixed(2) %></td>
                   <td>₹<%= (item.quantity * item.price).toFixed(2) %></td>
-                 
-                  <td> 
+                  <td>
                     <% if (item.product.productImage && item.product.productImage.length > 0) { %>
                       <img src="/uploads/<%= item.product.productImage[0] %>" alt="Product Image" class="product-image">
                     <% } else { %>
                       <p>No Image Available</p>
                     <% } %>
                   </td>
-                
                 </tr>
               <% }); %>
             </tbody>
@@ -184,104 +189,89 @@
 
   <%- include("../../views/partials/user/footer.ejs") %>
   <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
-
   <script>
-   // Handling the cancel button click
-   document.querySelectorAll('.cancel-button').forEach(button => {
-  button.addEventListener('click', function(event) {
-    const orderId = this.getAttribute('data-order-id');
-  
-    Swal.fire({
-      title: 'Are you sure?',
-      text: "You are about to cancel this order!",
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonText: 'Yes, cancel it!',
-      cancelButtonText: 'No, keep it'
-    }).then((result) => {
-      if (result.isConfirmed) {
-        fetch('/cancel-order', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ orderId: orderId })
-        })
-        .then(response => response.json())
-        .then(data => {
-          if (data.success) {
-            Swal.fire('Cancelled', data.message, 'success');
-          } else {
-            Swal.fire('Error', data.message, 'error');
+    // JavaScript for handling cancel, return, and retry actions
+    document.querySelectorAll('.cancel-button').forEach(button => {
+      button.addEventListener('click', function(event) {
+        const orderId = this.getAttribute('data-order-id');
+        Swal.fire({
+          title: 'Are you sure?',
+          text: "You are about to cancel this order!",
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonText: 'Yes, cancel it!',
+          cancelButtonText: 'No, keep it'
+        }).then((result) => {
+          if (result.isConfirmed) {
+            fetch('/cancel-order', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ orderId: orderId })
+            })
+            .then(response => response.json())
+            .then(data => {
+              if (data.success) {
+                Swal.fire('Cancelled', data.message, 'success');
+              } else {
+                Swal.fire('Error', data.message, 'error');
+              }
+            })
+            .catch(error => {
+              Swal.fire('Error', 'Failed to cancel the order. Please try again.', 'error');
+            });
           }
-        })
-        .catch(error => {
-          Swal.fire('Error', 'Failed to cancel the order. Please try again.', 'error');
         });
-      } else {
-        Swal.fire('Cancelled', 'Your order is safe.', 'info');
-      }
+      });
     });
-  });
-});
 
-document.querySelectorAll('.return-button').forEach(button => {
+    document.querySelectorAll('.return-button').forEach(button => {
   button.addEventListener('click', function () {
     const orderId = this.getAttribute('data-order-id');
-    
-    // Hide the return button immediately to prevent multiple clicks
-    this.style.display = 'none';
+    const returnButton = this;
 
     Swal.fire({
-      title: 'Are you sure?',
-      text: "You are requesting to return this order!",
-      icon: 'warning',
+      title: 'Return Reason',
+      input: 'textarea',
+      inputPlaceholder: 'Enter the reason for returning the order...',
       showCancelButton: true,
-      confirmButtonText: 'Yes, return it!',
-      cancelButtonText: 'No, keep it'
+      confirmButtonText: 'Submit',
+      cancelButtonText: 'Cancel',
+      preConfirm: (reason) => {
+        if (!reason.trim()) {
+          Swal.showValidationMessage('Please enter a valid return reason');
+        } else {
+          return reason.trim();
+        }
+      }
     }).then((result) => {
       if (result.isConfirmed) {
-        // Show loading spinner while waiting for the request to be processed
-        Swal.fire({
-          title: 'Processing...',
-          text: 'Please wait while we process your return request.',
-          showConfirmButton: false,
-          willOpen: () => {
-            Swal.showLoading();
-          }
-        });
+        returnButton.setAttribute('disabled', 'true');
+        returnButton.classList.add('disabled');
 
         fetch('/return-order', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ orderId: orderId })
+          body: JSON.stringify({ orderId: orderId, reason: result.value })
         })
-        .then(response => response.json())
-        .then(data => {
-          if (data.success) {
-            Swal.fire('Requested', 'Your return request has been sent.', 'success')
-              .then(() => {
-                const parentSection = this.closest('.order-section');
-                const newButton = document.createElement('button');
-                newButton.className = 'btn disabled';
-                newButton.textContent = 'Return Requested';
-                newButton.disabled = true;
-                parentSection.querySelector('.order-header').appendChild(newButton);
-              });
-          } else {
-            Swal.fire('Error', data.message, 'error');
-            this.style.display = 'inline-block'; // Restore button if failed
-          }
-        })
-        .catch(error => {
-          Swal.fire('Error', 'Failed to process your request. Please try again.', 'error');
-          this.style.display = 'inline-block'; // Restore button if failed
-        });
-      } else {
-        Swal.fire('Cancelled', 'Your order return request was canceled.', 'info');
-        this.style.display = 'inline-block'; // Restore button if cancelled
+          .then(response => response.json())
+          .then(data => {
+            if (data.success) {
+              Swal.fire('Requested', 'Your return request has been sent.', 'success');
+              returnButton.textContent = 'Return Requested';
+            } else {
+              Swal.fire('Error', data.message, 'error');
+              returnButton.removeAttribute('disabled');
+            }
+          })
+          .catch(error => {
+            Swal.fire('Error', 'Failed to process your request. Please try again.', 'error');
+            returnButton.removeAttribute('disabled');
+          });
       }
     });
   });
 });
+
 
 
 document.querySelectorAll('.retry-button').forEach(button => {
@@ -356,12 +346,7 @@ document.querySelectorAll('.retry-button').forEach(button => {
   });
 });
 
-
-
-
   </script>
-
-    
 </body>
 
 </html>

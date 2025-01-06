@@ -50,7 +50,7 @@ const orderSchema = new Schema({
   status: {
     type: String,
     required: true,
-    enum: ['Pending', 'Processing', 'Shipped', 'Delivered', 'Cancelled', 'Return Requested']
+    enum: ['Pending', 'Processing', 'Shipped', 'Delivered', 'Cancelled', 'Return Requested','Returned']
   },
   createdOn: {
     type: Date,
@@ -63,10 +63,25 @@ const orderSchema = new Schema({
     enum: ['Cash on Delivery', 'Razorpay', 'Wallet'],  // Limiting payment methods
 
   },
+  
   returnRequested: { 
     type: Boolean, 
     default: false 
-  },  razorpayDetails: {  // Added razorpayDetails to store payment information
+  },  
+
+  returnReason: {
+    type: String,
+    default: '',
+    validate: {
+      validator: function(value) {
+        if (this.returnRequested && !value) {
+          return false;
+        }
+        return true;
+      },
+      message: 'Return reason is required when return is requested'
+    }
+  },razorpayDetails: {  // Added razorpayDetails to store payment information
         paymentId: String,
         orderId: String,
         signature: String,

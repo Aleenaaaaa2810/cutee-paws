@@ -288,49 +288,59 @@ const cancelOrder = async (req, res) => {
   }
 };
 
-
 const returnorder = async (req, res) => {
   try {
-    const { orderId } = req.body;
+    const { orderId, reason } = req.body;
+    console.log("orderId, reason", orderId, reason);
 
-    if (!orderId) {
-      return res.status(400).json({ success: false, message: 'Order ID is required.' });
+    // Input validation
+    if (typeof orderId !== 'string' || typeof reason !== 'string' || orderId.trim() === '' || reason.trim() === '') {
+      return res.status(400).json({ success: false, message: 'Invalid order ID or reason.' });
     }
 
     if (!req.session?.user?.id) {
-      return res.status(401).json({ success: false, message: 'User not logged in.' });
+      return res.status(401).json({ success: false, message: 'Unauthorized.' });
     }
 
-    // Find the order by orderId and userId (from session)
+    // Fetch the order by orderId and user
     const order = await Order.findOne({ orderId: orderId, user: req.session.user.id });
 
     if (!order) {
       return res.status(404).json({ success: false, message: 'Order not found or you do not have permission to return this order.' });
     }
 
-    // Check if the return has already been requested
+    // Check if return has already been requested
     if (order.returnRequested) {
       return res.status(400).json({ success: false, message: 'Return has already been requested for this order.' });
     }
 
-    // Only allow returns for delivered orders
-    if (order.status !== 'Delivered') {
+    // Only allow return for 'Delivered' orders
+    if (order.status.toLowerCase() !== 'delivered') {
       return res.status(400).json({ success: false, message: 'Only delivered orders can be returned.' });
     }
 
-    // Update returnRequested status to true and update the order status
+    // Set returnRequested to true and update the status
     order.returnRequested = true;
     order.status = 'Return Requested';
-    
+
+    // Trim the reason to ensure there are no leading/trailing spaces
+    order.returnReason = reason.trim();
+
+    // Save the order with updated status and return reason
     await order.save();
 
     return res.json({ success: true, message: 'Return request has been submitted successfully.' });
 
   } catch (error) {
-    console.error(error);
-    return res.status(500).json({ success: false, message: 'An error occurred while processing your return request.' });
+    console.error(`Error processing return request for user ${req.session?.user?.id} and order ${req.body?.orderId}:`, error);
+    return res.status(500).json({ success: false, message: 'Internal server error.' });
   }
 };
+
+
+
+
+
 
 
 

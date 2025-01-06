@@ -5,6 +5,10 @@ const Cart = require('../../models/cartShema');
 const Address = require('../../models/addressSchema');
 const User = require('../../models/userSchema');
 const Order = require('../../models/orderSchema');
+const Wallet=require('../../models/walletSchema')
+const { v4: uuidv4 } = require('uuid'); 
+
+
 
 const getorder = async (req, res) => {
   try {
@@ -56,29 +60,55 @@ const updateStatusorder = async (req, res) => {
   }
 };
 
+
 const approvereturn = async (req, res) => {
-  console.log("jijijiij")
+  console.log("hi");
+  const orderId = req.params.orderId;
+  const userId = req.session.user?.id;
+
   try {
-    const { orderId } = req.body;
-
-    const order = await Order.findOne({ orderId: orderId });
-
+    // Find the order based on orderId and userId
+    const order = await Order.findOne({ _id: orderId, user: userId });
     if (!order) {
-      return res.status(404).json({ success: false, message: 'Order not found' });
+      return res.status(404).json({ success: false, message: 'Order not found.' });
     }
 
-    // Mark the order as returned
-    order.status = 'Returned';
-    order.returnRequested = false; // Optionally reset the returnRequested flag
+    // Ensure the return has been requested
+    if (order.status.toLowerCase() !== 'return requested') {
+      return res.status(400).json({ success: false, message: 'Return has not been requested or already processed.' });
+    }
 
+    // Update the order status to 'Returned'
+    order.status = 'Returned';
     await order.save();
 
-    return res.json({ success: true, message: 'Return has been approved.' });
+    // Find or create a wallet for the user
+    let wallet = await Wallet.findOne({ userId });
+    if (!wallet) {
+      wallet = new Wallet({ userId, balance: 0, transactions: [] });
+    }
+
+    // Add the total price back to the wallet balance
+    wallet.balance += order.finalAmount;
+    wallet.transactions.push({
+      transactionId: uuidv4(),
+      description: 'Refund for order cancellation',
+      amount: order.finalAmount,
+      date: new Date(),
+    });
+
+    await wallet.save();
+
+    // Respond with success
+    return res.json({ success: true, message: 'Return approved successfully.' });
   } catch (error) {
-    console.error(error);
-    return res.status(500).json({ success: false, message: 'An error occurred while processing the return approval.' });
+    console.error('Error approving return:', error);
+    return res.status(500).json({ success: false, message: 'Internal server error.' });
   }
 };
+
+
+
 
 
 const deleteOrder = async (req, res) => {
