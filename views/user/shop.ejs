@@ -4,6 +4,7 @@
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
 
 
+
 <style>
    a.active, .price-button.active {
 
@@ -347,7 +348,9 @@
          <div class="category-brand-container">
            <!-- Removed brand section -->
            <ul>
-            
+            <li class="filter-item">
+              <a href="/shop" class="<%= !selectedCategory ? 'active' : '' %>">All</a>
+            </li>
             <% for (let i = 0; i < category.length; i++) { %>
               <li class="filter-item">
                 <a href="/shop?category=<%= category[i]._id %>&gte=<%= minPrice %>&lte=<%= maxPrice %>"
@@ -357,6 +360,7 @@
               </li>
             <% } %>
           </ul>
+          
           </ul>
          </div>
        </div>
@@ -582,8 +586,23 @@ function addToCart(productId, productName, productPrice) {
 
 
 
-
-
 </script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+  $(document).ready(function () {
+    // Check if noResults flag is true and show SweetAlert
+    const noResults = <%= noResults || false %>;
+    if (noResults === true) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'No products found!',
+        text: 'Try adjusting your search or filters.',
+        confirmButtonText: 'OK'
+      });
+    }
+  });
+</script>
+
+
 
 <%- include("../../views/partials/user/footer") %>

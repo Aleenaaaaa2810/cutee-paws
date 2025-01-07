@@ -502,6 +502,7 @@ const loadshop = async (req, res) => {
       maxPrice: maxPrice,
       selectedSort: sortType,
       searchQuery: searchQuery,
+      noResults: products.length === 0,
     });
   } catch (error) {
     console.error("Error loading shop page:", error);
