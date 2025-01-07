@@ -432,6 +432,8 @@ const loadshop = async (req, res) => {
     const categorise = await Category.find({ isListed: true });
     const categoriseWithIds = categorise.map((category) => ({ _id: category._id, name: category.name }));
 
+    const categoryIds = categorise.map((category) => category._id);
+
     // Pagination setup
     const page = parseInt(req.query.page) || 1;
     const limit = 6;
@@ -440,8 +442,7 @@ const loadshop = async (req, res) => {
     // Filter conditions
     const filterConditions = {
       isBlocked: false,
-      // quantity: { $gt: 0 },
-    };
+      category: { $in: categoryIds },    };
 
     // Category filter
     const categoryFilter = req.query.category;

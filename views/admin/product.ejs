@@ -217,15 +217,20 @@
                 </td>
                 <td>
                   <% if (product.isBlocked) { %>
+                    
                     <form action="/admin/unblockProduct/<%= product._id %>" method="POST" style="display:inline;">
                       <button class="btn btn-danger" onclick="confirmAction(event, 'Do you want to unblock this product?')">Unblock</button>
                     </form>
+
+                    
+                    
                   <% } else { %>
                     <form action="/admin/blockProduct/<%= product._id %>" method="POST" style="display:inline;">
                       <button class="btn btn-primary" onclick="confirmAction(event, 'Do you want to block this product?')">Block</button>
                     </form>
                   <% } %>
                 </td>
+                
               </tr>
             <% }); %>
           <% } else { %>

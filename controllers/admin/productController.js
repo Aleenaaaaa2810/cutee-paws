@@ -202,15 +202,13 @@ const removeImage = async (req, res) => {
   }
 };
 
-
+// Function to block a product
 const blockProduct = async (req, res) => {
   try {
-    const productId = req.params.id;
-
-  
-    await Product.findByIdAndUpdate(productId, { isBlocked: true });
-
+    const productId = req.params.productId; // Correct parameter extraction
+    console.log("Product ID:", productId); // Log to verify correct ID
     
+    await Product.findByIdAndUpdate(productId, { isBlocked: true });
     res.redirect('/admin/products');
   } catch (error) {
     console.error('Error blocking product:', error);
@@ -218,20 +216,21 @@ const blockProduct = async (req, res) => {
   }
 };
 
-
+// Function to unblock a product
 const unblockProduct = async (req, res) => {
   try {
-    const productId = req.params.productId;
-
+    console.log("reached")
+    const productId = req.params.productId; // Extracting product ID from the route parameter
     
-    await Product.findByIdAndUpdate(productId, { isBlocked: true });
-
-    res.redirect('/admin/products'); 
+    await Product.findByIdAndUpdate(productId, { isBlocked: false });
+    res.redirect('/admin/products'); // Redirect to the products page
   } catch (error) {
-    console.error('Error blocking product:', error);
+    console.error('Error unblocking product:', error);
     res.status(500).send('Internal Server Error');
   }
 };
+
+
 
 
 const addproductoffer = async (req, res) => {

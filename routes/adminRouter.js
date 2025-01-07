@@ -80,8 +80,10 @@ router.post('/removeProductOffer',adminAuth,productController.removeproductoffer
 router.get("/editProduct",adminAuth,productController.editProduct)
 router.post("/updateProduct/:id", upload.array("images", 3), productController.updateProduct);
 router.delete('/delete-image/:productId/:imageId',adminAuth, productController.removeImage);
-router.post('/blockProduct/:productId',adminAuth,productController. blockProduct);
-router.post('/admin/unblockProduct/:productId',adminAuth,productController. unblockProduct);
+router.post('/blockProduct/:productId', adminAuth, productController.blockProduct);
+
+router.post('/unblockProduct/:productId', productController.unblockProduct);
+
 
 router.get('/orders',adminAuth,orderController.getorder)
 router.put('/orders/:orderId',adminAuth,orderController.updateStatusorder)
