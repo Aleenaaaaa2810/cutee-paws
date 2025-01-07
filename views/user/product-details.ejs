@@ -2,7 +2,45 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<style>
+.related-products {
+  margin-top: 50px;
+  padding: 20px 0;
+  margin-left: 235px;
+}
 
+.related-products .section-title {
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 20px;
+  margin-left: 139px;}
+
+.related-products .product-grid {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.related-products .product-card {
+  width: 22%;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  padding: 15px;
+  text-align: center;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease;
+}
+
+.related-products .product-card:hover {
+  transform: scale(1.05);
+}
+
+.product-image {
+  width: 100%;
+  height: auto;
+  border-radius: 8px;
+}
+</style>
 <main class="main">
   <!-- Breadcrumb -->
   <div class="page-header breadcrumb-wrap">
@@ -118,6 +156,34 @@
     </div>
   </section>
 </main>
+
+
+<section class="related-products mt-50">
+  <h3 class="section-title">Related Products</h3>
+  <div class="product-grid">
+    <% if (relatedProducts.length > 0) { %>
+      <% relatedProducts.forEach((related) => { %>
+        <div class="product-card">
+          <a href="/productDetails?id=<%= related._id %>">
+            <img src="/uploads/<%= related.productImage[0] %>" 
+                 alt="<%= related.name %>" 
+                 class="product-image" />
+            <h4><%= related.name %></h4>
+            <p>
+              Price: ₹<%= related.salePrice.toLocaleString('en-IN') %>
+              <span class="text-muted">
+                <strike>₹<%= related.regularPrice.toLocaleString('en-IN') %></strike>
+              </span>
+            </p>
+          </a>
+        </div>
+      <% }); %>
+    <% } else { %>
+      <p>No related products found.</p>
+    <% } %>
+  </div>
+</section>
+
 
 <%- include("../../views/partials/user/footer") %>
 

@@ -277,6 +277,13 @@ const cancelOrder = async (req, res) => {
       await wallet.save();
     }
 
+    for (const item of order.orderedItems) {
+      const product = await Product.findById(item.product);
+      if (product) {
+        product.quantity += item.quantity;
+        await product.save();
+      }
+    }
     // Proceed with order cancellation
     order.status = 'Cancelled';
     await order.save();

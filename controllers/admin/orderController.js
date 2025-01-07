@@ -78,6 +78,13 @@ const approvereturn = async (req, res) => {
       return res.status(400).json({ success: false, message: 'Return has not been requested or already processed.' });
     }
 
+    for (const item of order.orderedItems) {
+      const product = await Product.findById(item.product);
+      if (product) {
+        product.quantity += item.quantity;
+        await product.save();
+      }
+    }
     // Update the order status to 'Returned'
     order.status = 'Returned';
     await order.save();

@@ -12,13 +12,20 @@ const productDetails = async (req, res) => {
     const cateoryOffer=findCategory?.category||0
     const productOffer=product.productOffer
     totalOffer=cateoryOffer+productOffer
+
+
+    const relatedProducts = await Product.find({
+      category: findCategory,
+      _id: { $ne: productId }
+    }).limit(4);
+
    
     res.render('product-details',{
       user:userId,
       product:product,
       quantity:product.quantity,
       totalOffer:totalOffer,
-      category:findCategory
+      category:findCategory, relatedProducts: relatedProducts 
     })
 
      
