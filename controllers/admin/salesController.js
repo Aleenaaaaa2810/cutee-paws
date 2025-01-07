@@ -63,12 +63,14 @@ const getSalesReport = async (req, res) => {
     const totalOrders = orders.length;
     const totalDelivered = orders.filter(order => order.status === 'Delivered').length;
     const totalRevenue = orders.reduce((sum, order) => sum + order.totalPrice, 0);
+    const totalDiscount = orders.reduce((sum, order) => sum + (order.discount || 0), 0);
 
     res.render('salesReport', {
       orders,
       totalOrders,
       totalDelivered,
       totalRevenue,
+      totalDiscount,
       range: range || 'custom',
       startDate: startDate || '',
       endDate: endDate || ''
@@ -85,103 +87,93 @@ const getSalesReport = async (req, res) => {
 
 const downloadPDF = async (req, res) => {
   try {
-    // Fetch only "Delivered" orders
     const orders = await Order.find({ status: 'Delivered' }).populate('user', 'name');
-
     const totalRevenue = orders.reduce((sum, order) => sum + order.totalPrice, 0);
+    const totalDiscount = orders.reduce((sum, order) => sum + (order.discount || 0), 0); // Handle missing discount
 
     const PDFDocument = require('pdfkit');
+    const doc = new PDFDocument({ margin: 30 });
 
-    const doc = new PDFDocument({ margin: 30 }); // Set margin to ensure spacing
     res.setHeader('Content-Disposition', 'attachment; filename="sales-report-delivered.pdf"');
-    
     doc.pipe(res);
-    
-    const colWidths = [20, 150, 50, 60, 80, 50, 80]; // Column widths for No., Order ID, Amount, Status, Username, Discount, Payment Method
+
+    const colWidths = [20, 150, 50, 60, 80, 50, 80];
     const rowHeight = 18;
-    const maxRowsPerPage = Math.floor((doc.page.height - 100) / rowHeight); // Height available for rows
-    
-    let rowNumber = 1; // To keep track of row numbers
-    
-    // Function to draw a page border and table header
+    const maxRowsPerPage = 33;
+    const maxTotalRows = 66; // Maximum of 2 pages
+
+    let rowNumber = 1;
+
     function drawPageHeader() {
-      // Draw page border
       doc.rect(20, 20, doc.page.width - 60, doc.page.height - 60).stroke();
-    
-      // Title
       doc.fontSize(18).text('Sales Report (Delivered Orders)', { align: 'center' });
       doc.moveDown();
-    
-      // Order Summary
       doc.fontSize(10).text('Order Summary:');
       doc.text(`Total Orders: ${orders.length}`);
       doc.text(`Total Revenue: ₹${totalRevenue.toFixed(2)}`);
+      doc.text(`Total Discount: ₹${totalDiscount.toFixed(2)}`);
       doc.moveDown();
-    
-      // Draw table header
+
       const tableTop = doc.y;
       doc.fontSize(7).font('Helvetica-Bold');
-    
+
       let xPos = 50;
       const headers = ['No.', 'Order ID', 'Amount (₹)', 'Status', 'Username', 'Discount (₹)', 'Payment Method'];
-    
       headers.forEach((header, i) => {
         doc.rect(xPos, tableTop, colWidths[i], rowHeight).stroke().text(header, xPos + 5, tableTop + 5);
         xPos += colWidths[i];
       });
-    
+
       return tableTop + rowHeight;
     }
-    
-    // Draw the first page header
+
     let rowY = drawPageHeader();
-    
     doc.font('Helvetica');
-    
-    // Draw rows, adding pages as needed
-    orders.forEach((order, index) => {
+
+    orders.slice(0, maxTotalRows).forEach((order, index) => {
       if (index > 0 && index % maxRowsPerPage === 0) {
         doc.addPage();
-        rowY = drawPageHeader(); // Draw header on new page
+        rowY = drawPageHeader();
       }
-    
-      const fillColor = index % 2 === 0 ? '#f0f0f0' : '#ffffff'; // Alternating row color
+
+      const fillColor = index % 2 === 0 ? '#f0f0f0' : '#ffffff';
       let xPos = 50;
-    
+
       const rowData = [
-        rowNumber++, // Row number
-        order.orderId, // Order ID
-        `₹${order.totalPrice}`, // Amount
-        order.status, // Status
-        order.user ? order.user.name: 'Unknown',// Username (safeguard for missing user)
-        `₹${order.discount || 0}`, // Discount
-        order.paymentMethod || 'N/A' // Payment Method
+        rowNumber++,
+        order.orderId,
+        `₹${order.totalPrice}`,
+        order.status,
+        order.user ? order.user.name : 'Unknown',
+        `₹${order.discount || 0}`,
+        order.paymentMethod || 'N/A'
       ];
-    
+
       rowData.forEach((data, i) => {
-        doc
-          .rect(xPos, rowY, colWidths[i], rowHeight)
-          .fillAndStroke(fillColor, 'black')
-          .fillColor('black')
-          .text(data, xPos + 5, rowY + 5);
+        doc.rect(xPos, rowY, colWidths[i], rowHeight).fillAndStroke(fillColor, 'black');
+        doc.fillColor('black').text(data, xPos + 5, rowY + 5);
         xPos += colWidths[i];
       });
-    
+
       rowY += rowHeight;
     });
-    
-    // Finish the document
+
+    if (orders.length > maxTotalRows) {
+      doc.addPage();
+      doc.fontSize(12).text(
+        'Note: The report is truncated. Only the first 66 orders are displayed.',
+        { align: 'center', valign: 'center' }
+      );
+    }
+
     doc.end();
-    
-
-    
-    
-
   } catch (error) {
     console.error(error);
     res.status(500).send('Error generating PDF');
   }
 };
+
+
 
 
 
@@ -217,8 +209,10 @@ const downloadExcel = async (req, res) => {
     });
 
     const totalRevenue = orders.reduce((sum, order) => sum + order.totalPrice, 0);
+    const totalDiscount = orders.reduce((sum, order) => sum + (order.discount || 0), 0);
     worksheet.addRow({}); // Add an empty row for spacing
     worksheet.addRow({ customer: 'Total Revenue', amount: totalRevenue });
+    worksheet.addRow({ customer: 'Total Discount', amount: totalDiscount });
 
     res.setHeader('Content-Disposition', 'attachment; filename="sales-report-delivered.xlsx"');
     await workbook.xlsx.write(res);

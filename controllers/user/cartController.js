@@ -5,25 +5,31 @@ const User = require("../../models/userSchema");
 const coupons=require('../../models/couponSchema')
 
 const getCart = async (req, res) => {
-  const user = req.session.user || null;
+  const user = req.session.user;
+  if (!user) {
+    return res.render('cartnoitem', { user: null });
+  }
+
   try {
     const cart = await Cart.findOne({ userId: user.id }).populate('items.productId');
-    console.log(JSON.stringify(cart, null, 2));
 
-    cart.items.forEach(item => {
-      
-    });
-    
     if (!cart) {
       console.log("Cart not found");
-      return res.status(404).json({ error: 'Cart not found' });
+      return res.render('cartnoitem', { user });
     }
 
-    res.render('add-to-cart', { cart,user });
+    if (cart.items && cart.items.length > 0) {
+      cart.items.forEach(item => {
+        // Process each item
+      });
+    }
+
+    res.render('add-to-cart', { cart, user });
   } catch (error) {
     res.status(500).json({ error: 'Error fetching cart', details: error.message });
   }
 };
+
 
 
 let cart = []; 
@@ -160,7 +166,7 @@ const removeCart = async (req, res) => {
     
     await cart.save();
 
-    
+   
     res.json({
       success: true,
       message: 'Item removed from cart',

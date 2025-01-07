@@ -133,10 +133,15 @@
               <% if (order.status.toLowerCase() === 'delivered') { %>
               <a href="/invoice/<%= order.orderId %>" class="invoice-btn">Invoice</a>
               <% } %>
-
+              
               <% if (order.razorpayDetails && order.razorpayDetails.paymentStatus === 'failed') { %>
-                <button class="btn retry-button" data-order-id="<%= order.orderId %>">Retry payment</button>
+                <% if (order.status !== 'Cancelled') { %>
+                  <button class="btn retry-button" data-order-id="<%= order.orderId %>">Retry payment</button>
+                <% } else { %>
+                  <button class="btn retry-button" disabled>Retry payment (Cancelled)</button>
+                <% } %>
               <% } %>
+              
             </div>
 
             <% if (order.status.toLowerCase() === 'delivered') { %>

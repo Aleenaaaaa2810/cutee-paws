@@ -235,7 +235,18 @@
     }
 }
 
-
+.status-success {
+    color: green;
+    font-weight: bold;
+  }
+  .status-failed {
+    color: red;
+    font-weight: bold;
+  }
+  .status-returned {
+    color: blue;
+    font-weight: bold;
+  }
 
 
         
@@ -270,6 +281,7 @@
                     <th>Total Price</th>
                     <th>Status</th>
                     <th>payment Method</th>
+                    <th>payment status</th>
                     <th>Actions</th>
                 </tr>
             </thead>
@@ -291,6 +303,29 @@
                         <td>₹<%= order.totalPrice %></td>
                         <td><%= order.status %></td>
                         <td><%= order.paymentMethod || 'Not Available' %></td>
+
+  <td class="<%= 
+  (order.status === 'Returned') ? 'status-returned' : 
+  (order.paymentMethod === 'Cash on Delivery' && (order.status === 'Delivered' || order.status === 'Return Requested')) ? 'status-success' :
+  (order.paymentMethod === 'Cash on Delivery') ? 'status-failed' :
+  (order.paymentMethod === 'Wallet') ? 'status-success' :
+  ((order.paymentMethod === 'Wallet' || order.paymentMethod === 'Razorpay') && order.status === 'Cancelled') ? 'status-failed' :
+
+  (order.razorpayDetails && order.razorpayDetails.paymentStatus === 'failed') ? 'status-failed' : 
+  'status-success' 
+%>">
+  <%= 
+    (order.status === 'Returned') ? 'Returned' :
+    (order.paymentMethod === 'Cash on Delivery' && (order.status === 'Delivered' || order.status === 'Return Requested')) ? 'Success' :
+    (order.paymentMethod === 'Cash on Delivery') ? 'Failed' :
+    (order.paymentMethod === 'Wallet') ? 'Success' :
+    ((order.paymentMethod === 'Wallet' || order.paymentMethod === 'Razorpay') && order.status === 'Cancelled') ? 'Failed' :
+
+    (order.razorpayDetails ? order.razorpayDetails.paymentStatus : 'Failed') 
+  %>
+</td>
+      
+
                         <td class="actions-btns">
                             <button onclick="updateStatus('<%= order._id %>')">Update Status</button>
                             <% if (order.returnRequested && order.status === 'Return Requested') { %>

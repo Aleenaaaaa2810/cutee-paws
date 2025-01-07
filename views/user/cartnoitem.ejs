@@ -1,0 +1,103 @@
+<%- include("../../views/partials/user/header") %>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<style>
+  body {
+    font-family: 'Poppins', sans-serif;
+    background-color: #f8f9fa;
+    margin: 0;
+    padding: 0;
+  }
+
+  .cart-main {
+    padding: 80px 20px;
+    text-align: center;
+  }
+
+  .cart-section {
+    background: linear-gradient(135deg, #ffffff, #f3f4f6);
+    padding: 40px;
+    border-radius: 15px;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    max-width: 800px;
+    margin: 0 auto;
+  }
+
+  .cart-section h2 {
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: #343a40;
+    margin-bottom: 30px;
+  }
+
+  .cart-empty-message {
+    font-size: 1.2rem;
+    color: #6c757d;
+    margin-bottom: 20px;
+  }
+
+  .cart-empty-icon {
+    font-size: 4rem;
+    color: #adb5bd;
+    margin-bottom: 20px;
+  }
+
+  .continue-shopping {
+    margin-top: 40px;
+  }
+
+  .continue-btn {
+    background: linear-gradient(135deg, #6A1E55, #923f7a);
+    color: white;
+    border: none;
+    padding: 12px 30px;
+    font-size: 1.2rem;
+    cursor: pointer;
+    border-radius: 25px;
+    transition: background-color 0.3s;
+  }
+
+  .continue-btn:hover {
+    background-color: #6A1E55;
+  }
+
+  /* Footer Styling */
+  .footer {
+    background-color: #343a40;
+    color: white;
+    text-align: center;
+    padding: 20px 0;
+    margin-top: 40px;
+  }
+
+  .footer-content {
+    font-size: 1rem;
+  }
+</style>
+</head>
+
+<body>
+  <!-- Header Section -->
+
+  <!-- Main Content -->
+  <main class="cart-main">
+    <section class="cart-section">
+      <h2>Your Shopping Cart</h2>
+
+      <!-- Cart Empty State -->
+      <div class="cart-empty-icon">🛒</div>
+      <p class="cart-empty-message">Your cart is currently empty. Add items to get started!</p>
+
+      <!-- Continue Shopping Button -->
+      <section class="continue-shopping">
+        <button class="continue-btn" onclick="window.location.href='/shop'">Go Back to Shop</button>
+      </section>
+    </section>
+  </main>
+
+  <!-- Footer Section -->
+  <%- include("../../views/partials/user/footer") %>
+</body>
+
+</html>

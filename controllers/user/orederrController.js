@@ -14,6 +14,8 @@ const { v4: uuidv4 } = require('uuid');
 
 const getorder = async (req, res) => {
   try {
+    const user = req.session.user;
+
     const userId = req.session?.user?.id;
     const coupon= await Coupon.find({})
  
@@ -31,8 +33,7 @@ const getorder = async (req, res) => {
     const cart = await Cart.findOne({ userId }).populate('items.productId');
 
     if (!cart || cart.items.length === 0) {
-      return res.status(404).json({ success: false, message: 'Cart is empty.' });
-    }
+      return res.render('cartnoitem', { user });    }
 
     
     const totalPrice = cart.items.reduce((total, item) => total + item.quantity * item.price, 0);
@@ -253,7 +254,7 @@ const cancelOrder = async (req, res) => {
     }
 
     // Check if payment status is failed; if so, skip refund
-    if (order.razorpayDetails?.paymentStatus !== 'failed') {
+    if (order.paymentMethod !== 'Cash on Delivery' && order.razorpayDetails?.paymentStatus !== 'failed' ) {
       const user = await User.findById(req.session.user.id);
       if (!user) {
         return res.status(404).json({ success: false, message: 'User not found.' });
