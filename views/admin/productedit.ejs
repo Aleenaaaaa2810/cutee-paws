@@ -88,22 +88,56 @@
       </form>
     </div>
   </div>
-
   <script>
-    // Handle form submission
-    document.getElementById("edit-product-form").addEventListener("submit", async function(event) {
+    document.getElementById("edit-product-form").addEventListener("submit", async function (event) {
       event.preventDefault();
-      const formData = new FormData(event.target);
-
+  
+      // Collect form data
+      const form = event.target;
+      const name = form.name.value.trim();
+      const description = form.description.value.trim();
+      const regularPrice = parseFloat(form.regularPrice.value.trim());
+      const salePrice = parseFloat(form.salePrice.value.trim());
+      const quantity = parseInt(form.quantity.value.trim());
+      const categoryId = form.categoryId.value.trim();
+  
+      const image1 = form.image1.files[0];
+      const image2 = form.image2.files[0];
+      const image3 = form.image3.files[0];
+  
+      // Validation: Check required fields
+      if (!name || !description || isNaN(regularPrice) || isNaN(salePrice) || isNaN(quantity) || !categoryId) {
+        Swal.fire('Error', 'All fields are required.', 'error');
+        return;
+      }
+  
+      // Validation: Regular price should be greater than sale price
+      if (regularPrice <= salePrice) {
+        Swal.fire('Error', 'Regular price must be greater than sale price.', 'error');
+        return;
+      }
+  
+      // Validation: Minimum 2 images should be uploaded
+      let selectedImageCount = 0;
+      if (image1) selectedImageCount++;
+      if (image2) selectedImageCount++;
+      if (image3) selectedImageCount++;
+      if (selectedImageCount < 2) {
+        Swal.fire('Error', 'You must upload at least 2 images.', 'error');
+        return;
+      }
+  
+      // If all validations pass, proceed with form submission
+      const formData = new FormData(form);
+  
       try {
-        const response = await fetch('/admin/updateProduct/<%=product._id%>', {
+        const response = await fetch('/admin/updateProduct/<%= product._id %>', {
           method: 'POST',
           body: formData
         });
         const result = await response.json();
         if (result.success) {
-          Swal.fire('Success', 'Product updated successfully!', 'success')
-         
+          Swal.fire('Success', 'Product updated successfully!', 'success');
         } else {
           Swal.fire('Error', result.error || 'Failed to update product', 'error');
         }
@@ -111,26 +145,26 @@
         Swal.fire('Error', 'An unexpected error occurred.', 'error');
       }
     });
-
+  
     // Delete Image
     async function deleteImage(productId, imageId) {
-    try {
+      try {
         const response = await fetch(`/admin/delete-image/${productId}/${imageId}`, {
-            method: 'DELETE',
+          method: 'DELETE',
         });
         const result = await response.json();
         if (response.ok) {
-            alert(result.message);
-            location.reload(); // Reload the page to update UI
+          alert(result.message);
+          location.reload(); // Reload the page to update UI
         } else {
-            alert(result.message || 'Error deleting image');
+          alert(result.message || 'Error deleting image');
         }
-    } catch (error) {
+      } catch (error) {
         console.error('Error:', error);
         alert('Failed to delete image');
+      }
     }
-}
-
   </script>
+  
 </body>
 </html>

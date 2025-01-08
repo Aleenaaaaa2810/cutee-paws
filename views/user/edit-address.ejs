@@ -44,32 +44,72 @@
    </form>
 </div>
 
-
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-   document.getElementById('submitButton').addEventListener('click', function (event) {
+   document.getElementById('addressForm').addEventListener('submit', function(event) {
        if (!validateForm()) {
            event.preventDefault();
        }
    });
 
-
    function validateForm() {
        let isValid = true;
        const requiredFields = ["addressType", "name", "city", "landMark", "state", "pincode", "phone", "altPhone"];
-       requiredFields.forEach(function (field) {
+       const noWhitespacePattern = /^\S+$/; // Regex to disallow whitespace
+
+       requiredFields.forEach(function(field) {
            const input = document.getElementById(field);
-           if (input.value.trim() === "") {
-               Swal.fire({
-                   title: 'Error',
-                   text: `Please fill all the field.`,
-                   icon: 'error'
-               });
+           const errorElement = document.getElementById(field + '-error');
+           const inputValue = input.value.trim();
+
+           if (inputValue === "") {
+               if (!errorElement) {
+                   const errorDiv = document.createElement('div');
+                   errorDiv.className = "text-danger mt-1 small";
+                   errorDiv.id = field + '-error';
+                   errorDiv.textContent = "This field is required.";
+                   input.parentNode.appendChild(errorDiv);
+               }
                isValid = false;
+           } else if (!noWhitespacePattern.test(inputValue)) {
+               if (!errorElement) {
+                   const errorDiv = document.createElement('div');
+                   errorDiv.className = "text-danger mt-1 small";
+                   errorDiv.id = field + '-error';
+                   errorDiv.textContent = "Whitespace is not allowed.";
+                   input.parentNode.appendChild(errorDiv);
+               }
+               isValid = false;
+           } else if (errorElement) {
+               errorElement.remove();
            }
        });
 
+       const namePattern = /^[A-Za-z\s]+$/;
+       const pincodePattern = /^\d{6}$/;
+       const phonePattern = /^\d{10}$/;
+       const phone = document.getElementById('phone').value;
+       const altPhone = document.getElementById('altPhone').value;
+
+       if (!namePattern.test(document.getElementById('name').value)) {
+           Swal.fire('Error', 'Name should contain alphabets only.', 'error');
+           isValid = false;
+       }
+       if (!pincodePattern.test(document.getElementById('pincode').value)) {
+           Swal.fire('Error', 'Pincode must be a 6-digit number.', 'error');
+           isValid = false;
+       }
+       if (!phonePattern.test(phone) || !phonePattern.test(altPhone)) {
+           Swal.fire('Error', 'Phone numbers must be 10-digit numbers.', 'error');
+           isValid = false;
+       }
+       if (phone === altPhone) {
+           Swal.fire('Error', 'Phone and alternate phone numbers must be different.', 'error');
+           isValid = false;
+       }
 
        return isValid;
    }
 </script>
+
 <%- include("../../views/partials/user/footer") %>
