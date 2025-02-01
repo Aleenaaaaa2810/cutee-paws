@@ -99,7 +99,7 @@
             <h3>Crop Image</h3>
             <img id="cropper-image" style="max-width: 100%; max-height: 400px;">
             <div style="margin-top: 20px;">
-                <button onclick="saveCroppedImage(currentImageIndex)" style="padding: 10px 20px; background: #28a745; color: #fff; border: none; border-radius: 5px;">Save</button>
+                <button type="button" onclick="saveCroppedImage(currentImageIndex)" style="padding: 10px 20px; background: #28a745; color: #fff; border: none; border-radius: 5px;">Save</button>
                 <button onclick="closeCropper()" style="padding: 10px 20px; background: #dc3545; color: #fff; border: none; border-radius: 5px;">Cancel</button>
             </div>
         </div>
@@ -183,6 +183,7 @@
                     console.error('Error uploading image:', error);
                 });
             });
+            return false;
         }
     }
     function handleFormSubmit(event) {

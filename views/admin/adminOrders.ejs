@@ -118,6 +118,9 @@
         .orders-table td a:hover {
             color: #e0911c;
         }
+        
+
+
 
         .actions-btns {
             display: flex;
@@ -247,8 +250,73 @@
     color: blue;
     font-weight: bold;
   }
+  .actions-btns button {
+    padding: 5px 10px; /* Reduced padding */
+    font-size: 10px; /* Smaller text */
+    background-color: #f5a623;
+    color: white;
+    border: none;
+    border-radius: 4px; /* Slightly reduced border radius */
+    cursor: pointer;
+    margin: 0 3px; /* Adjusted margin for better spacing */
+    transition: background-color 0.3s ease;
+}
+
+.actions-btns button:hover {
+    background-color: #e0911c;
+}.pagination {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+.pagination a {
+    margin: 0 5px;
+    padding: 10px 15px;
+    text-decoration: none;
+    color: #f1c40f; /* Yellow pagination links */
+    border: 1px solid #f1c40f; /* Yellow border */
+    border-radius: 4px;
+    background-color: #444; /* Dark background */
+    transition: background-color 0.3s, color 0.3s;
+}
+
+.pagination a:hover {
+    background-color: #f1c40f; /* Yellow background on hover */
+    color: #1e212d; /* Dark text on hover */
+}
+
+.pagination a.active {
+    background-color: #e74c3c; /* Red active page */
+    color: #fff; /* White text */
+    border: none; /* Remove border for active page */
+}
+
+.pagination button {
+    padding: 10px 15px;
+    margin: 0 5px;
+    background-color: #f5a623; /* Button background */
+    color: white; /* Button text color */
+    border: none; /* No border */
+    border-radius: 4px; /* Rounded corners */
+    cursor: pointer; /* Pointer cursor on hover */
+    transition: background-color 0.3s ease; /* Smooth transition */
+}
+
+.pagination button:hover {
+    background-color: #e0911c; /* Darker shade on hover */
+}
+
+.pagination button:disabled {
+    background-color: #e0e0e0; /* Gray background for disabled */
+    color: #777; /* Gray text for disabled */
+    cursor: not-allowed; /* Not allowed cursor */
+    opacity: 0.6; /* Slightly transparent */
+}
 
 
+
+  
         
     </style>
 </head>
@@ -279,6 +347,7 @@
                     <th>Customer</th>
                     <th>Items</th>
                     <th>Total Price</th>
+                    <th>Final amount</th>
                     <th>Status</th>
                     <th>payment Method</th>
                     <th>payment status</th>
@@ -301,50 +370,113 @@
                             </ul>
                         </td>
                         <td>₹<%= order.totalPrice %></td>
+                        <td>₹<%= order.finalAmount %></td>
+
                         <td><%= order.status %></td>
+
                         <td><%= order.paymentMethod || 'Not Available' %></td>
 
-  <td class="<%= 
-  (order.status === 'Returned') ? 'status-returned' : 
-  (order.paymentMethod === 'Cash on Delivery' && (order.status === 'Delivered' || order.status === 'Return Requested')) ? 'status-success' :
-  (order.paymentMethod === 'Cash on Delivery') ? 'status-failed' :
-  (order.paymentMethod === 'Wallet') ? 'status-success' :
-  ((order.paymentMethod === 'Wallet' || order.paymentMethod === 'Razorpay') && order.status === 'Cancelled') ? 'status-failed' :
+                        <td class="<%= 
+                        (order.status === 'Returned') ? 'status-returned' : 
+                        (order.paymentMethod === 'Cash on Delivery' && (order.status === 'Delivered' || order.status === 'Return Requested')) ? 'status-success' :
+                        (order.paymentMethod === 'Cash on Delivery') ? 'status-failed' :
+                        (order.paymentMethod === 'Wallet' && order.status !== 'Cancelled') ? 'status-success' :  <!-- Fix for Wallet -->
+                        (order.paymentMethod === 'Wallet' || order.paymentMethod === 'Razorpay') && order.status === 'Cancelled' ? 'status-failed' : 
+                        (order.razorpayDetails && order.razorpayDetails.paymentStatus === 'failed') ? 'status-failed' : 
+                        'status-success' 
+                      %>">
+                        <%= 
+                          (order.status === 'Returned') ? 'Returned' :
+                          (order.paymentMethod === 'Cash on Delivery' && (order.status === 'Delivered' || order.status === 'Return Requested')) ? 'Success' :
+                          (order.paymentMethod === 'Cash on Delivery') ? 'Failed' :
+                          (order.paymentMethod === 'Wallet' && order.status !== 'Cancelled') ? 'Success' : <!-- Fix for Wallet -->
+                          (order.paymentMethod === 'Wallet' || order.paymentMethod === 'Razorpay') && order.status === 'Cancelled' ? 'Failed' :
+                          (order.razorpayDetails ? order.razorpayDetails.paymentStatus : 'Failed') 
+                        %>
+                      </td>
+                      
 
-  (order.razorpayDetails && order.razorpayDetails.paymentStatus === 'failed') ? 'status-failed' : 
-  'status-success' 
-%>">
-  <%= 
-    (order.status === 'Returned') ? 'Returned' :
-    (order.paymentMethod === 'Cash on Delivery' && (order.status === 'Delivered' || order.status === 'Return Requested')) ? 'Success' :
-    (order.paymentMethod === 'Cash on Delivery') ? 'Failed' :
-    (order.paymentMethod === 'Wallet') ? 'Success' :
-    ((order.paymentMethod === 'Wallet' || order.paymentMethod === 'Razorpay') && order.status === 'Cancelled') ? 'Failed' :
-
-    (order.razorpayDetails ? order.razorpayDetails.paymentStatus : 'Failed') 
-  %>
-</td>
       
 
                         <td class="actions-btns">
-                            <button onclick="updateStatus('<%= order._id %>')">Update Status</button>
+                            <style>
+                                .disabled-btn {
+                                    background-color: gray;
+                                    color: white;
+                                    cursor: not-allowed;
+                                    opacity: 0.6;
+                                }
+                            </style>
+                            
+                            <button 
+                                onclick="updateStatus('<%= order._id %>')" 
+                                class="<%= (order.status === 'Cancelled' || order.status === 'Returned' || order.status === 'Delivered' || order.status ==='Return Requested') ? 'disabled-btn' : '' %>" 
+                                <%= (order.status === 'Cancelled' || order.status === 'Returned' || order.status === 'Delivered'||order.status === 'Return Requested') ? 'disabled' : '' %>
+                            >
+                                Update Status
+                            </button>
+                            
                             <% if (order.returnRequested && order.status === 'Return Requested') { %>
                                 <button class="btn approve-return-button"
                                         data-order-id="<%= order._id %>"
                                         data-refund-amount="<%= order.totalPrice %>"
                                         data-reason="<%= order.returnReason %>"
-                                        onclick="showApproveModal('<%= order._id %>', '<%= order.totalPrice %>', '<%= order.returnReason %>')">
+                                        onclick="showApproveModal('<%= order._id %>', '<%= order.finalAmount %>', '<%= order.returnReason %>')">
                                     Approve Return    
                                 </button>
                              
                               <% } else { %>
                                 <button class="btn approve-return-button" disabled>Approve Return</button>
                               <% } %>
+
+                              <button 
+                              class="btn cancel-reason-button <%= order.status === 'Cancelled' ? '' : 'disabled-btn' %>" 
+                              data-order-id="<%= order._id %>"
+                              data-reason="<%=  order.cancelReason ? order.cancelReason.replace(/"/g, '&quot;').replace(/'/g, '&#39;') : 'No reason provided' %>"
+                              <%= order.status === 'Cancelled' ? '' : 'disabled' %>
+                            >
+                              Cancel Reason
+                            </button>
+
                                                   </td>
+
+                                                  
                     </tr>
                 <% }) %>
             </tbody>
         </table>
+        <div class="pagination">
+           
+        
+            <% 
+                let startPage = Math.max(1, pagination.currentPage - 2);
+                let endPage = Math.min(pagination.totalPages, startPage + 4);
+        
+                if (endPage - startPage < 4) {
+                    startPage = Math.max(1, endPage - 4);
+                }
+        
+                if (startPage > 1) { 
+            %>
+                <a href="?page=1">1</a>
+                <% if (startPage > 2) { %>
+                    <span>...</span>
+                <% } %>
+            <% } %>
+        
+            <% for (let i = startPage; i <= endPage; i++) { %>
+                <a href="?page=<%= i %>" class="<%= pagination.currentPage === i ? 'active' : '' %>"><%= i %></a>
+            <% } %>
+        
+            <% if (endPage < pagination.totalPages) { %>
+                <% if (endPage < pagination.totalPages - 1) { %>
+                    <span>...</span>
+                <% } %>
+                <a href="?page=<%= pagination.totalPages %>"><%= pagination.totalPages %></a>
+            <% } %>
+        
+        </div>
+        
     </div>
     <div id="approveModal" class="modal">
         <div class="modal-content">
@@ -356,8 +488,10 @@
                 <button onclick="closeModal()" class="btn cancel">Deny</button>
             </div>
         </div>
+
     </div>
-    
+   
+      
     
     <script>
         const updateStatus = (orderId) => {
@@ -407,9 +541,9 @@
 
         
 // Show approve modal
-const showApproveModal = (orderId, totalPrice, reason) => {
+const showApproveModal = (orderId, finalAmount, reason) => {
     currentOrderId = orderId;
-    document.getElementById('refundAmount').textContent = totalPrice;
+    document.getElementById('refundAmount').textContent = finalAmount;
     document.getElementById('reasonText').textContent = reason; // Show the reason in the modal
     document.getElementById('approveModal').style.display = 'block';
 };
@@ -428,7 +562,7 @@ const submitApproval = (orderId) => {
         headers: {
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ totalPrice: refundAmount })
+        body: JSON.stringify({ finalAmount: refundAmount })
     })
 
     
@@ -457,6 +591,21 @@ function toggleApproveReturnButton(orderId, isReturnRequested) {
     const button = document.querySelector(`[data-order-id="${orderId}"]`);
     button.disabled = !isReturnRequested;
 }
+
+document.querySelectorAll('.cancel-reason-button').forEach(button => {
+  button.addEventListener('click', function() {
+    const orderId = this.getAttribute('data-order-id');
+    const reason = this.getAttribute('data-reason') || 'No reason provided';
+
+    Swal.fire({
+      title: 'Cancellation Reason',
+      text: reason,
+      icon: 'info'
+    });
+  });
+});
+
+
 
     
     </script>

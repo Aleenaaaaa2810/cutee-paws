@@ -140,7 +140,7 @@
                 </tr>
               </thead>
               <tbody>
-                <% if (transactions.length > 0) { %>
+                <% if (transactions && transactions.length > 0) { %>
                   <% transactions.forEach((transaction) => { %>
                     <tr>
                       <td><%= transaction.transactionId %></td>
@@ -162,5 +162,6 @@
     </div>
   </div>
 </main>
+
 
 <%- include("../../views/partials/user/footer") %>

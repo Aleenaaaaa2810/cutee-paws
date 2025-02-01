@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <title>Admin Dashboard - Edit Product</title>
+
+    <!-- Link to Cropper.js for image cropping -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cropperjs@1.5.13/dist/cropper.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/cropperjs@1.5.13/dist/cropper.min.js"></script>
+    <link rel="stylesheet" href="/css/profileadd.css">
+
+
+</head>
+<body>
+
+    <!-- Sidebar -->
+    <%-include("../../views/partials/admin/header.ejs")%>
+
+    <!-- Main content (Product Add Form) -->
+    <div class="main-content">
+      <div class="add-product-form">
+        <h2>Edit Product</h2>
+
+          <form id="productForm" method="POST" action="/admin/updateProduct/<%= product._id %>" enctype="multipart/form-data" onsubmit="return handleFormSubmit(event);">
+              <!-- Product Name -->
+              <div class="form-group">
+                  <label for="product-name">Product Name</label>
+                  <input type="text" id="product-name" name="name" value="<%= product.name %>" required>
+                </div>
+
+              <!-- Full Description -->
+              <div class="form-group">
+                <label for="description">Full Description</label>
+                <textarea id="description" name="description" required><%= product.description %></textarea>
+            </div>
+              <!-- Regular Price -->
+              <div class="form-group">
+                  <label for="regular-price">Regular Price</label>
+                  <input type="text" id="regular-price" name="regularPrice" value="<%= product.regularPrice %>" required>
+                </div>
+
+              <!-- Sale Price -->
+              <div class="form-group">
+                  <label for="sale-price">Sale Price</label>
+                  <input type="text" id="sale-price" name="salePrice" value="<%= product.salePrice %>" required>
+                </div>
+
+              <!-- Quantity -->
+              <div class="form-group">
+                  <label for="quantity">Quantity</label>
+                  <input type="number" id="quantity" name="quantity" value="<%= product.quantity %>" required>
+                </div>
+
+              <!-- Category -->
+              <div class="form-group">
+                <label for="category">Category</label>
+                <select id="category" name="categoryId" required>
+                  <% for (let i = 0; i < cat.length; i++) { %>
+                    <option value="<%= cat[i]._id %>" <%= String(cat[i]._id) === String(product.category) ? 'selected' : '' %>><%= cat[i].name %></option>
+                  <% } %>
+                </select>
+              </div>
+              
+              
+
+              <!-- Image Upload with Save Button -->
+              <div class="form-group">
+                  <label for="image1">Browse to change image</label>
+                  <input type="file" id="image1" name="image" accept="image/*" onchange="openCropper(event, 1)" >
+              </div>
+              <div class="image-preview-container">
+                <img id="cropped-image1" src="/uploads/<%= product.productImage[0]%>" alt="Cropped Image 1 Preview" style="max-width: 150px; max-height: auto; object-fit: cover;"/>
+              </div>
+
+              <div class="form-group">
+                <input type="file" id="image2" name="image" accept="image/*" onchange="openCropper(event, 2)" >
+            </div>
+            <div class="image-preview-container">
+                <img id="cropped-image2" src="/uploads/<%= product.productImage[1]%>" alt="Cropped Image 2 Preview" style="max-width: 150px; max-height: auto; object-fit: cover;"/>
+
+            </div>
+            <div class="form-group">
+                <input type="file" id="image3" name="image" accept="image/*" onchange="openCropper(event, 3)" >
+            </div>
+            <div class="image-preview-container">
+                <img id="cropped-image3" src="/uploads/<%= product.productImage[2]%>" alt="Cropped Image 3 Preview" style="max-width: 150px; max-height: auto; object-fit: cover;"/>
+
+            </div>
+
+<!-- Cropper Modal -->
+<div id="cropper-modal" style="display: none;">
+    <div style="background: rgba(0, 0, 0, 0.8); position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 1000; display: flex; justify-content: center; align-items: center;">
+        <div style="background: #fff; padding: 20px; border-radius: 10px; text-align: center;">
+            <h3>Crop Image</h3>
+            <img id="cropper-image" style="max-width: 100%; max-height: 400px;">
+            <div style="margin-top: 20px;">
+                <button type="button" onclick="saveCroppedImage(currentImageIndex)" style="padding: 10px 20px; background: #28a745; color: #fff; border: none; border-radius: 5px;">Save</button>
+                <button onclick="closeCropper()" style="padding: 10px 20px; background: #dc3545; color: #fff; border: none; border-radius: 5px;">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
+              <!-- Publish Button -->
+              <div class="button-group">
+              <button type="submit" class="publish-btn">Update Product</button>
+              </div>
+          </form>
+      </div>
+  </div>
+
+  <script>
+    let cropper; // Global cropper instance
+    let currentImageIndex;
+
+    // Open Cropper Modal
+    function openCropper(event, index) {
+        currentImageIndex = index;
+        const file = event.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                document.getElementById('cropper-image').src = e.target.result;
+                document.getElementById('cropper-modal').style.display = 'block';
+                cropper = new Cropper(document.getElementById('cropper-image'), {
+                    aspectRatio: 1, // Adjust aspect ratio as needed
+                    viewMode: 1
+                });
+            };
+            reader.readAsDataURL(file);
+        }
+    }
+
+    // Close Cropper Modal
+    function closeCropper() {
+        document.getElementById('cropper-modal').style.display = 'none';
+        if (cropper) {
+            cropper.destroy();
+            cropper = null;
+        }
+    }
+
+    // Save Cropped Image
+    function saveCroppedImage(index) {
+        if (cropper) {
+            const canvas = cropper.getCroppedCanvas({
+                width: 150,
+                height: 150
+            });
+            if (!canvas) {
+            console.error("Cropped canvas not generated");
+            return;
+        }
+            const croppedImage = document.getElementById(`cropped-image${index}`);
+            if (croppedImage) {
+            croppedImage.src = canvas.toDataURL('image/jpeg');
+            croppedImage.style.display = 'block';
+             } else {
+            console.error(`Preview element for image${index} not found`);
+        }
+            closeCropper();
+
+            // Optional: Upload the cropped image to the server
+            canvas.toBlob((blob) => {
+                const formData = new FormData();
+                formData.append('image', blob, `image${index}.jpg`);
+                fetch('/upload-cropped-image', {
+                    method: 'POST',
+                    body: formData
+                }).then(response => response.json())
+                .then(data => {
+                    if (data.url) {
+                        // Update the preview container with the server-hosted image
+                        document.getElementById(`cropped-image${index}`).src = data.url;
+                    } else {
+                        console.error('Image URL not received from the server');
+                    }
+                }).catch(error => {
+                    console.error('Error uploading image:', error);
+                });
+            });
+            return false;
+        }
+    }
+    function handleFormSubmit(event) {
+    event.preventDefault(); // Prevent default form submission
+
+    const productName = document.getElementById("product-name").value.trim();
+    const description = document.getElementById("description").value.trim();
+    const regularPrice = parseFloat(document.getElementById("regular-price").value.trim());
+    const salePrice = parseFloat(document.getElementById("sale-price").value.trim());
+    const quantity = document.getElementById("quantity").value.trim();
+    const category = document.getElementById("category").value;
+    // const image1 = document.getElementById("image1").files.length;
+    // const image2 = document.getElementById("image2").files.length;
+    // const image3 = document.getElementById("image3").files.length;
+
+    // Validate required fields
+    if (!productName || !description || !regularPrice || !salePrice || !quantity || !category) {
+        Swal.fire("Validation Error", "All fields are required!", "error");
+        return false;
+    }
+
+    // Validate prices
+    if (isNaN(regularPrice) || isNaN(salePrice) || regularPrice <= 0 || salePrice <= 0) {
+        Swal.fire("Validation Error", "Regular and sale prices must be valid positive numbers!", "error");
+        return false;
+    }
+
+    if (salePrice > regularPrice) {
+        Swal.fire("Validation Error", "Sale price must be less than or equal to the regular price!", "error");
+        return false;
+    }
+
+    // // Validate image upload
+    // if (image1 === 0 ||  image2 === 0 || image3 === 0) {
+    //     Swal.fire("Validation Error", "Please upload  image!", "error");
+    //     return false;
+    // }
+    Swal.fire({
+    title: "Update Product",
+    text: "Are you sure you want to update this product?",
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonColor: "#28a745",
+    cancelButtonColor: "#dc3545",
+    confirmButtonText: "Yes, Update",
+  }).then((result) => {
+    if (result.isConfirmed) {
+      event.target.submit(); // Submit the form
+    }
+  });
+
+ 
+}
+
+
+</script>
+</body>
+</html>

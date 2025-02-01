@@ -147,6 +147,58 @@
       background-color: #ffc107;
       color: #000;
     }
+
+
+    .pagination {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+.pagination a {
+    margin: 0 5px;
+    padding: 10px 15px;
+    text-decoration: none;
+    color: #f1c40f; /* Yellow pagination links */
+    border: 1px solid #f1c40f; /* Yellow border */
+    border-radius: 4px;
+    background-color: #444; /* Dark background */
+    transition: background-color 0.3s, color 0.3s;
+}
+
+.pagination a:hover {
+    background-color: #f1c40f; /* Yellow background on hover */
+    color: #1e212d; /* Dark text on hover */
+}
+
+.pagination a.active {
+    background-color: #e74c3c; /* Red active page */
+    color: #fff; /* White text */
+    border: none; /* Remove border for active page */
+}
+
+.pagination button {
+    padding: 10px 15px;
+    margin: 0 5px;
+    background-color: #f5a623; /* Button background */
+    color: white; /* Button text color */
+    border: none; /* No border */
+    border-radius: 4px; /* Rounded corners */
+    cursor: pointer; /* Pointer cursor on hover */
+    transition: background-color 0.3s ease; /* Smooth transition */
+}
+
+.pagination button:hover {
+    background-color: #e0911c; /* Darker shade on hover */
+}
+
+.pagination button:disabled {
+    background-color: #e0e0e0; /* Gray background for disabled */
+    color: #777; /* Gray text for disabled */
+    cursor: not-allowed; /* Not allowed cursor */
+    opacity: 0.6; /* Slightly transparent */
+}
+
   </style>
 </head>
 <body>
@@ -241,6 +293,38 @@
         </tbody>
         
       </table>
+
+      <div class="pagination">
+           
+        
+        <% 
+            let startPage = Math.max(1, pagination.currentPage - 2);
+            let endPage = Math.min(pagination.totalPages, startPage + 4);
+    
+            if (endPage - startPage < 4) {
+                startPage = Math.max(1, endPage - 4);
+            }
+    
+            if (startPage > 1) { 
+        %>
+            <a href="?page=1">1</a>
+            <% if (startPage > 2) { %>
+                <span>...</span>
+            <% } %>
+        <% } %>
+    
+        <% for (let i = startPage; i <= endPage; i++) { %>
+            <a href="?page=<%= i %>" class="<%= pagination.currentPage === i ? 'active' : '' %>"><%= i %></a>
+        <% } %>
+    
+        <% if (endPage < pagination.totalPages) { %>
+            <% if (endPage < pagination.totalPages - 1) { %>
+                <span>...</span>
+            <% } %>
+            <a href="?page=<%= pagination.totalPages %>"><%= pagination.totalPages %></a>
+        <% } %>
+    
+    </div>
     </div>
   </div>
 

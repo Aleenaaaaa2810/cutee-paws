@@ -38,7 +38,7 @@
     background-color: white;
     border-radius: 5px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    padding: 20px;
+    padding: 20px;  
     text-align: center;
   }
 
@@ -116,8 +116,10 @@ h2 {
       <option value="weekly" <%= range === 'weekly' ? 'selected' : '' %>>Weekly</option>
       <option value="monthly" <%= range === 'monthly' ? 'selected' : '' %>>Monthly</option>
       <option value="yearly" <%= range === 'yearly' ? 'selected' : '' %>>Yearly</option>
+      <option value="all" <%= range === 'all' ? 'selected' : '' %>>All</option>
     </select>
   </div>
+  
 
   <div class="chart-container">
     <canvas id="revenueChart"></canvas>
@@ -174,7 +176,7 @@ h2 {
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <script>
-  const salesData = <%- JSON.stringify(salesData) %>;
+  const salesData = <%- JSON.stringify(salesData) %>;  // Sales data structure from the backend
   const ctx = document.getElementById('revenueChart').getContext('2d');
   let chart;
 
@@ -184,7 +186,7 @@ h2 {
     chart = new Chart(ctx, {
       type: 'bar',
       data: {
-        labels: salesData.labels,
+        labels: salesData.labels,  // This will dynamically change based on the range selected
         datasets: [
           {
             label: 'Revenue (₹)',
@@ -192,6 +194,7 @@ h2 {
             backgroundColor: 'rgba(75, 192, 192, 0.6)',
             borderColor: 'rgba(75, 192, 192, 1)',
             borderWidth: 1,
+            yAxisID: 'y1',
           },
           {
             label: 'Total Orders',
@@ -199,6 +202,7 @@ h2 {
             backgroundColor: 'rgba(255, 99, 132, 0.6)',
             borderColor: 'rgba(255, 99, 132, 1)',
             borderWidth: 1,
+            yAxisID: 'y2',
           },
         ],
       },
@@ -214,15 +218,23 @@ h2 {
           x: {
             title: {
               display: true,
-              text: 'Time Period',
+              text: 'Time Period', // Title for the x-axis
             },
           },
-          y: {
+          y1: {
             beginAtZero: true,
             title: {
               display: true,
-              text: 'Values',
+              text: 'Revenue (₹)',
             },
+          },
+          y2: {
+            beginAtZero: true,
+            title: {
+              display: true,
+              text: 'Orders',
+            },
+            position: 'right',
           },
         },
       },
@@ -233,6 +245,6 @@ h2 {
 
   function fetchSalesReport() {
     const range = document.getElementById('range').value;
-    window.location.href = `/admin/dashboard?range=${range}`;
+    window.location.href = `/admin/dashboard?range=${range}`;  // This will trigger the update based on the selected range
   }
 </script>

@@ -100,12 +100,25 @@ const postProductAdd = async (req, res) => {
 const getproduct = async (req, res) => {
   try {
     
+    let page = parseInt(req.query.page) || 1; // Get the page number from query params (default: 1)
+    let limit = 10; // Number of products per page
+    let skip = (page - 1) * limit; // Calculate the number of documents to skip
+
+    const totalProducts = await Product.countDocuments(); // Get the total number of products
+    const totalPages = Math.ceil(totalProducts / limit); // Calculate the total number of pages
+
     const products = await Product.find()
       .populate("category", "name") 
+      .skip(skip)
+      .limit(limit)
       .exec();
 
-     return res.render('product', { products }); 
-  } catch (error) {
+      return res.render('product', { 
+        products, 
+        pagination: {
+          totalPages,
+          currentPage: page
+        }   });}catch (error) {
     console.error("Error fetching products:", error);
     res.status(500).send("Server Error");
   }

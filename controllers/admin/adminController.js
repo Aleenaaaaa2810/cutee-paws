@@ -50,13 +50,6 @@ const login = async (req, res) => {
 };
 
 
-
-
-
-
-
-
-
 const logout = async (req, res) => {
   try {
     req.session.destroy((error) => {
@@ -73,46 +66,56 @@ const logout = async (req, res) => {
 };
 
 
-
 const loadDashboard = async (req, res) => {
   try {
-    const { range } = req.query || 'daily';
-
+    const { range = 'all' } = req.query; 
     let filter = { status: 'Delivered' };
 
-    // Define date range filters
     if (range === 'daily') {
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      filter.createdOn = { $gte: today, $lt: new Date(today.getTime() + 24 * 60 * 60 * 1000) };
-    } else if (range === 'weekly') {
-      const startOfWeek = moment().startOf('isoWeek').toDate();
-      const endOfWeek = moment().endOf('isoWeek').toDate();
+      const startOfWeek = moment().startOf('isoWeek').toDate();  // Get the start of the week (Sunday)
+      const endOfWeek = moment().endOf('isoWeek').toDate();      // Get the end of the week (Saturday)
       filter.createdOn = { $gte: startOfWeek, $lte: endOfWeek };
-    } else if (range === 'monthly') {
+    } else if (range === 'weekly') {
       const startOfMonth = moment().startOf('month').toDate();
       const endOfMonth = moment().endOf('month').toDate();
       filter.createdOn = { $gte: startOfMonth, $lte: endOfMonth };
-    } else if (range === 'yearly') {
+    } else if (range === 'monthly') {
       const startOfYear = moment().startOf('year').toDate();
       const endOfYear = moment().endOf('year').toDate();
       filter.createdOn = { $gte: startOfYear, $lte: endOfYear };
+    } else if (range === 'yearly') {
+      // Modify to show data for the last 10 years (decade)
+      const startOfDecade = moment().subtract(10, 'years').startOf('year').toDate();
+      const endOfDecade = moment().endOf('year').toDate();
+      filter.createdOn = { $gte: startOfDecade, $lte: endOfDecade };
+    } else if (range === 'all') {
+      delete filter.createdOn;
     }
 
     const orders = await Order.find(filter);
 
-    // Group orders by the selected range
     const groupedOrders = {};
+
     orders.forEach((order) => {
       let groupLabel;
+
       if (range === 'daily') {
-        groupLabel = moment(order.createdOn).format('YYYY-MM-DD');
-      } else if (range === 'weekly') {
-        groupLabel = `Week ${moment(order.createdOn).isoWeek()}`;
-      } else if (range === 'monthly') {
-        groupLabel = moment(order.createdOn).format('MMMM');
-      } else if (range === 'yearly') {
-        groupLabel = moment(order.createdOn).format('YYYY');
+        groupLabel = moment(order.createdOn).format('dddd');  // Days of the week (e.g., Sunday, Monday, etc.)
+      } 
+      // Modify the logic for the "weekly" range to show weeks of the month
+      else if (range === 'weekly') {
+        const weekOfMonth = moment(order.createdOn).week() - moment(order.createdOn).startOf('month').week() + 1;
+        groupLabel = `Week ${weekOfMonth}`;
+      } 
+      // Modify the logic for the "monthly" range to show months of the year
+      else if (range === 'monthly') {
+        groupLabel = moment(order.createdOn).format('MMMM');  // Full month names (e.g., January, February, etc.)
+      }
+      // For "yearly" and "all", retain the original logic
+      else if (range === 'yearly') {
+        groupLabel = moment(order.createdOn).format('YYYY'); // Show each year in the last decade
+      } else if (range === 'all') {
+        groupLabel = 'All Orders';
       }
 
       if (!groupedOrders[groupLabel]) {
@@ -122,48 +125,40 @@ const loadDashboard = async (req, res) => {
       groupedOrders[groupLabel].totalRevenue += order.totalPrice;
       groupedOrders[groupLabel].orderCount += 1;
     });
-
-    // Prepare sales data for the chart
+   
     const salesData = {
-      labels: Object.keys(groupedOrders), // Labels for the X-axis (dates, weeks, etc.)
+      labels: Object.keys(groupedOrders), // X-axis labels: days of the week, weeks, months, etc.
       revenue: Object.values(groupedOrders).map((data) => data.totalRevenue), // Revenue values
       orders: Object.values(groupedOrders).map((data) => data.orderCount), // Orders values
     };
 
-    // Calculate total revenue and total orders
     const totalOrders = orders.length;
     const totalRevenue = orders.reduce((sum, order) => sum + order.totalPrice, 0);
 
-// Query for top 10 best-selling products
-const topProducts = await Products.find().sort({ salesCount: -1 }).limit(10);
+    const topProducts = await Products.find().sort({ salesCount: -1 }).limit(10);
 
-  // Query for top 10 best-selling categories
-  const topCategories = await Products.aggregate([
-    { $group: { _id: '$category', totalSales: { $sum: '$salesCount' } } },
-    { $sort: { totalSales: -1 } },
-    { $limit: 10 },
-    { $lookup: {
-        from: 'categories', // Use the exact collection name for categories
-        localField: '_id',
-        foreignField: '_id',
-        as: 'categoryInfo'
-      }
-    },
-    { $unwind: '$categoryInfo' },
-    { $project: { categoryName: '$categoryInfo.name', totalSales: 1 } }
-  ]);
-  
+    const topCategories = await Products.aggregate([
+      { $group: { _id: '$category', totalSales: { $sum: '$salesCount' } } },
+      { $sort: { totalSales: -1 } },
+      { $limit: 10 },
+      { $lookup: {
+          from: 'categories', 
+          localField: '_id',
+          foreignField: '_id',
+          as: 'categoryInfo'
+        }
+      },
+      { $unwind: '$categoryInfo' },
+      { $project: { categoryName: '$categoryInfo.name', totalSales: 1 } }
+    ]);
 
-
-
-
-    res.render('dashboard', { salesData, totalOrders, totalRevenue, range,topProducts, 
-      topCategories });
+    res.render('dashboard', { salesData, totalOrders, totalRevenue, range, topProducts, topCategories });
   } catch (err) {
     console.error(err);
     res.status(500).send('Error fetching dashboard data');
   }
 };
+
 
 
 
@@ -173,8 +168,6 @@ module.exports = {
   loadDashboard,
   pageerror,
   logout
-
-
 };
 
 

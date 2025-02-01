@@ -279,6 +279,9 @@
 
 
 
+
+
+
 document.querySelectorAll('.retry-button').forEach(button => {
   button.addEventListener('click', async function () {
     const orderId = this.getAttribute('data-order-id');
@@ -350,6 +353,59 @@ document.querySelectorAll('.retry-button').forEach(button => {
     }
   });
 });
+
+
+
+document.querySelectorAll('.cancel-button').forEach(button => {
+  button.addEventListener('click', function(event) {
+    const orderId = this.getAttribute('data-order-id');
+    const cancelButton = this;
+
+    Swal.fire({
+      title: 'Cancel Order',
+      input: 'textarea',
+      inputPlaceholder: 'Enter the reason for cancellation...',
+      showCancelButton: true,
+      confirmButtonText: 'Submit',
+      cancelButtonText: 'Cancel',
+      preConfirm: (reason) => {
+        if (!reason.trim()) {
+          Swal.showValidationMessage('Please enter a valid reason for cancellation');
+        } else {
+          return reason.trim();
+        }
+      }
+    }).then((result) => {
+      if (result.isConfirmed) {
+        cancelButton.setAttribute('disabled', 'true');
+        cancelButton.classList.add('disabled');
+
+        fetch('/cancel-order', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ orderId: orderId, reason: result.value }) // Send reason to backend
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            Swal.fire('Cancelled', 'Your order has been cancelled successfully.', 'success');
+            cancelButton.textContent = 'Cancelled';
+          } else {
+            Swal.fire('Error', data.message, 'error');
+            cancelButton.removeAttribute('disabled');
+          }
+        })
+        .catch(error => {
+          Swal.fire('Error', 'Failed to cancel the order. Please try again.', 'error');
+          cancelButton.removeAttribute('disabled');
+        });
+      }
+    });
+  });
+});
+
+
+
 
   </script>
 </body>

@@ -18,6 +18,7 @@ const orderSchema = new Schema({
       ref: 'Product',
       required: true
     },
+   
     quantity: {
       type: Number,
       required: true
@@ -87,8 +88,13 @@ const orderSchema = new Schema({
         signature: String,
         paymentStatus: String  // Store the payment status here
     },
-   
+    cancelReason: {
+    type: String,
+    required: false  // optional field for cancellation reason
+  }
 });
+   
+
 
 const Order = mongoose.model("Order", orderSchema);
 module.exports = Order;

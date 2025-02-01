@@ -147,6 +147,8 @@ const postorder = async (req, res) => {
       }
 
       product.quantity -= item.quantity;
+      product.salesCount = (product.salesCount || 0) + item.quantity;
+
       await product.save();
     }
 
@@ -233,11 +235,16 @@ const profileOderget = async (req, res) => {
 
 const cancelOrder = async (req, res) => {
   try {
-    const { orderId } = req.body;
+    const { orderId ,reason} = req.body;
 
     if (!orderId) {
       return res.status(400).send('Order ID is required.');
     }
+
+    if (!reason || reason.trim() === '') {
+      return res.status(400).json({ success: false, message: 'Cancellation reason is required.' });
+    }
+
 
     if (!req.session?.user?.id) {
       return res.status(401).send('User not logged in.');
@@ -284,9 +291,10 @@ const cancelOrder = async (req, res) => {
         await product.save();
       }
     }
-    // Proceed with order cancellation
     order.status = 'Cancelled';
+    order.cancelReason = reason;  // Save cancellation reason
     await order.save();
+    
 
     return res.status(200).json({ success: true, message: 'Order successfully cancelled.' });
 

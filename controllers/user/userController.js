@@ -121,26 +121,24 @@ async function pageNotFound(req, res) {
     res.status(500).send("Server Error");
   }
 }
+
+
 function generateReferralCode() {
   return Math.random().toString(36).substring(2, 10).toUpperCase(); // Example: 'A3D4E5F7'
 }
 
-// Signup process
 async function signup(req, res) {
   const { name, email, phone, password, cpassword, referralCode } = req.body;
 
-  // Check if all required fields are provided
   if (!name || !email || !phone || !password || !cpassword) {
     return res.render("signup", { message: "All fields are required" });
   }
 
-  // Check if passwords match
   if (password !== cpassword) {
     return res.render("signup", { message: "Passwords do not match" });
   }
 
   try {
-    // Check if the user already exists
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.render("signup", { message: "User already exists" });
@@ -164,7 +162,7 @@ async function signup(req, res) {
         if (!referrerWallet) {
           referrerWallet = new Wallet({
             userId: referrer._id,
-            balance: pointsToAdd+100, // Adding the 100 points for the referral
+            balance: 100, // Start with 100 points for referral
             transactions: [{
               transactionId: uuidv4(),
               description: 'Referral Reward (Referrer)',
@@ -173,7 +171,7 @@ async function signup(req, res) {
             }],
           });
         } else {
-          referrerWallet.balance =pointsToAdd+100;
+          referrerWallet.balance += 100;  // Increment the existing balance by 100
           referrerWallet.transactions.push({
             transactionId: uuidv4(),
             description: 'Referral Reward (Referrer)',
@@ -183,8 +181,8 @@ async function signup(req, res) {
         }
         await referrerWallet.save();
 
-        // User gets 50 points for using the referral code
-        // pointsToAdd += 50;  // Add 50 points for using the referral code
+        // Add 50 points for the new user using a referral code
+        // pointsToAdd += 50;  
       } else {
         return res.render("signup", { message: "Invalid referral code" });
       }
@@ -208,7 +206,8 @@ async function signup(req, res) {
   }
 }
 
-// OTP verification
+
+
 async function verifyOtp(req, res) {
   try {
     const { otp } = req.body;
@@ -247,11 +246,11 @@ async function verifyOtp(req, res) {
     // Create a wallet for the new user
     const wallet = new Wallet({
       userId: newUser._id,
-      balance: pointsToAdd,  // Initialize wallet with points from signup and referral
+      balance: pointsToAdd,  // Correct pointsToAdd for new user
       transactions: [{
         transactionId: uuidv4(),
         description: 'Signup Bonus (New User)',
-        amount: 25,  // Add points based on signup and referral
+        amount: pointsToAdd,  // Use the calculated points here
         date: new Date(),
       }],
     });
@@ -274,6 +273,7 @@ async function verifyOtp(req, res) {
     });
   }
 }
+
 
 // Login process
 async function login(req, res) {
@@ -427,11 +427,8 @@ const logout = async (req, res) => {
 const loadshop = async (req, res) => {
   try {
     const userData = req.session.user || null; // Fetch user session data
-
-    // Fetch active categories
     const categorise = await Category.find({ isListed: true });
     const categoriseWithIds = categorise.map((category) => ({ _id: category._id, name: category.name }));
-
     const categoryIds = categorise.map((category) => category._id);
 
     // Pagination setup
@@ -439,25 +436,21 @@ const loadshop = async (req, res) => {
     const limit = 6;
     const skip = (page - 1) * limit;
 
-    // Filter conditions
     const filterConditions = {
       isBlocked: false,
-      category: { $in: categoryIds },    };
+      category: { $in: categoryIds },
+    };
 
-    // Category filter
     const categoryFilter = req.query.category;
     if (categoryFilter) {
       filterConditions.category = categoryFilter;
     }
 
-    // Price filter
     const minPrice = parseInt(req.query.gte) || 0;
     const maxPrice = parseInt(req.query.lte) || 100000;
     filterConditions.salePrice = { $gte: minPrice, $lte: maxPrice };
 
-    
     const searchQuery = req.query.search || "";
-    console.log(searchQuery)
     if (searchQuery) {
       filterConditions.name = { $regex: searchQuery, $options: "i" };
     }
@@ -474,22 +467,19 @@ const loadshop = async (req, res) => {
         case "zToA":
           return { name: -1 };
         default:
-          return { createdOn: -1 }; 
+          return { createdOn: -1 };
       }
     };
     const sortQuery = getSortQuery(sortType);
 
-    // Fetch products with filters, sorting, and pagination
     const products = await Product.find(filterConditions)
       .sort(sortQuery)
       .skip(skip)
       .limit(limit);
 
-    // Total product count for pagination
     const totalProducts = await Product.countDocuments(filterConditions);
     const totalPages = Math.ceil(totalProducts / limit);
 
-    // Render the shop page with all data
     res.render("shop", {
       user: userData,
       products: products,
@@ -509,6 +499,7 @@ const loadshop = async (req, res) => {
     res.redirect("/pageNotFound");
   }
 };
+
 
 
 module.exports = {

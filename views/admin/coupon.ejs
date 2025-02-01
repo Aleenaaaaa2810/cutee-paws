@@ -188,7 +188,7 @@
               <th>Expire On</th>
               <th>Offer Price</th>
               <th>Minimum Price</th>
-              <th>Status</th>
+              <!-- <th>Status</th> -->
               <th>Edit</th>
               <th>Delete</th>
             </tr>
@@ -208,12 +208,12 @@
                 </td>
                 <td class="text-start"><%= coupon[i].offerPrice %></td>
                 <td class="text-start"><%= coupon[i].minimumPrice %></td>
-                <td class="text-start"><%= coupon[i].isList %></td>
+                <!-- <td class="text-start"><%= coupon[i].isList %></td> -->
                 <td class="text-start">
                   <a href="/admin/editcoupon?id=<%= coupon[i]._id %>" class="btn btn-primary btn-sm">Edit</a>
                 </td>
                 <td>
-                  <a href="#" onclick="confirmDelete('<%= coupon[i]._id %>')" class="btn btn-danger btn-sm" style="height: 35px; width: 105px;">Delete</a>
+                  <a href="#" onclick="confirmDelete('<%= coupon[i]._id %>')" class="btn btn-primary btn-sm" style="height: 35px; width: 105px;">Delete</a>
                 </td>
               </tr>
             <% } %>

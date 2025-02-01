@@ -12,30 +12,46 @@ const { v4: uuidv4 } = require('uuid');
 
 const getorder = async (req, res) => {
   try {
-    
+    const page = parseInt(req.query.page) || 1; // Get the page number from query parameters
+    const pageSize = parseInt(req.query.pageSize) || 10; // Get the page size from query parameters, default to 10
+    const skip = (page - 1) * pageSize;
+
     const orders = await Order.find({})
-    .sort({ _id: -1 })    
-       .populate('user', 'name email') 
+      .skip(skip) // Skip the documents for the previous pages
+      .limit(pageSize) // Limit the number of documents per page
+      .sort({ _id: -1 })
+      .populate('user', 'name email')
       .populate('orderedItems.product', 'name price');
 
     if (!orders || orders.length === 0) {
       return res.status(404).json({ success: false, message: 'No orders found.' });
     }
+
+    const totalOrders = await Order.countDocuments(); // Get the total number of orders
+    const totalPages = Math.ceil(totalOrders / pageSize); // Calculate the total number of pages
+
     const sanitizedOrders = orders.map(order => {
       order.orderedItems = order.orderedItems.filter(item => item.product);
+      order.finalAmount = (order.totalPrice || 0) + 60; // Assuming 60 is the delivery charge
+
       return order;
     });
 
-    
-    res.render('adminOrders', {  
+    res.render('adminOrders', {
       orders: sanitizedOrders,
-      statusOptions: ['Pending', 'Processing', 'Shipped', 'Delivered', 'Cancelled']
+      statusOptions: ['Pending', 'Processing', 'Shipped', 'Delivered', 'Cancelled'],
+      pagination: {
+        currentPage: page,
+        totalPages: totalPages,
+        totalOrders: totalOrders
+      }
     });
   } catch (error) {
     console.error('Error fetching orders:', error);
     res.status(500).json({ success: false, message: 'Failed to fetch orders.' });
   }
 };
+
 
 
 const updateStatusorder = async (req, res) => {
@@ -85,7 +101,7 @@ const approvereturn = async (req, res) => {
         await product.save();
       }
     }
-    // Update the order status to 'Returned'
+    // Update the order status to 'Returned' 
     order.status = 'Returned';
     await order.save();
 
