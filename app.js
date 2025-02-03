@@ -40,29 +40,24 @@ app.use((req, res, next) => {
   next();
 });
 
-// Cache prevention middleware
 app.use((req, res, next) => {
   res.set('Cache-Control', 'no-store');
   next();
 });
 
-// View engine setup
 app.set("view engine", "ejs");
 app.set("views", [
     path.join(__dirname, "views/user"),
     path.join(__dirname, "views/admin")
 ]);
 
-// Serve static files
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Routes
 app.use("/", userRouter); 
 app.use("/admin", adminRouter); 
 
 
 
-// Start the server
 const PORT = process.env.PORT || 4000;
 
 app.listen(PORT, '0.0.0.0', () => {

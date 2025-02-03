@@ -6,7 +6,7 @@ require("dotenv").config();  // Ensure dotenv is loaded
 passport.use(new GoogleStrategy({
   clientID: process.env.GOOGLE_CLIENT_ID,  // Corrected variable name
   clientSecret: process.env.GOOGLE_CLIENT_SECRET,  // Corrected variable name
-  callbackURL: '/auth/google/callback'  // Make sure this URL matches your Google Developer Console redirect URL
+  callbackURL: 'https://cuteepaws.aleena.fun/auth/google/callback'  // Make sure this URL matches your Google Developer Console redirect URL
 }, async (accessToken, refreshToken, profile, done) => {
   try {
     let user = await User.findOne({ googleId: profile.id });

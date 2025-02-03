@@ -22,8 +22,9 @@
    justify-content: space-between;
    align-items: center;
    margin-bottom: 20px;
- }
-
+   margin-left: 20px;
+}
+ 
  .search-form {
    display: flex;
    align-items: center;
@@ -121,13 +122,17 @@
    border-radius: 8px;
    text-align: center;
    position: relative;
+   height: 460px;
  }
 
  .product-card img {
    max-width: 100%;
    height: auto;
    border-radius: 5px;
+   width: 100%;
+   height: 231px;
  }
+
 
  .wishlist-btn {
    position: absolute;
@@ -254,30 +259,7 @@
   font-size: 1.2rem; /* Smaller size for stars */
   margin-right: 3px;
 }
-</style>
 
-<div class="main-container">
- <section class="shop-page container">
-<div class="shop-topbar">
-  <div class="search-bar">
-    <form action="/shop" method="GET" class="search-form">
-      <input type="text" name="search" placeholder="Search items..." class="search-input" id="searchInput" />
-      <button type="submit" class="search-button">Search</button>
-      <button type="button" class="cancel-button" id="cancelButton" onclick="clearSearch()">
-        <i class="fas fa-times"></i>
-      </button>
-    </form>
-  </div>
-</div>
-
-<script>
-  // Function to clear the search input
-  function clearSearch() {
-    document.getElementById("searchInput").value = ""; // Clear the input field
-  }
-</script>
-
-<style>
   /* Styling the cancel button */
   .cancel-button {
     background: transparent;
@@ -340,6 +322,42 @@
   }
 </style>
 
+
+
+<div class="main-container">
+ <section class="shop-page container">  <div class="search-bar"> 
+  <button 
+  id="clearSearchButton" 
+  style="color: rgb(255, 255, 255); 
+         border-radius: 50px; 
+         background-color: black; 
+         position: absolute; 
+         margin-left: 203px; 
+         margin-top: 7px; 
+         cursor: pointer; 
+         padding-right: 12px; 
+         padding-left: 12px;">
+  x
+</button>
+<div class="shop-topbar">
+  <form action="/shop" method="GET" class="search-form">
+    <input type="hidden" name="category" value="<%= selectedCategory %>"> <!-- Persist selected category -->
+    <input type="hidden" name="gte" value="<%= minPrice %>"> <!-- Persist min price -->
+    <input type="hidden" name="lte" value="<%= maxPrice %>"> <!-- Persist max price -->
+    <input type="text" name="search" value="<%= searchQuery %>" placeholder="Search items..." class="search-input" id="searchInput" />
+    <button type="submit" class="search-button">Search</button>
+  </form>
+</div>
+
+
+</div>
+
+<script>
+  // Function to clear the search input
+  function clearSearch() {
+    document.getElementById("searchInput").value = ""; // Clear the input field
+  }
+</script>
   
    <div class="product-list-container">
      <aside class="sidebar">
@@ -349,11 +367,14 @@
            <!-- Removed brand section -->
            <ul>
             <li class="filter-item">
-              <a href="/shop" class="<%= !selectedCategory ? 'active' : '' %>">All</a>
+              <a href="/shop?search=<%= searchQuery %>&category=<%= selectedCategory %>&gte=<%= minPrice %>&lte=<%= maxPrice %>&sort=<%= selectedSort %>"
+                 class="<%= !selectedCategory ? 'active' : '' %>">
+                All
+              </a>
             </li>
             <% for (let i = 0; i < category.length; i++) { %>
               <li class="filter-item">
-                <a href="/shop?category=<%= category[i]._id %>&gte=<%= minPrice %>&lte=<%= maxPrice %>"
+                <a href="/shop?search=<%= searchQuery %>&category=<%= category[i]._id %>&gte=<%= minPrice %>&lte=<%= maxPrice %>&sort=<%= selectedSort %>"
                    class="<%= selectedCategory === category[i]._id.toString() ? 'active' : '' %>">
                   <%= category[i].name %>
                 </a>
@@ -370,71 +391,59 @@
          <form id="price-filter-form">
            <div class="price-options">
             <div class="price-filter">
-              <a href="/shop?category=<%= selectedCategory %>&gte=0&lte=499">
+
+              <a href="/shop?search=<%= searchQuery %>&category=<%= selectedCategory %>&gte=0&lte=499">
                 <button type="button" class="price-button <%= minPrice === 0 && maxPrice === 499 ? 'active' : '' %>">
                   Under ₹500
                 </button>
               </a>
-              <a href="/shop?category=<%= selectedCategory %>&gte=500&lte=999">
+              <a href="/shop?search=<%= searchQuery %>&category=<%= selectedCategory %>&gte=500&lte=999">
                 <button type="button" class="price-button <%= minPrice === 500 && maxPrice === 999 ? 'active' : '' %>">
                   ₹500 - ₹1000
                 </button>
               </a>
-              <a href="/shop?category=<%= selectedCategory %>&gte=1000&lte=1499">
+              <a href="/shop?search=<%= searchQuery %>&category=<%= selectedCategory %>&gte=1000&lte=1499">
                 <button type="button" class="price-button <%= minPrice === 1000 && maxPrice === 1499 ? 'active' : '' %>">
                   ₹1000 - ₹1500
                 </button>
               </a>
-              <a href="/shop?category=<%= selectedCategory %>&gte=1500&lte=100000">
+              <a href="/shop?search=<%= searchQuery %>&category=<%= selectedCategory %>&gte=1500&lte=100000">
                 <button type="button" class="price-button <%= minPrice === 1500 && maxPrice === 100000 ? 'active' : '' %>">
                   Above ₹1500
                 </button>
               </a>
+              
             </div>
            </div>
          </form>
        </div>
        
-       <!-- <div>
-        <ul  class="sort-list"></ul>>
-          <li  class="sort-list">
-            <a href="" class="<%= selectedSort === 'default' ? 'active' : '' %>">Sort list</a>
-          </li >
-          <li class="sort-list" >
-            <a href="/shop?sort=lowToHigh" class="<%= selectedSort === 'lowToHigh' ? 'active' : '' %>">Price: Low to High</a>
-
-          </li>
-
-          <li class="sort-list">
-            <a href="/shop?sort=highToLow" class="<%= selectedSort === 'highToLow' ? 'active' : '' %>">Price: High to Low</a>
-          </li>
-          <li class="sort-list">
-            <a href="/shop?sort=aToZ" class="<%= selectedSort === 'aToZ' ? 'active' : '' %>">Name: A to Z</a>
-          </li>
-          <li class="sort-list">
-            <a href="/shop?sort=zToA" class="<%= selectedSort === 'zToA' ? 'active' : '' %>">Name: Z to A</a>
-          </li>
-        </ul>
-        
-       </div> -->
+       
+       
        <div>
         <ul class="sort-list">
           <li>
-            <a href="/shop" class="<%= selectedSort === 'default' ? 'active' : '' %>">FILTER</a>
+            <a href="/shop?search=<%= searchQuery %>&category=<%= selectedCategory %>&gte=<%= minPrice %>&lte=<%= maxPrice %>&sort=lowToHigh"
+               class="<%= selectedSort === 'lowToHigh' ? 'active' : '' %>">
+              ₹: Low to High
+            </a>
           </li>
           <li>
-            <a href="/shop?sort=lowToHigh" class="<%= selectedSort === 'lowToHigh' ? 'active' : '' %>">₹: Low to High</a>
+            <a href="/shop?search=<%= searchQuery %>&category=<%= selectedCategory %>&gte=<%= minPrice %>&lte=<%= maxPrice %>&sort=highToLow"
+               class="<%= selectedSort === 'highToLow' ? 'active' : '' %>">
+              ₹: High to Low
+            </a>
           </li>
           <li>
-            <a href="/shop?sort=highToLow" class="<%= selectedSort === 'highToLow' ? 'active' : '' %>">₹: High to Low</a>
+            <a href="/shop?search=<%= searchQuery %>&category=<%= selectedCategory %>&gte=<%= minPrice %>&lte=<%= maxPrice %>&sort=aToZ"
+               class="<%= selectedSort === 'aToZ' ? 'active' : '' %>">Name: A to Z</a>
           </li>
           <li>
-            <a href="/shop?sort=aToZ" class="<%= selectedSort === 'aToZ' ? 'active' : '' %>">Name: A to Z</a>
-          </li>
-          <li>
-            <a href="/shop?sort=zToA" class="<%= selectedSort === 'zToA' ? 'active' : '' %>">Name: Z to A</a>
+            <a href="/shop?search=<%= searchQuery %>&category=<%= selectedCategory %>&gte=<%= minPrice %>&lte=<%= maxPrice %>&sort=zToA"
+               class="<%= selectedSort === 'zToA' ? 'active' : '' %>">Name: Z to A</a>
           </li>
         </ul>
+        
       </div>
       
      </aside>
@@ -496,17 +505,13 @@
 
    <!-- Pagination -->
    <div class="pagination">
-    <% if (currentpage > 1) { %>
-      <a class="btn" href="/shop?page=<%= currentpage - 1 %>">Prev</a>
-    <% } %>
-    
-    <% for (let i = 1; i <= totalPages; i++) { %>
-      <a class="btn <%= currentpage === i ? 'active' : '' %>" href="/shop?page=<%= i %>"><%= i %></a>
-    <% } %>
-    
-    <% if (currentpage < totalPages) { %>
-      <a class="btn" href="/shop?page=<%= currentpage + 1 %>">Next</a>
-    <% } %>
+  <% for (let i = 1; i <= totalPages; i++) { %>
+    <a href="/shop?page=<%= i %>&category=<%= selectedCategory || '' %>&gte=<%= minPrice %>&lte=<%= maxPrice %>&sort=<%= selectedSort %>&search=<%= searchQuery %>"
+       class="<%= currentpage === i ? 'active' : '' %>">
+      <%= i %>
+    </a>
+  <% } %>
+</div>
     
    </div>
   
@@ -589,6 +594,12 @@ function addToCart(productId, productName, productPrice) {
 </script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
+
+    document.getElementById("clearSearchButton").addEventListener("click", function () {
+  const url = new URL(window.location.href);
+  url.searchParams.delete("search"); // Remove the search parameter
+  window.location.href = url.toString(); // Reload the page with updated URL
+});
   $(document).ready(function () {
     // Check if noResults flag is true and show SweetAlert
     const noResults = <%= noResults || false %>;
@@ -601,6 +612,20 @@ function addToCart(productId, productName, productPrice) {
       });
     }
   });
+
+
+  document.getElementById("clearSearchButton").addEventListener("click", function () {
+  const url = new URL(window.location.href);
+  url.searchParams.delete("search"); // Remove the search parameter
+  url.searchParams.delete("category"); // Remove category filter
+  url.searchParams.delete("gte"); // Remove min price
+  url.searchParams.delete("lte"); // Remove max price
+  window.location.href = url.toString(); // Reload the page with updated URL
+});
+
+
+
+
 </script>
 
 

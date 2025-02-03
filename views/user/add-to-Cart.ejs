@@ -261,6 +261,8 @@ $(document).ready(function () {
     const quantityElement = $(`#quantity-${itemId}`);
     const itemRow = $(`.cart-item[data-item-id="${itemId}"]`);
     const totalElement = $('.cart-total p');
+    const maxStock = Number(itemRow.data('stock')); // Get stock limit from data attribute
+
 
     $.ajax({
       url: action === 'increase' ? '/cart/increase' : '/cart/decrease',
@@ -298,8 +300,18 @@ $(document).ready(function () {
         });
       }
 
-      // SweetAlert when quantity exceeds or equals stock limit
-      if (newQuantity ===5) {
+    
+      
+      if (newQuantity === maxStock) {
+              Swal.fire({
+                icon: 'warning',
+                title: 'Stock Limit Reached',
+                text: 'You have added the maximum available stock.',
+                timer: 2000,
+                showConfirmButton: false
+              });
+            }
+      else if(newQuantity ===5){
         Swal.fire({
           icon: 'warning',
           title: 'Maximum Limit Reached',

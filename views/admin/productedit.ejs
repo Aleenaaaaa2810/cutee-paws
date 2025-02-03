@@ -25,11 +25,14 @@
       background: white;
       padding: 20px;
       border-radius: 5px;
+      max-width: 600px; /* Set a max width for the cropper container */
+      max-height: 80%; /* Set a max height for the cropper container */
+      overflow: hidden; /* Hide overflow */
     }
     #cropper-image {
-      max-width: 100%;
+      max-width: 100%; /* Ensure the image fits within the container */
+      max-height: 400px; /* Set a max height for the cropper image */
     }
-    /* Style for Delete Button */
 .delete-btn {
   background-color: #ff4d4d; /* Red color for delete */
   color: white;
@@ -99,8 +102,10 @@
         <!-- Quantity -->
         <div class="form-group">
           <label for="quantity">Quantity</label>
-          <input type="number" id="quantity" name="quantity" value="<%= product.quantity %>" required>
+          <input type="number" min="1" id="quantity" name="quantity" value="<%= product.quantity %>" required>
         </div>
+
+       
 
         <!-- Category -->
         <div class="form-group">
@@ -173,6 +178,10 @@
       cropper = new Cropper(document.getElementById('cropper-image'), {
         aspectRatio: 1, // Set the aspect ratio as needed
         viewMode: 1,
+        minCropBoxWidth: 100, // Minimum width of the crop box
+        minCropBoxHeight: 100, // Minimum height of the crop box
+        cropBoxResizable: true, // Allow resizing of the crop box
+        cropBoxMovable: true, // Allow moving of the crop box
       });
     }
 
@@ -216,6 +225,7 @@
         Swal.fire('Error', 'All fields are required.', 'error');
         return;
       }
+      
 
       // Validation: Regular price should be greater than sale price
       if (regularPrice <= salePrice) {

@@ -244,12 +244,13 @@
             </div>
         </div>
         
-        <div class="total-price">
-            <h3>Discount: ₹<span id="discountAmount">0</span></h3>
-            <h3>Delivery Charge: ₹60</h3>
-            <h3>Total Price: ₹<span id="totalPrice"><%= totalPrice %></span></h3>
-            <h3>Final Total Price: ₹<span id="finalTotalPrice"><%= totalPrice + 60 %></span></h3>
+        <div class="total-price">  
+            <h3 style="color: red;">Discount: ₹<span id="discountAmount">0</span></h3>  
+            <h3 style="color: red;">Delivery Charge: ₹60</h3>  
+            <h3 style="color: red;">Total Price: ₹<span id="totalPrice"><%= totalPrice %></span></h3>  
+            <h3 style="color: green; font-weight: bold;">Final Total Price: ₹<span id="finalTotalPrice"><%= totalPrice + 60 %></span></h3>  
         </div>
+        
         
         <script>
             function selectCouponFromModal() {
