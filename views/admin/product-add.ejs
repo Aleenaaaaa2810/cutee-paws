@@ -166,31 +166,26 @@
 
             // Optional: Upload the cropped image to the server
             canvas.toBlob((blob) => {
-    const formData = new FormData();
-    formData.append('image_jpg', blob, `image${index}.jpg`);
-
-    // Generate PNG and append
-    canvas.toBlob((pngBlob) => {
-        formData.append('image_png', pngBlob, `image${index}.png`);
-
-        fetch('/upload-cropped-image', {
-            method: 'POST',
-            body: formData
-        }).then(response => response.json())
-        .then(data => {
-            if (data.url) {
-                // Update the preview container with the server-hosted image
-                document.getElementById(`cropped-image${index}`).src = data.url;
-            } else {
-                console.error('Image URL not received from the server');
-            }
-        }).catch(error => {
-            console.error('Error uploading image:', error);
-        });
-
-    }, 'image/png'); // Ensure PNG format is specified
-}, 'image/jpeg'); // Ensure JPG format is specified
-
+                const formData = new FormData();
+                formData.append('image', blob, `image${index}.jpg`);
+                fetch('/upload-cropped-image', {
+                    method: 'POST',
+                    body: formData
+                }).then(response => response.json())
+                .then(data => {
+                    if (data.url) {
+                        // Update the preview container with the server-hosted image
+                        document.getElementById(`cropped-image${index}`).src = data.url;
+                    } else {
+                        console.error('Image URL not received from the server');
+                    }
+                }).catch(error => {
+                    console.error('Error uploading image:', error);
+                });
+            });
+            return false;
+        }
+    }
     function handleFormSubmit(event) {
     event.preventDefault(); // Prevent default form submission
 
