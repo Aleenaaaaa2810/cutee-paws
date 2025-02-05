@@ -25,7 +25,6 @@ const loadLogin = (req, res) => {
 const login = async (req, res) => {
   try {
     const { email, password } = req.body;
-    console.log("hiiiiiiiiiiiiiiiiiiiiiiii logined")
     const admin = await User.findOne({ email, isAdmin: true });
 
     if (admin) {

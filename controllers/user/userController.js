@@ -53,11 +53,17 @@ async function sendVerificationEmail(email, otp) {
   }
 }
 
-// Individual page load functions
 async function loadHomepage(req, res) {
-  const user = req.session.user || null; // Safely retrieve session user
-  res.render("home", { user });
+  try {
+    const products = await Product.find().sort({ salesCount: -1 }).limit(16); // Fetch top 16 best-selling products
+    const user = req.session.user || null;
+    res.render("home", { user, products });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Server Error");
+  }
 }
+
 
 
 
