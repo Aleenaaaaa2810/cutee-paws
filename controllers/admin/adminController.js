@@ -44,7 +44,6 @@ const login = async (req, res) => {
       });
     }
   } catch (error) {
-    console.log("login error", error);
     return res.redirect("/pageerror");
   }
 };
@@ -54,13 +53,11 @@ const logout = async (req, res) => {
   try {
     req.session.destroy((error) => {
       if (error) {
-        console.log("Error destroying session", error);
         return res.redirect("/pageerror");
       }
        return res.redirect("/admin/login"); 
     });
   } catch (error) {
-    console.log("Unexpected error during logout", error);
     res.redirect("/pageerror");
   }
 };
@@ -72,8 +69,8 @@ const loadDashboard = async (req, res) => {
     let filter = { status: 'Delivered' };
 
     if (range === 'daily') {
-      const startOfWeek = moment().startOf('isoWeek').toDate();  // Get the start of the week (Sunday)
-      const endOfWeek = moment().endOf('isoWeek').toDate();      // Get the end of the week (Saturday)
+      const startOfWeek = moment().startOf('isoWeek').toDate();  
+      const endOfWeek = moment().endOf('isoWeek').toDate();      
       filter.createdOn = { $gte: startOfWeek, $lte: endOfWeek };
     } else if (range === 'weekly') {
       const startOfMonth = moment().startOf('month').toDate();
@@ -84,7 +81,6 @@ const loadDashboard = async (req, res) => {
       const endOfYear = moment().endOf('year').toDate();
       filter.createdOn = { $gte: startOfYear, $lte: endOfYear };
     } else if (range === 'yearly') {
-      // Modify to show data for the last 10 years (decade)
       const startOfDecade = moment().subtract(10, 'years').startOf('year').toDate();
       const endOfDecade = moment().endOf('year').toDate();
       filter.createdOn = { $gte: startOfDecade, $lte: endOfDecade };
@@ -100,20 +96,17 @@ const loadDashboard = async (req, res) => {
       let groupLabel;
 
       if (range === 'daily') {
-        groupLabel = moment(order.createdOn).format('dddd');  // Days of the week (e.g., Sunday, Monday, etc.)
+        groupLabel = moment(order.createdOn).format('dddd');  
       } 
-      // Modify the logic for the "weekly" range to show weeks of the month
       else if (range === 'weekly') {
         const weekOfMonth = moment(order.createdOn).week() - moment(order.createdOn).startOf('month').week() + 1;
         groupLabel = `Week ${weekOfMonth}`;
       } 
-      // Modify the logic for the "monthly" range to show months of the year
       else if (range === 'monthly') {
-        groupLabel = moment(order.createdOn).format('MMMM');  // Full month names (e.g., January, February, etc.)
+        groupLabel = moment(order.createdOn).format('MMMM');  
       }
-      // For "yearly" and "all", retain the original logic
       else if (range === 'yearly') {
-        groupLabel = moment(order.createdOn).format('YYYY'); // Show each year in the last decade
+        groupLabel = moment(order.createdOn).format('YYYY'); 
       } else if (range === 'all') {
         groupLabel = 'All Orders';
       }
@@ -127,9 +120,9 @@ const loadDashboard = async (req, res) => {
     });
    
     const salesData = {
-      labels: Object.keys(groupedOrders), // X-axis labels: days of the week, weeks, months, etc.
-      revenue: Object.values(groupedOrders).map((data) => data.totalRevenue), // Revenue values
-      orders: Object.values(groupedOrders).map((data) => data.orderCount), // Orders values
+      labels: Object.keys(groupedOrders), 
+      revenue: Object.values(groupedOrders).map((data) => data.totalRevenue), 
+      orders: Object.values(groupedOrders).map((data) => data.orderCount), 
     };
 
     const totalOrders = orders.length;

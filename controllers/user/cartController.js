@@ -14,13 +14,11 @@ const getCart = async (req, res) => {
     const cart = await Cart.findOne({ userId: user.id }).populate('items.productId');
 
     if (!cart) {
-      console.log("Cart not found");
       return res.render('cartnoitem', { user });
     }
 
     if (cart.items && cart.items.length > 0) {
       cart.items.forEach(item => {
-        // Process each item
       });
     }
 
@@ -93,7 +91,6 @@ const increaseQuantity = async (req, res) => {
 
     const item = dbCart.items.find(item => item._id.toString() === itemId);
     
-    // Check if item is found and if its quantity is less than 5
     if (item) {
       if (item.quantity < 5) {
         item.quantity += 1;

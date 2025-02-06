@@ -32,12 +32,9 @@ const getWallet = async (req, res) => {
 
 const addMoney = async (req, res) => {
   const { amount } = req.body; 
-  console.log("Received body:", req.body);
   const userId = req.session.user?.id; 
-  console.log("Session user:", req.session.user);
   
   try {
-    // Ensure amount is treated as a number
     const parsedAmount = parseFloat(amount);
     if (isNaN(parsedAmount) || parsedAmount <= 0) {
       return res.status(400).send("Invalid amount");
@@ -48,7 +45,7 @@ const addMoney = async (req, res) => {
     if (!wallet) {
       wallet = new Wallet({
         userId,
-        balance: parsedAmount,  // set balance to the received amount
+        balance: parsedAmount,  
         transactions: [{
           transactionId: uuidv4(),
           description: 'Credit',
@@ -58,10 +55,8 @@ const addMoney = async (req, res) => {
       });
       await wallet.save();
     } else {
-      // Add the parsed amount to the existing wallet balance
       wallet.balance += parsedAmount;
 
-      // Create a new transaction entry
       wallet.transactions.push({
         transactionId: uuidv4(),
         description: 'Credit',
@@ -72,7 +67,7 @@ const addMoney = async (req, res) => {
       await wallet.save();
     }
 
-    res.redirect('/wallet'); // Redirect to wallet page after adding money
+    res.redirect('/wallet'); 
   } catch (err) {
     console.error(err);
     res.status(500).send('Server Error');
@@ -82,7 +77,6 @@ const addMoney = async (req, res) => {
 
 
 const walletpay = async (req, res) => {
-  console.log("Wallet payment initiated"); 
   
   const userId = req.session?.user?.id;
   const coupon= await Coupon.find({})
@@ -104,21 +98,18 @@ const walletpay = async (req, res) => {
       const userId = req.session.user?.id;
       const { totalPrice ,selectedCoupon} = req.body;
       let discount = 0;
-      let couponDetails = null; // Renaming to avoid conflict
+      let couponDetails = null;
       if (selectedCoupon) {
         couponDetails = await Coupon.findOne({ name: selectedCoupon });
        
           discount = Number(couponDetails.offerPrice);
-          console.log(discount)
   
         
        
       }
      
-      // Calculate final amount (including shipping fee)
-      let finalAmount = totalPrice - discount + 60; // Assuming 60 is a fixed shipping fee
+      let finalAmount = totalPrice - discount + 60; 
   
-      console.log("finalprice",finalAmount)
 
       if (!userId) {
           return res.status(400).json({ success: false, message: 'User ID is missing or invalid!' });

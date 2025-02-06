@@ -30,7 +30,7 @@ const loadwishlist = async (req, res) => {
 const addTowishlist = async (req, res) => {
   try {
     const productId = req.body.productId;
-    const userId = req.session.user && req.session.user.id; // Ensure correct user ID extraction
+    const userId = req.session.user && req.session.user.id; 
 
     if (!userId) {
       return res.status(401).json({ status: false, message: "User not logged in" });
@@ -81,7 +81,6 @@ const deletewishlist = async (req, res) => {
       return res.status(404).json({ status: false, message: 'User not found' });
     }
 
-    // Filter out the product from the wishlist
     user.wishlist = user.wishlist.filter(id => id.toString() !== productId);
 
     await user.save();

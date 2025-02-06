@@ -20,7 +20,6 @@ const getorder = async (req, res) => {
     const coupon= await Coupon.find({})
  
 
-    // Check if user is authenticated
     if (!userId || !mongoose.Types.ObjectId.isValid(userId)) {
       return res.status(401).json({ success: false, message: 'Unauthorized access.' });
     }
@@ -53,9 +52,7 @@ const getorder = async (req, res) => {
 const postorder = async (req, res) => {
   try {
     const { items, totalPrice, addressId, paymentMethod, razorpayDetails, selectedCoupon } = req.body;
-    console.log("selectedCoupon", selectedCoupon);
 
-    // Parse items if received as a string
     let parsedItems;
     try {
       parsedItems = typeof items === "string" ? JSON.parse(items) : items;
@@ -63,7 +60,6 @@ const postorder = async (req, res) => {
       return res.status(400).json({ success: false, message: "Invalid items format." });
     }
 
-    // Validate input
     if (!parsedItems || !Array.isArray(parsedItems) || parsedItems.length === 0) {
       return res.status(400).json({ success: false, message: "Ordered items are required." });
     }
@@ -76,7 +72,6 @@ const postorder = async (req, res) => {
       return res.status(400).json({ success: false, message: "Invalid address ID." });
     }
 
-    // Validate payment method
     const validMethods = ['Cash on Delivery', 'Razorpay', 'Wallet'];
     if (!validMethods.includes(paymentMethod)) {
       return res.status(400).json({ success: false, message: 'Invalid payment method selected.' });
@@ -87,7 +82,6 @@ const postorder = async (req, res) => {
       return res.status(401).json({ success: false, message: "Unauthorized access." });
     }
 
-    // Validate product stock
     for (const item of parsedItems) {
       const product = await Product.findById(item.productId);
       if (!product) {
@@ -102,7 +96,6 @@ const postorder = async (req, res) => {
       }
     }
 
-    // Map cart items to order format
     const orderedItems = parsedItems.map((item) => ({
       product: item.productId?._id || item.productId,
       quantity: item.quantity,
@@ -116,10 +109,8 @@ const postorder = async (req, res) => {
       discount = Number(couponDetails.offerPrice);
     }
 
-    // Calculate final amount (including shipping fee)
     let finalAmount = totalPrice - discount + 60;
 
-    // Save order
     const newOrder = new Order({
       user: userId,
       orderedItems,
@@ -136,9 +127,7 @@ const postorder = async (req, res) => {
     });
 
     const orderrr = await newOrder.save();
-    console.log("Order saved:", orderrr);
 
-    // Update product quantities based on ordered items
     for (const item of orderedItems) {
       const product = await Product.findById(item.product);
       if (!product) {
@@ -152,14 +141,12 @@ const postorder = async (req, res) => {
       await product.save();
     }
 
-    // Delete items from cart
     const cart = await Cart.findOne({ userId });
     if (cart) {
       cart.items = [];
       await cart.save();
     }
 
-    // Respond with success
     res.status(200).json({
       success: true,
       message: "Checkout successful, cart is now empty",
@@ -188,14 +175,13 @@ const orderPage = async (req, res) => {
       return res.status(404).send('Order not found!');
     }
     let finalAmount =order.totalPrice - order.discount+ 60;
-    console.log("finalprice",finalAmount)
 
 
     res.render('orderplaced', {
       orderId: order.orderId,
       orderDate: order.createdOn.toLocaleDateString(),
       totalPrice: order.totalPrice,
-            paymentMethods: order.paymentMethod, // Ensure this matches the schema field
+            paymentMethods: order.paymentMethod, 
       status: order.status,coupon,
       finalTotalPrice:finalAmount,
       discount:order.discount
@@ -218,12 +204,12 @@ const profileOderget = async (req, res) => {
     const userId = req.session?.user?.id;
 
     const orders = await Order.find({ user: userId })
-      .sort({ createdOn: -1 }) // Fetch all orders in descending order
-      .populate('orderedItems.product') // Populate product details
+      .sort({ createdOn: -1 }) 
+      .populate('orderedItems.product') 
       .lean();
 
     if (!orders || orders.length === 0) {
-      return res.render('profileOrderpage', { orders: [] }); // Pass empty array if no orders
+      return res.render('profileOrderpage', { orders: [] }); 
     }
 
     res.render('profileOrderpage', { orders,user });
@@ -260,7 +246,6 @@ const cancelOrder = async (req, res) => {
       return res.status(400).json({ success: false, message: 'This order has already been cancelled.' });
     }
 
-    // Check if payment status is failed; if so, skip refund
     if (order.paymentMethod !== 'Cash on Delivery' && order.razorpayDetails?.paymentStatus !== 'failed' ) {
       const user = await User.findById(req.session.user.id);
       if (!user) {
@@ -292,7 +277,7 @@ const cancelOrder = async (req, res) => {
       }
     }
     order.status = 'Cancelled';
-    order.cancelReason = reason;  // Save cancellation reason
+    order.cancelReason = reason;  
     await order.save();
     
 
@@ -307,9 +292,8 @@ const cancelOrder = async (req, res) => {
 const returnorder = async (req, res) => {
   try {
     const { orderId, reason } = req.body;
-    console.log("orderId, reason", orderId, reason);
 
-    // Input validation
+    
     if (typeof orderId !== 'string' || typeof reason !== 'string' || orderId.trim() === '' || reason.trim() === '') {
       return res.status(400).json({ success: false, message: 'Invalid order ID or reason.' });
     }
@@ -318,31 +302,25 @@ const returnorder = async (req, res) => {
       return res.status(401).json({ success: false, message: 'Unauthorized.' });
     }
 
-    // Fetch the order by orderId and user
     const order = await Order.findOne({ orderId: orderId, user: req.session.user.id });
 
     if (!order) {
       return res.status(404).json({ success: false, message: 'Order not found or you do not have permission to return this order.' });
     }
 
-    // Check if return has already been requested
     if (order.returnRequested) {
       return res.status(400).json({ success: false, message: 'Return has already been requested for this order.' });
     }
 
-    // Only allow return for 'Delivered' orders
     if (order.status.toLowerCase() !== 'delivered') {
       return res.status(400).json({ success: false, message: 'Only delivered orders can be returned.' });
     }
 
-    // Set returnRequested to true and update the status
     order.returnRequested = true;
     order.status = 'Return Requested';
 
-    // Trim the reason to ensure there are no leading/trailing spaces
     order.returnReason = reason.trim();
 
-    // Save the order with updated status and return reason
     await order.save();
 
     return res.json({ success: true, message: 'Return request has been submitted successfully.' });

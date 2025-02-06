@@ -11,14 +11,12 @@ const { v4: uuidv4 } = require('uuid');
 
  const env=require("dotenv").config();
 
-// Helper function to generate OTP
 function generateOTP() {
   const otp = (Math.floor(100000 + Math.random() * 900000)).toString(); 
   console.log("Generated OTP:", otp);
   return otp;
 }
 
-// Send OTP email function
 async function sendVerificationEmail(email, otp) {
   if (!process.env.NODEMAILER_EMAIL || !process.env.NODEMAILER_PASSWORD) {
     console.error("Nodemailer credentials are missing in environment variables");
@@ -45,7 +43,6 @@ async function sendVerificationEmail(email, otp) {
       html: `<b>Your OTP: ${otp}</b>`,
     });
 
-    console.log("Email sent successfully:", info.response);
     return info.accepted.length > 0;
   } catch (error) {
     console.error("Error sending email:", error.message);
@@ -55,7 +52,7 @@ async function sendVerificationEmail(email, otp) {
 
 async function loadHomepage(req, res) {
   try {
-    const products = await Product.find().sort({ salesCount: -1 }).limit(16); // Fetch top 16 best-selling products
+    const products = await Product.find().sort({ salesCount: -1 }).limit(16); 
     const user = req.session.user || null;
     res.render("home", { user, products });
   } catch (error) {
@@ -151,24 +148,21 @@ async function signup(req, res) {
     }
 
     let referredBy = null;
-    let pointsToAdd = 25;  // Default points for new user (no referral)
+    let pointsToAdd = 25;  
 
     if (referralCode) {
-      // Validate referral code
       const referrer = await User.findOne({ referralId: referralCode });
       if (referrer) {
         referredBy = referrer._id;
 
-        // Add 100 points to the referrer for their successful referral
         referrer.points += 100;
         await referrer.save();
 
-        // Update referrer's wallet
         let referrerWallet = await Wallet.findOne({ userId: referrer._id });
         if (!referrerWallet) {
           referrerWallet = new Wallet({
             userId: referrer._id,
-            balance: 100, // Start with 100 points for referral
+            balance: 100, 
             transactions: [{
               transactionId: uuidv4(),
               description: 'Referral Reward (Referrer)',
@@ -177,7 +171,7 @@ async function signup(req, res) {
             }],
           });
         } else {
-          referrerWallet.balance += 100;  // Increment the existing balance by 100
+          referrerWallet.balance += 100;  
           referrerWallet.transactions.push({
             transactionId: uuidv4(),
             description: 'Referral Reward (Referrer)',
@@ -187,14 +181,12 @@ async function signup(req, res) {
         }
         await referrerWallet.save();
 
-        // Add 50 points for the new user using a referral code
-        // pointsToAdd += 50;  
+        
       } else {
         return res.render("signup", { message: "Invalid referral code" });
       }
     }
 
-    // Generate referral ID and OTP
     const referralId = generateReferralCode();
     const otp = generateOTP();
     req.session.userOtp = otp;
@@ -235,7 +227,6 @@ async function verifyOtp(req, res) {
     const { name, email, phone, password, referralId, referredBy, pointsToAdd } = req.session.userData;
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Create the new user
     const newUser = new User({
       name,
       email,
@@ -244,26 +235,24 @@ async function verifyOtp(req, res) {
       isValid: true,
       referralId,
       referredBy,
-      points: pointsToAdd,  // Add points (25 for new user, +50 if referral code used)
+      points: pointsToAdd,  
     });
 
     await newUser.save();
 
-    // Create a wallet for the new user
     const wallet = new Wallet({
       userId: newUser._id,
-      balance: pointsToAdd,  // Correct pointsToAdd for new user
+      balance: pointsToAdd,  
       transactions: [{
         transactionId: uuidv4(),
         description: 'Signup Bonus (New User)',
-        amount: pointsToAdd,  // Use the calculated points here
+        amount: pointsToAdd,  
         date: new Date(),
       }],
     });
 
     await wallet.save();
 
-    // Clear session data
     req.session.userOtp = null;
     req.session.userData = null;
 
@@ -281,46 +270,38 @@ async function verifyOtp(req, res) {
 }
 
 
-// Login process
 async function login(req, res) {
   try {
     const { email, password } = req.body;
 
-    // Find the user by email
     const user = await User.findOne({ email });
 
     if (!user) {
       return res.status(404).json({ success: false, message: "User not found" });
     }
 
-    // Check if the user's account is blocked
     if (user.isBlocked) {
       return res.status(403).json({ success: false, message: "Your account has been blocked. Please contact support." });
     }
 
-    // Validate the password
     const isPasswordValid = await user.matchPassword(password);
     if (!isPasswordValid) {
       return res.status(401).json({ success: false, message: "Incorrect password" });
     }
 
-    // Set session
     req.session.user = {
       id: user._id,
       name: user.name,
       email: user.email,
     };
 
-    // Check referral status and update wallet if necessary
     if (user.referredBy !=null) {
-      // Add points to the user’s wallet if the referral code hasn’t been applied
       let wallet = await Wallet.findOne({ userId: user._id });
 
-      // If no wallet exists, create one
       if (!wallet) {
         wallet = new Wallet({
           userId: user._id,
-          balance: pointsToAdd+50,  // Add the user’s points to the wallet
+          balance: pointsToAdd+50,  
           transactions: [{
             transactionId: uuidv4(),
             description: 'Referral Bonus',
@@ -338,14 +319,11 @@ async function login(req, res) {
         });
       }
 
-      // Mark the referral as applied
       user.referredBy = null
-      // Save changes to user and wallet
       await user.save();
       await wallet.save();
     }
 
-    // Respond with success
     return res.status(200).json({ success: true, message: "Login successful" });
   } catch (error) {
     console.error("Login error:", error.message);
@@ -356,7 +334,6 @@ async function login(req, res) {
 
 
 
-// Load Login page
 async function loadLogin(req, res) {
   try {
     if (!req.session.user) {
@@ -437,31 +414,26 @@ const loadshop = async (req, res) => {
     const categoriseWithIds = categorise.map(category => ({ _id: category._id, name: category.name }));
     const categoryIds = categorise.map(category => category._id);
 
-    // Pagination setup
     const page = parseInt(req.query.page) || 1;
     const limit = 6;
     const skip = (page - 1) * limit;
 
-    // Apply category filter if selected
     const filterConditions = { isBlocked: false };
     if (req.query.category) {
       filterConditions.category = req.query.category;
     } else {
-      filterConditions.category = { $in: categoryIds }; // Default: include all categories
+      filterConditions.category = { $in: categoryIds }; 
     }
 
-    // Apply price filter (persisting selection)
     const minPrice = parseInt(req.query.gte) || 0;
     const maxPrice = parseInt(req.query.lte) || 100000;
     filterConditions.salePrice = { $gte: minPrice, $lte: maxPrice };
 
-    // Apply search query within selected filters
     const searchQuery = req.query.search || "";
     if (searchQuery) {
-      filterConditions.name = { $regex: searchQuery, $options: "i" }; // Case-insensitive search
+      filterConditions.name = { $regex: searchQuery, $options: "i" }; 
     }
 
-    // Sorting conditions
     const sortType = req.query.sort || "default";
     const getSortQuery = (type) => {
       switch (type) {
@@ -479,14 +451,11 @@ const loadshop = async (req, res) => {
     };
     const sortQuery = getSortQuery(sortType);
 
-    // Fetch filtered and sorted products
     const products = await Product.find(filterConditions).sort(sortQuery).skip(skip).limit(limit);
 
-    // Calculate pagination info
     const totalProducts = await Product.countDocuments(filterConditions);
     const totalPages = Math.ceil(totalProducts / limit);
 
-    // Render the shop page with updated filters
     res.render("shop", {
       user: userData,
       products: products,

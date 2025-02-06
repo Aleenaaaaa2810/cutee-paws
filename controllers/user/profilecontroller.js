@@ -40,7 +40,6 @@ const sendVerificationEmail=async (email,otp)=>{
     
    const info = await transporter.sendMail(mailOptions);
 
-   console.log("Email.sent:info.messageId")
    return true
 
   } catch (error) {
@@ -82,7 +81,6 @@ try {
       req.session.userOtp=otp
       req.session.email=email
       res.render("forgotPass-otp")
-      console.log("OTP:",otp)
     }else{
       res.json({success:false,message:"failed to send otp.please try again"})
     }
@@ -99,10 +97,7 @@ try {
 const verifyForgotpassOtp =async(req,res)=>{
   try {
     const enteredOtp=req.body.otp
-    console.log("Entered OTP:", req.body.otp);
-console.log("Session OTP:", req.session.userOtp);
     if(enteredOtp === req.session.userOtp){
-      console.log(enteredOtp === req.session.userOtp)
       res.json({success:true,redirectUrl:"/reset-password"})
     }else{
       res.json({success:false,message:"OTP not matching"})
@@ -119,7 +114,6 @@ const userprofile = async (req, res) => {
 
   try {
     const userId = req.session.user?.id; 
-    console.log(userId);
 
    
     if (!userId) {
@@ -127,7 +121,6 @@ const userprofile = async (req, res) => {
       return res.redirect('/login');
     }
 
-    // Validate and convert the userId to an ObjectId
     if (!mongoose.Types.ObjectId.isValid(userId)) {
       console.error('Invalid User ID format.');
       return res.redirect('/pageNotFound');
@@ -136,8 +129,6 @@ const userprofile = async (req, res) => {
 
     
     const userData = await User.findById(objectId);
-    console.log(userData);
-    console.log('User ID:', userId);
 
     if (!userData) {
       console.error('User not found in the database.');
@@ -175,13 +166,11 @@ const resendOtp = async (req, res) => {
     req.session.userOtp = otp; 
     const email = req.session.email; 
 
-    console.log("Resend OTP to email:", email);
 
     
     const emailSent = await sendVerificationEmail(email, otp);
 
     if (emailSent) {
-      console.log("Resent OTP:", otp);
       res.status(200).json({ success: true, message: "Resend OTP successful" });
     } else {
       res.status(500).json({ success: false, message: "Failed to resend OTP" });
@@ -197,7 +186,6 @@ const postNewpassword = async (req, res) => {
    
     const { newPass1, newPass2 } = req.body;
     const email = req.session.email;
-    console.log( req.body)
 
     
     if (!email) {
@@ -207,7 +195,6 @@ const postNewpassword = async (req, res) => {
       });  
     }
     if (!newPass1 || !newPass2) {
-      console.log(newPass1!=="" || newPass2!=="")
       return res.render("reset-password", {
         message: "Passwords cannot be empty.",
       });  
@@ -224,12 +211,9 @@ const postNewpassword = async (req, res) => {
     const passwordHash=await bcrypt.hash(newPass1,10)
 
   
-    console.log(passwordHash)
     const user=await User.findOne({email})
-    console.log(user)
     await User.updateOne({ email }, { $set: { password: passwordHash } });
 
-    console.log("Password updated successfully for email:", email);
 
  
     res.redirect("/login?message=Password+reset+successful");
@@ -263,8 +247,6 @@ const changeEmail=async(req,res)=>{
         req.session.userData=req.body
         req.session.email=email
         res.render('change-emailOtp')
-        console.log("Email sented:",email)
-        console.log("Otp",otp);
         
 
       }else{
@@ -303,9 +285,7 @@ const changeEmail=async(req,res)=>{
 
  const updateemail = async (req, res) => {
   try {
-    console.log("hi"); 
     const newEmail = req.body.newEmail;
-    console.log("hi"); 
     const userId = req.session.user.id;
     await User.findByIdAndUpdate(userId, { email: newEmail });
     res.redirect('/profile');
@@ -337,7 +317,6 @@ const changeEmail=async(req,res)=>{
         req.session.userData=req.body;
         req.session.email=email
         res.render("change-password-otp")
-        console.log("OTP:",otp)
       }else{
         res.json({
           success:false,
@@ -351,7 +330,6 @@ const changeEmail=async(req,res)=>{
     }
     
   } catch (error) {
-    console.log("Error in changedpassword validation",Error)
     res.redirect("/pageNotFound")
     
   }
@@ -378,7 +356,6 @@ const verifyChangepassOtp=async(req,res)=>{
 const showAddress=async(req,res)=>{
   try {
     const userId = req.session.user?.id; 
-    console.log(userId);
 
    
     if (!userId) {
@@ -386,7 +363,6 @@ const showAddress=async(req,res)=>{
       return res.redirect('/login');
     }
 
-    // Validate and convert the userId to an ObjectId
     if (!mongoose.Types.ObjectId.isValid(userId)) {
       console.error('Invalid User ID format.');
       return res.redirect('/pageNotFound');
@@ -395,8 +371,6 @@ const showAddress=async(req,res)=>{
 
     
     const userData = await User.findById(objectId);
-    console.log(userData);
-    console.log('User ID:', userId);
 
     if (!userData) {
       console.error('User not found in the database.');
@@ -438,15 +412,11 @@ const orderAddadres=async(req,res)=>{
 const  orderaddAddress=async (req,res) => {
   try {
     const userId = req.session.user?.id;
-    console.log(userId)
-    console.log(req.session)
 
     if (!userId) {
       return res.redirect("/login");
     }
-    console.log("hai")
     const { addressType, name, city, landMark, state, pincode, phone, altPhone } = req.body;
-    console.log(req.body)
 
     if (!addressType || !name || !city || !state ||!landMark || !pincode || !phone || !altPhone) {
       console.error("Missing required fields in request body");
@@ -463,12 +433,10 @@ const  orderaddAddress=async (req,res) => {
         address: [{ addressType, name, city, landMark, state, pincode, phone, altPhone }],
       });
       await newAddress.save();
-      console.log("New address added for user:", userId);
     } else {
       
       userAddress.address.push({ addressType, name, city, landMark, state, pincode, phone, altPhone });
       await userAddress.save();
-      console.log("Address appended for user:", userId);
     }
 
     res.redirect("/Order");
@@ -483,15 +451,11 @@ const  orderaddAddress=async (req,res) => {
 const postAddAddress = async (req,res) => {
   try {
     const userId = req.session.user?.id;
-    console.log(userId)
-    console.log(req.session)
 
     if (!userId) {
       return res.redirect("/login");
     }
-    console.log("hai")
     const { addressType, name, city, landMark, state, pincode, phone, altPhone } = req.body;
-    console.log(req.body)
 
     if (!addressType || !name || !city || !state ||!landMark || !pincode || !phone || !altPhone) {
       console.error("Missing required fields in request body");
@@ -508,12 +472,10 @@ const postAddAddress = async (req,res) => {
         address: [{ addressType, name, city, landMark, state, pincode, phone, altPhone }],
       });
       await newAddress.save();
-      console.log("New address added for user:", userId);
     } else {
       
       userAddress.address.push({ addressType, name, city, landMark, state, pincode, phone, altPhone });
       await userAddress.save();
-      console.log("Address appended for user:", userId);
     }
 
     res.redirect("/profile");
@@ -526,10 +488,8 @@ const postAddAddress = async (req,res) => {
 
 const editAddress = async (req, res) => {
   try {
-    console.log("Edit address function called");
 
     const addressId = req.query.id; 
-    console.log("Address ID:", addressId);
 
     const user = req.session.user;
     if (!user) {
@@ -550,7 +510,6 @@ const editAddress = async (req, res) => {
       "address._id": addressId,
     });
 
-    console.log("Current Address Found:", currentAddress);
 
     if (!currentAddress) {
       console.error("No address found in the database for the given ID");
@@ -616,19 +575,15 @@ const posteditAddress = async (req, res) => {
 };
 
  const deleteAddress =async(req,res)=>{
-  console.log("hy");
   
   try {
     const addressId=req.query.id
-    console.log(addressId)
     const user = req.session.user;
-    console.log(req.session)
 
     const findAddress=await Address.findOne({"address._id":addressId})
     if(!findAddress){
-      console.log("noo")
       return res.status(404).send("Address not found")
-    }console.log("update")
+    }
     await  Address.updateOne({
      
       "address._id":addressId

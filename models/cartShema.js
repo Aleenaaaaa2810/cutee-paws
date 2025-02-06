@@ -24,7 +24,7 @@ const cartSchema = new Schema({
       },
       totalPrice: {
         type: Number,
-        required: true, // Optional if you compute this dynamically
+        required: true, 
       },
       status: {
         type: String,

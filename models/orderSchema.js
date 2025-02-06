@@ -82,15 +82,15 @@ const orderSchema = new Schema({
       },
       message: 'Return reason is required when return is requested'
     }
-  },razorpayDetails: {  // Added razorpayDetails to store payment information
+  },razorpayDetails: {  
         paymentId: String,
         orderId: String,
         signature: String,
-        paymentStatus: String  // Store the payment status here
+        paymentStatus: String  
     },
     cancelReason: {
     type: String,
-    required: false  // optional field for cancellation reason
+    required: false  
   }
 });
    

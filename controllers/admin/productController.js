@@ -78,7 +78,6 @@ const postProductAdd = async (req, res) => {
       quantity,
       productImage: images,
     });
-    console.log(newProduct)
     await newProduct.save();
 
     res.render("product-add", {
@@ -153,19 +152,14 @@ const editProduct = async (req, res) => {
 
 const updateProduct = async (req, res) => {
   try {
-    console.log("Files received:", req.files);
-    console.log("Body received:", req.body);
 
     const productId = req.params.id;
     const { name, description, regularPrice, salePrice, quantity, categoryId } = req.body;
-    console.log( name, description, regularPrice, salePrice, quantity, categoryId);
     
-    const newImages = req.files.map((file) => file.filename); // Handle new uploaded images
+    const newImages = req.files.map((file) => file.filename); 
   
-      // Fetch existing product
       const product = await Product.findById(productId);
   
-      // Update details
       product.name = name;
       product.description = description;
       product.regularPrice = regularPrice;
@@ -173,10 +167,8 @@ const updateProduct = async (req, res) => {
       product.quantity = quantity;
       product.category = categoryId;
   
-      // Add new images to the product
       product.productImage.push(...newImages);
   
-      // Save the product
       await product.save();
   
     res.json({ success: true, message: "Product updated successfully" });
@@ -202,7 +194,6 @@ const removeImage = async (req, res) => {
 
     await product.save();
 
-    // Remove the image from the file system (optional)
     const imagePath = path.join(__dirname, '../public/uploads', imageId);
     if (fs.existsSync(imagePath)) {
       fs.unlinkSync(imagePath);
@@ -215,11 +206,9 @@ const removeImage = async (req, res) => {
   }
 };
 
-// Function to block a product
 const blockProduct = async (req, res) => {
   try {
-    const productId = req.params.productId; // Correct parameter extraction
-    console.log("Product ID:", productId); // Log to verify correct ID
+    const productId = req.params.productId; 
     
     await Product.findByIdAndUpdate(productId, { isBlocked: true });
     res.redirect('/admin/products');
@@ -229,14 +218,12 @@ const blockProduct = async (req, res) => {
   }
 };
 
-// Function to unblock a product
 const unblockProduct = async (req, res) => {
   try {
-    console.log("reached")
-    const productId = req.params.productId; // Extracting product ID from the route parameter
+    const productId = req.params.productId; 
     
     await Product.findByIdAndUpdate(productId, { isBlocked: false });
-    res.redirect('/admin/products'); // Redirect to the products page
+    res.redirect('/admin/products'); 
   } catch (error) {
     console.error('Error unblocking product:', error);
     res.status(500).send('Internal Server Error');
@@ -276,7 +263,6 @@ const addproductoffer = async (req, res) => {
 
     await findProduct.save();
 
-    // Remove the category offer if a product offer is applied
     findCategory.categoryOffer = 0;
     await findCategory.save();
 

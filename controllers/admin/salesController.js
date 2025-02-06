@@ -13,7 +13,7 @@ const getSalesReport = async (req, res) => {
 
 
     let page = parseInt(req.query.page) || 1;
-    let limit = 5; // Number of orders per page
+    let limit = 5; 
     let skip = (page - 1) * limit;
 
     if (startDate && endDate) {
@@ -53,7 +53,6 @@ const getSalesReport = async (req, res) => {
       }
     }
 
-    console.log('Filter being applied:', filter);
 
     const totalOrdersCount = await Order.countDocuments(filter);
     const totalPages = Math.ceil(totalOrdersCount / limit);
@@ -190,7 +189,6 @@ const downloadPDF = async (req, res) => {
 
     doc.end();
   } catch (error) {
-    console.error(error);
     res.status(500).send('Error generating PDF');
   }
 };
@@ -225,7 +223,7 @@ const downloadExcel = async (req, res) => {
         customer: order.user ? order.user.name : 'Unknown',
         discount: order.discount || 0,
         amount: order.totalPrice,
-        finalAmount, // Add final amount to the row
+        finalAmount, 
         status: order.status,
         paymentmethod: order.paymentMethod || 'N/A',
       });
@@ -234,7 +232,7 @@ const downloadExcel = async (req, res) => {
     const totalRevenue = orders.reduce((sum, order) => sum + order.totalPrice, 0);
     const totalDiscount = orders.reduce((sum, order) => sum + (order.discount || 0), 0);
 
-    worksheet.addRow({}); // Add an empty row for spacing
+    worksheet.addRow({}); 
     worksheet.addRow({ customer: 'Total Revenue', amount: totalRevenue });
     worksheet.addRow({ customer: 'Total Discount', amount: totalDiscount });
 

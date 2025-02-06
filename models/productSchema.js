@@ -29,7 +29,6 @@ const productSchema = new Schema({
   quantity: { 
     type: Number, 
     required: true,
-    //  default: 0 
     },
 
   productImage: {
@@ -41,17 +40,17 @@ const productSchema = new Schema({
     default: false,
   },
   ratings: {
-    type: [Number], // Array of ratings (1-5)
+    type: [Number], 
     default: [],
   },
   averageRating: {
-    type: Number, // Calculated average
+    type: Number, 
     default: 0,
   },
 
   status: {
     type: String,
-    enum: ["Available", "Out of Stock", "Discontinued"], // Fixed typos in options
+    enum: ["Available", "Out of Stock", "Discontinued"], 
     required: true,
     default: "Available",
   },
@@ -60,7 +59,7 @@ const productSchema = new Schema({
     default:0
 },
 salesCount: {
-  type: Number, // Track the number of times the product was sold
+  type: Number, 
   default: 0,
 },
 

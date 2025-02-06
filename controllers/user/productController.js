@@ -49,7 +49,6 @@ const rateProduct =  async (req, res) => {
       return res.status(404).send({ error: 'Product not found' });
     }
 
-    // Update product ratings (logic depends on your schema)
     product.ratings.push(rating);
     product.averageRating = product.ratings.reduce((a, b) => a + b) / product.ratings.length;
     await product.save();

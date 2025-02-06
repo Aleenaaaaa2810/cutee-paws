@@ -59,13 +59,11 @@ const editcategory = async (req, res) => {
       const id = req.params.id;
 
       const category = await Category.findByIdAndUpdate(id, { name, description }, { new: true });
-      console.log(category)
       if (!category) {
           return res.status(404).json({ success: false, message: 'Category not found' });
       }
      return  res.status(200).json({ success: true, message: "Category edited successfully" });
   } catch (error) {
-    console.log("Error")
       console.error("Error in editcategory:", error);
       res.status(500).json({ success: false, message: 'Internal server error' });
   }
@@ -143,7 +141,6 @@ const addcategoryoffer = async (req, res) => {
       });
     }
 
-    // Update category offer and reset product offers
     await Category.updateOne({ _id: categoryId }, { $set: { categoryOffer: percentage } });
 
     for (const product of products) {

@@ -51,12 +51,12 @@ const userSchema = new Schema({
   referralId: { 
     type: String, 
     unique: true 
-  }, // Unique referral code for the user
+  }, 
   referredBy: { 
     type: mongoose.Schema.Types.ObjectId, 
     ref: 'User', 
     default: null 
-  }, // Referrer user ID
+  }, 
   points: { 
     type: Number, 
     default: false
